@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.21.1",
     "mongoose": "^8.7.2",
     "nodemon": "^3.1.7"
@@ -8,12 +9,11 @@
   "name": "baitaplon",
   "version": "1.0.0",
   "description": "Backend ktx",
-  "main": "index.js",
-  "devDependencies": {},
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js",
-    "dev": "nodemon main"
+    "start": "node app.js",
+    "dev": "nodemon app"
   },
   "author": "Việt Anh",
   "license": "ISC"

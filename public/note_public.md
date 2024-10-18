@@ -1,0 +1,1 @@
+static file (index.html, scripts.js, CDN links and files)
