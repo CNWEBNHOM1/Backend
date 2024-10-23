@@ -11,6 +11,11 @@ const UserSchema = new mongoose.Schema({
         required: [true, "Please provide a password!"],
         unique: false,
     },
+    role: {
+        type: String,
+        enum: ['student', 'manager', 'temp'], // Giới hạn giá trị cho trường "role"
+        required: true,
+    },
 })
 
 module.exports = mongoose.models.Users || mongoose.model("Users", UserSchema);

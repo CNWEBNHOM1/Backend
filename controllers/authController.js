@@ -12,7 +12,8 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { user, token } = await userService.loginUser(req.body.email, req.body.password);
-    res.status(200).json({ message: 'Login Successful', user, token });
+    const userData = { id: user._id, email : user.email};
+    res.status(200).json({ message: 'Login Successful', userData, token });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

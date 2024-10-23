@@ -15,7 +15,7 @@ exports.loginUser = async (email, password) => {
 
     const passwordCheck = await bcrypt.compare(password, user.password);
     if (!passwordCheck) throw new Error('Invalid password');
-
+    
     const token = jwt.sign(
         { userId: user._id, userEmail: user.email },
         process.env.JWT_TOKEN,
