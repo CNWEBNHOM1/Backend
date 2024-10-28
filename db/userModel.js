@@ -9,12 +9,11 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Please provide a password!"],
-        unique: false,
     },
     role: {
         type: String,
-        enum: ['student', 'manager', 'temp'], // Giới hạn giá trị cho trường "role"
-        required: true,
+        enum: ['Sinh viên', 'Quản lý'], // Giới hạn giá trị cho trường "role"
+        required: [true, "Please provide a role!"],
     },
 })
 
