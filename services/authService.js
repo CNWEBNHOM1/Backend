@@ -2,8 +2,11 @@ const User = require('../db/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+\d{6,}@sis\.hust\.edu\.vn$/;
+
 exports.createUser = async (email, password, role) => {
-    if (role === "manager") {
+    if (!emailRegex.test(email)) throw new Error('You must use HUST email');
+    if (role === "Quản lý") {
         throw new Error('Cannot assigned as manager')
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -12,6 +15,9 @@ exports.createUser = async (email, password, role) => {
 };
 
 exports.loginUser = async (email, password, role) => {
+    if (role !== 'Quản lý' && !emailRegex.test(email)) 
+        throw new Error('You must use HUST email');
+    
     const user = await User.findOne({ email, role });
     if (!user) throw new Error('Email or role is invalid');
     const passwordCheck = await bcrypt.compare(password, user.password);
