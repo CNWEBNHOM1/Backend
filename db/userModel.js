@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['Sinh viên', 'Quản lý'], // Giới hạn giá trị cho trường "role"
+        enum: ['Khách', 'Sinh viên', 'Quản lý'], // Giới hạn giá trị cho trường "role"
         required: [true, "Please provide a role!"],
     },
 })

@@ -1,5 +1,15 @@
 const userService = require('../services/userService');
 
+// Guest controller
+exports.writeInfo = async (req, res) => {
+    try {
+        const std = await userService.writeInfo(req.body);
+        res.json({ data: std, status: "success" });
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+}
+
 // Student controller 
 exports.getListRoommates = async (req, res) => {
     try {

@@ -22,7 +22,7 @@ const StudentSchema = new mongoose.Schema({
     },
     priority: {
         type: Boolean,
-        require: true,
+        require: [true, "Please provide a priority!"],
     },
     phone: {
         type: String,
@@ -74,7 +74,7 @@ const StudentSchema = new mongoose.Schema({
     },
     minhchung: {
         type: Buffer,
-        required: true,
+        // required: [true, "Please provide a mihhchung!"],
     },
     trangthai: {
         type: String,
