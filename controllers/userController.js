@@ -76,3 +76,11 @@ exports.kickAllStudents = async (req, res) => {
         res.status(500).json({error: err.message});
     }
 }
+exports.transferRoom = async (req, res) => {
+    try {
+        const data = await userService.transferRoom(req.body.email, req.body.department, req.body.room);
+        res.status(200).json({data: data, status: "success"});
+    } catch (err) {
+        res.status(500).json({error: err.message});
+    }
+}

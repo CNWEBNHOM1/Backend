@@ -69,8 +69,9 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please provide a family member phone number"],
     },
-    department: {
+    departmentselected: {
         type: String,
+        default: "none",
     },
     roomselected: {
         type: String,

@@ -7,10 +7,11 @@ exports.writeInfo = async (info) => {
     return await StudentModel.create(info);
 }
 // Student Service 
-exports.getListRoommates = async (room) => {
+exports.getListRoommates = async (department, room) => {
     return await StudentModel.find(
         {
-            room: room,
+            roomselected: room,
+            departmentselected: department,
         }
     );
 };
@@ -53,9 +54,11 @@ exports.declineStudent = async (email) => {
     const room = await RoomModel.find(
         {
             name: student.roomselected,
+            department: student.departmentselected,
         }
     );
     student.roomselected = "none";
+    student.departmentselected = "none";
     student.trangthai = "none";
     room.occupiedSlots++;
 
@@ -78,12 +81,14 @@ exports.kickOneStudents = async () => {
     const r = RoomModel.find(
         {
             name: student.roomselected,
+            department: student.departmentselected,
         }
     )
     r.occupiedSlots--;
     acc.role = "Khách";
     student.trangthai = "kicked";
     student.roomselected = "none";
+    student.departmentselected = "none";
 
     r.save();
     acc.save();
@@ -97,6 +102,7 @@ exports.kickAllStudents = async() => {
         {
             $set: {
                 roomselected: "none",
+                departmentselected: "none",
                 status: "none",
             },
         }
@@ -118,4 +124,32 @@ exports.kickAllStudents = async() => {
         }
     );
     return;
+}
+exports.transferRoom = async(email, department, room) => {
+    const r_change = await RoomModel.find(
+        {
+            name: room,
+            department: department,
+        }
+    );
+    if (r_change.occupiedSlots == r_change.capacity) throw new Error("New room is full!");
+    const std = await StudentModel.find(
+        {
+            email: email,
+        }
+    );
+    const r = await RoomModel.find(
+        {
+            department: std.departmentselected,
+            name: std.roomselected, 
+        }
+    )
+    
+    std.roomselected = room;
+    std.departmentselected = department;
+    r.occupiedSlots--;
+    r_change.occupiedSlots++;
+
+    r.save();   r_change.save();
+    return await std.save();
 }
