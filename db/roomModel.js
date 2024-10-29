@@ -9,13 +9,14 @@ const RoomSchema = new mongoose.Schema({
     department: {
         type: String,
     },
-    size: {
+    capacity: {
         type: Number,
         required: [true, "Please provide a size"],
     },
-    current: {
+    occupiedSlots: {
         type: Number,
         required: [true],
+        default: 0,
     },
     giatrangbi: {
         type: Number

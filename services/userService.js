@@ -1,4 +1,5 @@
 const StudentModel = require("../db/studentModel");
+const RoomModel = require("../db/roomModel");
 
 // Guest Service 
 exports.writeInfo = async(info) => {
@@ -12,11 +13,26 @@ exports.getListRoommates = async(room) => {
        } 
     );
 };
-exports.getMyInfo = async(id) => {
+exports.getMyInfo = async(email) => {
     return await StudentModel.find(
        {
-        id: id,
+        email: email,
        } 
     );
 };
 // Manager Service 
+exports.getAllStudents = async() => {
+    return await StudentModel.find()
+}
+exports.getAllRooms = async() => {
+    return await RoomModel.find();
+}
+exports.pendingStudent= async(email, room, minhchung) => {
+    const usr = StudentModel.find()
+}
+exports.addStudentToRoom = async() => {
+
+}
+exports.removeStudentFromRoom = async() => {
+
+}

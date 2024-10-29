@@ -10,6 +10,9 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please provide a name!"],
     },
+    ngaysinh: {
+        type: Date,
+    },
     sid: {
         type: String,
         // enum: ['student', 'manager', 'temp'], // Giới hạn giá trị cho trường "role"
@@ -44,6 +47,7 @@ const StudentSchema = new mongoose.Schema({
     },
     khoa: {
         type: Number,
+        default: 69,
     },
     truong_khoa_vien: {
         type: String,
@@ -69,16 +73,23 @@ const StudentSchema = new mongoose.Schema({
     department: {
         type: String,
     },
-    room: {
+    roomselected: {
         type: Number,
     },
     minhchung: {
         type: Buffer,
         // required: [true, "Please provide a mihhchung!"],
     },
+    ngaydangky: {
+        type: Date,
+    },
     trangthai: {
         type: String,
-        enum: ["Chờ phê duyệt", "Đang ở"],
+        enum: ["pending", "approved", "none"],
+        default: "none",
+    },
+    holdExpiry: { 
+        type: Date 
     }
 })
 
