@@ -44,21 +44,26 @@ exports.getAllRooms = async (req, res) => {
         res.status(500).json({error: err.message});
     }
 }
-exports.pendingStudent = async (req, res) => {
-    
-}
-exports.addStudentToRoom = async (req, res) => {
+exports.approveStudentToRoom = async (req, res) => {
     try {
-        
-        res.status(200).json({data: "", status: "success"});
+        const data = await userService.approveStudentToRoom(req.email);
+        res.status(200).json({data: data, status: "success"});
     } catch(err) {
         res.status(500).json({error: err.message});
     }
 }
-exports.removeStudentFromRoom = async (req, res) => {
+exports.declineStudent = async (req, res) => {
     try {
-        
-        res.status(200).json({data: "", status: "success"});
+        const data = await userService.declineStudent(req.body.email)
+        res.status(200).json({data: data, status: "success"});
+    } catch(err) {
+        res.status(500).json({error: err.message});
+    }
+}
+exports.kickOneStudents = async (req, res) => {
+    try {
+        const data = await userService.kickOneStudents(req.body.email);
+        res.status(200).json({data: data, status: "success"});
     } catch(err) {
         res.status(500).json({error: err.message});
     }

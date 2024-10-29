@@ -1,5 +1,6 @@
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
+const UserModel = require("../db/userModel");
 
 // Guest Service 
 exports.writeInfo = async(info) => {
@@ -27,12 +28,66 @@ exports.getAllStudents = async() => {
 exports.getAllRooms = async() => {
     return await RoomModel.find();
 }
-exports.pendingStudent= async(email, room, minhchung) => {
-    const usr = StudentModel.find()
+exports.approveStudentToRoom = async(email) => {
+    const student = await StudentModel.find(
+        {
+            email: email,
+        }
+    );
+    const acc = await UserModel.find(
+        {
+            email: email,
+        }
+    );
+    acc.role = "Sinh viên";
+    student.trangthai = "approved";
+    
+    return await student.save();
 }
-exports.addStudentToRoom = async() => {
+exports.declineStudent = async(email) => {
+    const student = await StudentModel.find(
+        {
+            email: email,
+        }
+    );
+    const room = await RoomModel.find(
+        {
+            name: student.roomselected,
+        }
+    );
+    student.roomselected = "none";
+    student.trangthai = "none";
+    room.occupiedSlots++;
 
+    await room.save();
+    return await student.save();
 }
-exports.removeStudentFromRoom = async() => {
+exports.kickOneStudents = async() => {
+    const student = await StudentModel.find(
+        {
+            email: email,
+        }
+    );
 
+    const acc = UserModel.find(
+        {
+            email: email,
+        }
+    );
+
+    const r = RoomModel.find(
+        {
+            name: student.roomselected,
+        }
+    )
+    r.occupiedSlots--;
+    acc.role = "Khách";
+    student.trangthai = "kicked";
+    student.roomselected = "none";
+
+    r.save();
+    acc.save();
+    student.save();
+
+    return;
 }

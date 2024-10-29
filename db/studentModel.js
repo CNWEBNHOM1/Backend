@@ -4,7 +4,6 @@ const StudentSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, "Please provide an Email!"],
-        unique: [true, "Email Exist"],
     },
     name: {
         type: String,
@@ -74,18 +73,19 @@ const StudentSchema = new mongoose.Schema({
         type: String,
     },
     roomselected: {
-        type: Number,
+        type: String,
+        default: "none",
     },
     minhchung: {
         type: Buffer,
-        // required: [true, "Please provide a mihhchung!"],
+        // required: [true, "Please provide a minhchung!"],
     },
     ngaydangky: {
         type: Date,
     },
     trangthai: {
         type: String,
-        enum: ["pending", "approved", "none"],
+        enum: ["pending", "approved", "kicked", "none"],
         default: "none",
     },
     holdExpiry: { 

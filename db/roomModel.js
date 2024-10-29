@@ -2,9 +2,8 @@ const mongoose = require("mongoose");
 
 const RoomSchema = new mongoose.Schema({
     name: {
-        type: Number,
+        type: String,
         required: [true, "Please provide a name"],
-        unique: [true, "Name Exist"],
     },
     department: {
         type: String,
