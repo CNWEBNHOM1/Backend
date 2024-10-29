@@ -4,6 +4,9 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-router.get('/auth-endpoint', auth, userController.authEndpoint);
+// Student route 
+router.get('/', auth(['Sinh viên']), userController.getListRoommates);
+router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
+// Manager route 
 
 module.exports = router;

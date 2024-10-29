@@ -24,7 +24,7 @@ exports.loginUser = async (email, password, role) => {
     if (!passwordCheck) throw new Error('Invalid password');
 
     const token = jwt.sign(
-        { userId: user._id, userEmail: user.email },
+        { userId: user._id, userEmail: user.email, role: user.role },
         process.env.JWT_TOKEN,
         { expiresIn: '24h' }
     );
