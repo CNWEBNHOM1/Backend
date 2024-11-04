@@ -81,7 +81,7 @@ const StudentSchema = new mongoose.Schema({
         default: "none",
     },
     minhchung: {
-        type: Buffer,
+        type: String,
         // required: [true, "Please provide a minhchung!"],
     },
     ngaydangky: {

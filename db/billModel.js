@@ -36,7 +36,7 @@ const BillSchema = new mongoose.Schema({
         type: Date,
     },
     anhminhchung: {
-        type: Buffer,
+        type: String,
     },
 })
 

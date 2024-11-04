@@ -154,6 +154,10 @@ exports.transferRoom = async(email, department, room) => {
     r.save();   r_change.save();
     return await std.save();
 }
-exports.approvedBills = async(bill) => {
+exports.getAllBills = async() => {
+    return await BillModel.find();
+}
+exports.approvedBill = async(bill) => {
     bill.trangthai = 'Đã đóng'
 }
+
