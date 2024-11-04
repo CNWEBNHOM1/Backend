@@ -3,14 +3,14 @@ const mongoose = require("mongoose");
 const RoomSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, "Please provide a name"],
+        // required: [true, "Please provide a name"],
     },
     department: {
         type: String,
     },
     capacity: {
         type: Number,
-        required: [true, "Please provide a size"],
+        // required: [true, "Please provide a size"],
     },
     occupiedSlots: {
         type: Number,
@@ -38,6 +38,10 @@ const RoomSchema = new mongoose.Schema({
     dieuhoa: {
         type: Number,
     },
+    tinhtrang: {
+        type: String,
+        enum: ['Bình thường', 'Bị hỏng']
+    }
 })
 
 module.exports = mongoose.models.Rooms || mongoose.model("Rooms", RoomSchema);

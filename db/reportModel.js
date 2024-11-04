@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const ReportSchema = new mongoose.Schema({
     department: {
         type: String,
-        required: [true, "Department name"],
+        // required: [true, "Department name"],
     },
     room: {
         type: Number,
-        required: [true, "Room number"],
+        // required: [true, "Room number"],
     },
     ngaygui: {
         type: Date,

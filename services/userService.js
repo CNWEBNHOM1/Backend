@@ -1,6 +1,7 @@
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
+const BillModel = require("../db/billModel")
 
 // Guest Service 
 exports.writeInfo = async (info) => {
@@ -152,4 +153,7 @@ exports.transferRoom = async(email, department, room) => {
 
     r.save();   r_change.save();
     return await std.save();
+}
+exports.approvedBills = async(bill) => {
+    bill.trangthai = 'Đã đóng'
 }

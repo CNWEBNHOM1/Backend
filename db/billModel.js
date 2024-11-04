@@ -3,30 +3,30 @@ const mongoose = require("mongoose");
 const BillSchema = new mongoose.Schema({
     department: {
         type: String,
-        required: [true, "Department name"],
+        // required: [true, "Department name"],
     },
     room: {
         type: Number,
-        required: [true, "Room number"],
+        // required: [true, "Room number"],
     },
     sodiendau: {
         type: Number,
-        required: [true, "Số điện đầu!"],
+        // required: [true, "Số điện đầu!"],
     },
     sodiencuoi: {
         type: Number,
-        required: [true, "Số điện cuối!"],
+        // required: [true, "Số điện cuối!"],
     },
     dongia: {
         type: Number,
-        required: [true, "Giá điện!"],
+        // required: [true, "Giá điện!"],
     },
     thanhtien: {
         type: Number,
     },
     handong: {
         type: Date,
-        require: [true, "Thiếu hạn đóng!"],
+        // require: [true, "Thiếu hạn đóng!"],
     },
     trangthai: {
         type: String,
