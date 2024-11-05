@@ -1,7 +1,10 @@
+const nodemailer = require('nodemailer');
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
-const BillModel = require("../db/billModel")
+const BillModel = require("../db/billModel");
+
+require('dotenv').config();
 
 // Guest Service 
 exports.writeInfo = async (info) => {
@@ -27,8 +30,32 @@ exports.getMyInfo = async (email) => {
 exports.getAllStudents = async () => {
     return await StudentModel.find()
 }
+exports.getAllWaitingStudents = async() => {
+    return await StudentModel.find(
+        {
+            trangthai: "pending"
+        }
+    )
+}
 exports.getAllRooms = async () => {
-    return await RoomModel.find();
+    return await RoomModel.find().sort({ department: 1 });
+}
+exports.getAllRoomsOfDepartment = async(data) => {
+    const { page = 1, limit = 10, department = "B5" } = data;
+    const listRoom = await RoomModel.find(
+        {
+            department: department,
+        }
+    ) 
+        .skip((page - 1) * limit) 
+        .limit(parseInt(limit)); 
+    const totalRoom = await RoomModel.countDocuments();
+    return {
+        total: totalRoom,
+        page: parseInt(page),
+        pageSize: parseInt(limit),
+        listRoom
+    };
 }
 exports.approveStudentToRoom = async (email) => {
     const student = await StudentModel.find(
@@ -97,9 +124,9 @@ exports.kickOneStudents = async () => {
 
     return;
 }
-exports.kickAllStudents = async() => {
+exports.kickAllStudents = async () => {
     await StudentModel.updateMany(
-        { roomselected: { $ne: "none" } }, 
+        { roomselected: { $ne: "none" } },
         {
             $set: {
                 roomselected: "none",
@@ -126,7 +153,7 @@ exports.kickAllStudents = async() => {
     );
     return;
 }
-exports.transferRoom = async(email, department, room) => {
+exports.transferRoom = async (email, department, room) => {
     const r_change = await RoomModel.find(
         {
             name: room,
@@ -142,22 +169,63 @@ exports.transferRoom = async(email, department, room) => {
     const r = await RoomModel.find(
         {
             department: std.departmentselected,
-            name: std.roomselected, 
+            name: std.roomselected,
         }
     )
-    
+
     std.roomselected = room;
     std.departmentselected = department;
     r.occupiedSlots--;
     r_change.occupiedSlots++;
 
-    r.save();   r_change.save();
+    r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async() => {
+exports.getAllBills = async () => {
     return await BillModel.find();
 }
-exports.approvedBill = async(bill) => {
-    bill.trangthai = 'Đã đóng'
+exports.getOutDateBills = async () => {
+    return await BillModel.find({ handong: { $lt: ngaydong } });
 }
 
+exports.approvedBill = async (bill) => {
+    bill.trangthai = 'Đã đóng';
+    await(bill.save())
+}
+
+exports.createBill = async () => {
+    const rooms = await RoomModel.find(
+        {
+            tinhtrang: 'Bình thường',
+        }
+    ).sort({ department: 1 });
+    const bills = rooms.map(room => {
+        return {
+            department: room.department,
+            room: room.name,
+            sodiendau: room.sodiencuoi,
+            sodiencuoi: null,
+            dongia: null,
+            thanhtien: null,
+            handong: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+            trangthai: 'Chưa đóng',
+            ngaydong: null,
+            anhminhchung: null,
+        };
+    });
+    await BillModel.insertMany(bills);
+} 
+exports.sendMail = async (mailOptions) => {
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.mailUser,
+            pass: process.env.mailPass
+        }
+    });
+    return transporter.sendMail(mailOptions);
+}
+// Cập nhật hóa đơn cho các phòng
+// Xuất hóa đơn cho từng phòng, 
+// danh sách pdf, excel
+// Gửi thông báo tiền phòng đến email của sinh viên

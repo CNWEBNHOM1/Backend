@@ -26,6 +26,9 @@ const RoomSchema = new mongoose.Schema({
     tiennuoc: {
         type: Number,
     },
+    sodiencuoi: {
+        type: Number,
+    },
     tongthu: {
         type: Number,
     },
