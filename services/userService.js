@@ -23,6 +23,12 @@ exports.getMyInfo = async (email) => {
         }
     );
 };
+exports.transferPayment = async (req, res) => {
+    return {
+        ok: 'ok'
+    };//chuyen trang thai thanh toan,vv
+};
+
 // Manager Service 
 exports.getAllStudents = async () => {
     return await StudentModel.find()
@@ -97,9 +103,9 @@ exports.kickOneStudents = async () => {
 
     return;
 }
-exports.kickAllStudents = async() => {
+exports.kickAllStudents = async () => {
     await StudentModel.updateMany(
-        { roomselected: { $ne: "none" } }, 
+        { roomselected: { $ne: "none" } },
         {
             $set: {
                 roomselected: "none",
@@ -126,7 +132,7 @@ exports.kickAllStudents = async() => {
     );
     return;
 }
-exports.transferRoom = async(email, department, room) => {
+exports.transferRoom = async (email, department, room) => {
     const r_change = await RoomModel.find(
         {
             name: room,
@@ -142,22 +148,22 @@ exports.transferRoom = async(email, department, room) => {
     const r = await RoomModel.find(
         {
             department: std.departmentselected,
-            name: std.roomselected, 
+            name: std.roomselected,
         }
     )
-    
+
     std.roomselected = room;
     std.departmentselected = department;
     r.occupiedSlots--;
     r_change.occupiedSlots++;
 
-    r.save();   r_change.save();
+    r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async() => {
+exports.getAllBills = async () => {
     return await BillModel.find();
 }
-exports.approvedBill = async(bill) => {
+exports.approvedBill = async (bill) => {
     bill.trangthai = 'Đã đóng'
 }
 
