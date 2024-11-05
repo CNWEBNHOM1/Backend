@@ -4,13 +4,12 @@ const jwt = require('jsonwebtoken');
 
 const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+\d{6,}@sis\.hust\.edu\.vn$/;
 
-exports.createUser = async (email, password, role) => {
+exports.createUser = async (email, password) => {
     if (!emailRegex.test(email)) throw new Error('You must use HUST email');
-    if (role === "Quản lý") {
-        throw new Error('Cannot assigned as manager')
-    }
+    
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, role });
+    const user = new User({ email, password: hashedPassword});
+    user.role = 'Khách';
     return await user.save();
 };
 
@@ -24,7 +23,7 @@ exports.loginUser = async (email, password, role) => {
     if (!passwordCheck) throw new Error('Invalid password');
 
     const token = jwt.sign(
-        { userId: user._id, userEmail: user.email },
+        { userId: user._id, userEmail: user.email, role: user.role },
         process.env.JWT_TOKEN,
         { expiresIn: '24h' }
     );

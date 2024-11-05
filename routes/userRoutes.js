@@ -4,6 +4,11 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-router.get('/auth-endpoint', auth, userController.authEndpoint);
+// Guest route 
+router.post('/', auth(['Khách']), userController.writeInfo);
+// Student route 
+router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
+router.get('/', auth(['Sinh viên']), userController.getListRoommates);
+// Manager route 
 
 module.exports = router;

@@ -3,47 +3,50 @@ const mongoose = require("mongoose");
 const StudentSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: [true, "Please provide an Email!"],
-        unique: [true, "Email Exist"],
+        // required: [true, "Please provide an Email!"],
     },
     name: {
         type: String,
-        required: [true, "Please provide a name!"],
+        // required: [true, "Please provide a name!"],
+    },
+    ngaysinh: {
+        type: Date,
     },
     sid: {
         type: String,
         // enum: ['student', 'manager', 'temp'], // Giới hạn giá trị cho trường "role"
-        required: [true, "Please provide a student id!"],
+        // required: [true, "Please provide a student id!"],
         unique: [true, "Student ID Exist"],
     },
     cccd: {
         type: String,
-        required: [true, "Please provide a identity number!"],
+        // required: [true, "Please provide a identity number!"],
     },
     priority: {
         type: Boolean,
-        require: true,
+        // require: [true, "Please provide a priority!"],
     },
     phone: {
         type: String,
-        required: [true, "Please provide a phone number"],
+        // required: [true, "Please provide a phone number"],
     },
     address: {
         tinh: {
             type: String,
-            required: [true, "Please provide an address"],
+            // required: [true, "Please provide an address"],
         },
         thanh: {
             type: String,
-            required: [true, "Please provide an address"],
+            // required: [true, "Please provide an address"],
         },
         xa: {
             type: String,
-            required: [true, "Please provide an address"],
+            // required: [true, "Please provide an address"],
         },
     },
     khoa: {
         type: Number,
+        default: 69,
     },
     truong_khoa_vien: {
         type: String,
@@ -60,25 +63,37 @@ const StudentSchema = new mongoose.Schema({
     family: {
         type: String,
         enum: ['Ông', 'Bà', 'Cha', 'Mẹ', 'Anh', 'Chị', 'Em'],
-        required: [true, "Please provide a family member"],
+        // required: [true, "Please provide a family member"],
+    },
+    familyname: {
+        type: String,
     },
     familyphone: {
         type: String,
-        required: [true, "Please provide a family member phone number"],
+        // required: [true, "Please provide a family member phone number"],
     },
-    department: {
+    departmentselected: {
         type: String,
+        default: "none",
     },
-    room: {
-        type: Number,
+    roomselected: {
+        type: String,
+        default: "none",
     },
     minhchung: {
-        type: Buffer,
-        required: true,
+        type: String,
+        // required: [true, "Please provide a minhchung!"],
+    },
+    ngaydangky: {
+        type: Date,
     },
     trangthai: {
         type: String,
-        enum: ["Chờ phê duyệt", "Đang ở"],
+        enum: ["pending", "approved", "kicked", "none"],
+        default: "none",
+    },
+    holdexpiry: { 
+        type: Date 
     }
 })
 
