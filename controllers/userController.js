@@ -3,7 +3,9 @@ const userService = require('../services/userService');
 // Guest controller
 exports.writeInfo = async (req, res) => {
     try {
-        const std = await userService.writeInfo(req.body);
+        const {email, name, ngaysinh, sid, cccd, priority, phone, address, khoa, truong_khoa_vien, nganh, ma_nganh, lop, family, familyname, familyphone, ngaydangky, trangthai, holdexpiry} = req.body;
+        const minhchung = req.file? req.file.filename: null;
+        const std = await userService.writeInfo({email, name, ngaysinh, sid, cccd, priority, phone, address, khoa, truong_khoa_vien, nganh, ma_nganh, lop, family, familyname, familyphone, ngaydangky, trangthai, holdexpiry, minhchung});
         res.json({ data: std, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

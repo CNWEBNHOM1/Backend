@@ -1,11 +1,17 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
+const upload = require('../middlewares/uploadImg');
 
 const router = express.Router();
 
 // Guest route 
-router.post('/', auth(['Khách']), userController.writeInfo);
+// Ví dụ nếu form ở frontend như sau:
+// <form action="/add" method="POST" enctype="multipart/form-data">
+//     <input type="file" name="minhchung" />
+//     <input type="submit" value="Upload Avatar" />
+// </form>
+router.post('/', auth(['Khách']), upload.single('minhchung'), userController.writeInfo);
 // Student route 
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
 router.get('/', auth(['Sinh viên']), userController.getListRoommates);

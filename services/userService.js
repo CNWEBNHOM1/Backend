@@ -11,6 +11,7 @@ require('dotenv').config();
 exports.writeInfo = async (info) => {
     return await StudentModel.create(info);
 }
+
 // Student Service 
 exports.getListRoommates = async (department, room) => {
     return await StudentModel.find(
@@ -284,7 +285,4 @@ exports.sendBills = async (data) => {
     }
     return;
 }
-
-
-
 // Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
