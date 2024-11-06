@@ -32,9 +32,6 @@ const BillSchema = new mongoose.Schema({
         type: String,
         enum: ["Chờ xác nhận", "Đã đóng", "Chưa đóng", "Quá hạn"],
     },
-    ngaydong: {
-        type: Date,
-    },
     anhminhchung: {
         type: String,
     },

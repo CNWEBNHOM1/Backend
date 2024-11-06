@@ -3,6 +3,7 @@ const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
 const BillModel = require("../db/billModel");
+const departmentModel = require('../db/departmentModel');
 
 require('dotenv').config();
 
@@ -30,7 +31,7 @@ exports.getMyInfo = async (email) => {
 exports.getAllStudents = async () => {
     return await StudentModel.find()
 }
-exports.getAllWaitingStudents = async() => {
+exports.getAllWaitingStudents = async () => {
     return await StudentModel.find(
         {
             trangthai: "pending"
@@ -40,15 +41,15 @@ exports.getAllWaitingStudents = async() => {
 exports.getAllRooms = async () => {
     return await RoomModel.find().sort({ department: 1 });
 }
-exports.getAllRoomsOfDepartment = async(data) => {
+exports.getAllRoomsOfDepartment = async (data) => {
     const { page = 1, limit = 10, department = "B5" } = data;
     const listRoom = await RoomModel.find(
         {
             department: department,
         }
-    ) 
-        .skip((page - 1) * limit) 
-        .limit(parseInt(limit)); 
+    )
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
     const totalRoom = await RoomModel.countDocuments();
     return {
         total: totalRoom,
@@ -58,12 +59,12 @@ exports.getAllRoomsOfDepartment = async(data) => {
     };
 }
 exports.approveStudentToRoom = async (email) => {
-    const student = await StudentModel.find(
+    const student = await StudentModel.findOne(
         {
             email: email,
         }
     );
-    const acc = await UserModel.find(
+    const acc = await UserModel.findOne(
         {
             email: email,
         }
@@ -74,15 +75,15 @@ exports.approveStudentToRoom = async (email) => {
     return await student.save();
 }
 exports.declineStudent = async (email) => {
-    const student = await StudentModel.find(
+    const student = await StudentModel.findOne(
         {
             email: email,
         }
     );
-    const room = await RoomModel.find(
+    const room = await RoomModel.findOne(
         {
-            name: student.roomselected,
-            department: student.departmentselected,
+            name: student[0].roomselected,
+            department: student[0].departmentselected,
         }
     );
     student.roomselected = "none";
@@ -94,19 +95,19 @@ exports.declineStudent = async (email) => {
     return await student.save();
 }
 exports.kickOneStudents = async () => {
-    const student = await StudentModel.find(
+    const student = await StudentModel.findOne(
         {
             email: email,
         }
     );
 
-    const acc = UserModel.find(
+    const acc = await UserModel.findOne(
         {
             email: email,
         }
     );
 
-    const r = RoomModel.find(
+    const r = await RoomModel.findOne(
         {
             name: student.roomselected,
             department: student.departmentselected,
@@ -161,12 +162,12 @@ exports.transferRoom = async (email, department, room) => {
         }
     );
     if (r_change.occupiedSlots == r_change.capacity) throw new Error("New room is full!");
-    const std = await StudentModel.find(
+    const std = await StudentModel.findOne(
         {
             email: email,
         }
     );
-    const r = await RoomModel.find(
+    const r = await RoomModel.findOne(
         {
             department: std.departmentselected,
             name: std.roomselected,
@@ -185,37 +186,48 @@ exports.getAllBills = async () => {
     return await BillModel.find();
 }
 exports.getOutDateBills = async () => {
-    return await BillModel.find({ handong: { $lt: ngaydong } });
+    return await BillModel.find({ handong: { $lt: ngaydong } }); // trả về một mảng
 }
 
-exports.approvedBill = async (bill) => {
+exports.approvedBill = async (id) => {
+    const bill = await BillModel.findById(id);
     bill.trangthai = 'Đã đóng';
-    await(bill.save())
+    await (bill.save())
 }
-
+// Khởi tạo hóa đơn 
 exports.createBill = async () => {
     const rooms = await RoomModel.find(
         {
             tinhtrang: 'Bình thường',
+        },
+        {
+            department: 1,
+            name: 1,
+            sodiencuoi: 1,
+            dongiadien: 1,
         }
     ).sort({ department: 1 });
     const bills = rooms.map(room => {
+        const handong = new Date();
+        handong.setDate(handong.getDate() + 15);
         return {
             department: room.department,
             room: room.name,
             sodiendau: room.sodiencuoi,
-            sodiencuoi: null,
-            dongia: null,
-            thanhtien: null,
-            handong: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-            trangthai: 'Chưa đóng',
-            ngaydong: null,
-            anhminhchung: null,
+            sodiencuoi: 0,
+            dongia: room.dongiadien,
+            thanhtien: 0,
+            handong: handong,
+            trangthai: "Chưa đóng",
+            anhminhchung: "",
         };
     });
-    await BillModel.insertMany(bills);
-} 
-exports.sendMail = async (mailOptions) => {
+    return bills;
+}
+exports.insertBills = async (data) => {
+    return await BillModel.insertMany(data);
+}
+exports.sendBills = async (data) => {
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -223,9 +235,56 @@ exports.sendMail = async (mailOptions) => {
             pass: process.env.mailPass
         }
     });
-    return transporter.sendMail(mailOptions);
+    let mailOptions = {
+        from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
+        subject: `Tiền phòng KTX tháng ${data[0].handong.getMonth() + 1}`,
+    };
+
+    for (const item of data) {
+        const department = departmentModel.findOne({ name: item.department });
+        const room = RoomModel.findOne({ department: item.department, name: item.room });
+        const emails = StudentModel.find(
+            {
+                roomselected: room.name,
+                departmentselected: department.name
+            },
+            {
+                email: 1,
+            }
+        );
+        mailOptions.to = emails.join(", ");
+        mailOptions.html = `
+            <h3>Hóa đơn tiền điện</h3>
+            <table border="1" cellpadding="10" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Phòng</th>
+                    <th>Tòa</th>
+                    <th>Số điện đầu</th>
+                    <th>Số điện cuối</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                    <th>Hạn đóng</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${item.department}</td>
+                    <td>${item.room}</td>
+                    <td>${item.sodiendau}</td>
+                    <td>${item.sodiencuoi}</td>
+                    <td>${item.dongia}</td>
+                    <td>${item.thanhtien}</td>
+                    <td>${item.handong}</td>
+                </tr>
+            </tbody>
+            </table>
+        `;
+        transporter.sendMail(mailOptions);
+    }
+    return;
 }
-// Cập nhật hóa đơn cho các phòng
-// Xuất hóa đơn cho từng phòng, 
-// danh sách pdf, excel
-// Gửi thông báo tiền phòng đến email của sinh viên
+
+
+
+// Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
