@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { user, token } = await authService.loginUser(req.body.email, req.body.password, req.body.role);
-    const userData = { id: user._id, email : user.email, role: user.role};
+    const userData = { id: user._id, email: user.email, role: user.role };
     res.status(200).json({ message: 'Login Successful', userData, token });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -25,5 +25,14 @@ exports.changePassword = async (req, res) => {
     res.status(200).json({ message: 'Password changed successfully' })
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+}
+exports.sendMailToResetPassword = async (req, res) => {
+  let email = req.body.email;
+  try {
+    await authService.resetPasswordMail(email);
+    res.status(200).json({ message: "Email sent successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to send email" });
   }
 }
