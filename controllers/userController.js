@@ -64,7 +64,7 @@ exports.getAllRoomsOfDepartment = async (req, res) => {
 }
 exports.approveStudentToRoom = async (req, res) => {
     try {
-        const data = await userService.approveStudentToRoom(req.email);
+        const data = await userService.approveStudentToRoom(req.body.email);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -98,6 +98,22 @@ exports.transferRoom = async (req, res) => {
     try {
         const data = await userService.transferRoom(req.body.email, req.body.department, req.body.room);
         res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.createRoom = async (req, res) => {
+    try {
+        const data = await userService.createRoom(req.body);
+        res.status(200).json({data: data, status: "success"});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRoom = async (req, res) => {
+    try {
+        const data = await userService.updateRoom(req.params.id, req.body);
+        res.status(200).json({data: data, status: "success"});
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -144,7 +160,7 @@ exports.insertBills = async (req, res) => {
 exports.sendBills = async (req, res) => {
     let data = req.body;
     try {
-        await authService.resetPasswordMail(data);
+        await authService.sendBills(data);
         res.status(200).json({ message: "Bills sent successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send bills" });

@@ -21,6 +21,7 @@ const StudentSchema = new mongoose.Schema({
     cccd: {
         type: String,
         // required: [true, "Please provide a identity number!"],
+        unique: [true, "cccd Exist"],
     },
     priority: {
         type: Boolean,
@@ -86,6 +87,9 @@ const StudentSchema = new mongoose.Schema({
     },
     ngaydangky: {
         type: Date,
+    },
+    ngayduocduyet: {
+        type: Date
     },
     trangthai: {
         type: String,

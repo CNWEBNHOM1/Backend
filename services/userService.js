@@ -39,26 +39,35 @@ exports.getAllWaitingStudents = async () => {
         }
     )
 }
+exports.createRoom = async (data) => {
+    return await RoomModel.create(data);
+}
+exports.updateRoom = async (id, data) => {
+    return await RoomModel.findByIdAndUpdate(id, data);
+}
 exports.getAllRooms = async () => {
     return await RoomModel.find().sort({ department: 1 });
 }
 exports.getAllRoomsOfDepartment = async (data) => {
-    const { page = 1, limit = 10, department = "B5" } = data;
-    const listRoom = await RoomModel.find(
-        {
-            department: department,
-        }
-    )
+    const { page = 1, limit = 10, department } = data;
+
+    // Tạo filter, nếu department có giá trị thì thêm điều kiện, nếu không thì lấy tất cả
+    const filter = department ? { department: department } : {};
+
+    const listRoom = await RoomModel.find(filter)
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
-    const totalRoom = await RoomModel.countDocuments();
+
+    // Đếm tổng số phòng theo filter
+    const totalRoom = await RoomModel.countDocuments(filter);
+
     return {
         total: totalRoom,
         page: parseInt(page),
         pageSize: parseInt(limit),
         listRoom
     };
-}
+};
 exports.approveStudentToRoom = async (email) => {
     const student = await StudentModel.findOne(
         {
@@ -184,10 +193,18 @@ exports.transferRoom = async (email, department, room) => {
     return await std.save();
 }
 exports.getAllBills = async () => {
-    return await BillModel.find();
+    const data = await BillModel.find();
+    for (item of data) {
+        if (item.trangthai === "Chưa đóng" && item.handong < new Date()) {
+            item.trangthai = "Quá hạn";
+        };
+        item.save();
+    }
+
+    return data;
 }
 exports.getOutDateBills = async () => {
-    return await BillModel.find({ handong: { $lt: ngaydong } }); // trả về một mảng
+    return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
 
 exports.approvedBill = async (id) => {
@@ -223,6 +240,7 @@ exports.createBill = async () => {
             anhminhchung: "",
         };
     });
+    BillModel.insertMany(bills);
     return bills;
 }
 exports.insertBills = async (data) => {
@@ -285,4 +303,5 @@ exports.sendBills = async (data) => {
     }
     return;
 }
+
 // Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
