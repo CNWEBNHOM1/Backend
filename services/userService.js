@@ -192,7 +192,7 @@ exports.transferRoom = async (email, department, room) => {
     r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async () => {
+exports.getAllBills = async (f) => {
     const data = await BillModel.find();
     for (item of data) {
         if (item.trangthai === "Chưa đóng" && item.handong < new Date()) {
@@ -303,5 +303,21 @@ exports.sendBills = async (data) => {
     }
     return;
 }
+exports.searchStudents = async (query) => {
+    const searchConditions = [];
+    if (!isNaN(query) && query.trim() !== "") {
+        searchConditions.push({ "sid": Number(query) });
+    }
 
+    if (query.trim() !== "") {
+        searchConditions.push({ "name": { $regex: new RegExp(query + '.*'), $options: 'i' } });
+    }
+
+    return await StudentModel.find({
+        $or: searchConditions
+    });
+};
+exports.getAllDepartments = async () => {
+    return departmentModel.find();
+}
 // Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
