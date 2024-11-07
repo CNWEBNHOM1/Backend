@@ -17,7 +17,7 @@ router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
 router.get('/', auth(['Sinh viên']), userController.getListRoommates);
 // Manager route
 router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
-router.get ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
+router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.get ('/room', auth(['Quản lý']), userController.getAllRooms);
 router.get ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.get ('/outDateBills', auth(['Quản lý']), userController.getAllOutDateBills);

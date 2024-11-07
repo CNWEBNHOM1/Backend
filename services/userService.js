@@ -42,6 +42,7 @@ exports.getAllWaitingStudents = async () => {
 exports.getAllRooms = async () => {
     return await RoomModel.find().sort({ department: 1 });
 }
+/*
 exports.getAllRoomsOfDepartment = async (data) => {
     const { page = 1, limit = 10, department = "B5" } = data;
     const listRoom = await RoomModel.find(
@@ -59,6 +60,31 @@ exports.getAllRoomsOfDepartment = async (data) => {
         listRoom
     };
 }
+*/
+exports.getAllRoomsOfDepartment = async (data) => {
+    const { page = 1, limit = 10, department } = data;
+    // Tạo filter, nếu department có giá trị thì thêm điều kiện, nếu không thì lấy tất cả
+    const filter = department ? { department: department } : {};
+
+    const listRoom = await RoomModel.find(filter)
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+    
+    // Đếm tổng số phòng theo filter
+    const totalRoom = await RoomModel.countDocuments(filter);
+
+     // Tính tổng số trang
+     const totalPages = Math.ceil(totalRoom / limit);
+
+    return {
+        total: totalRoom,
+        totalPages: totalPages,
+        page: parseInt(page),
+        pageSize: parseInt(limit),
+        listRoom
+    };
+};
+
 exports.approveStudentToRoom = async (email) => {
     const student = await StudentModel.findOne(
         {
