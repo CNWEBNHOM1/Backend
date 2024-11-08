@@ -70,10 +70,13 @@ exports.getAllRoomsOfDepartment = async (data) => {
     // Đếm tổng số phòng theo filter
     const totalRoom = await RoomModel.countDocuments(filter);
 
+    const totalPages = Math.ceil(totalRoom / limit);
+
     return {
         total: totalRoom,
         page: parseInt(page),
         pageSize: parseInt(limit),
+        totalPages,
         listRoom
     };
 };
