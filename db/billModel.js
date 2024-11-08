@@ -24,6 +24,9 @@ const BillSchema = new mongoose.Schema({
     thanhtien: {
         type: Number,
     },
+    ngaytao: {
+        type: Date,
+    },
     handong: {
         type: Date,
         // require: [true, "Thiếu hạn đóng!"],
@@ -31,6 +34,9 @@ const BillSchema = new mongoose.Schema({
     trangthai: {
         type: String,
         enum: ["Chờ xác nhận", "Đã đóng", "Chưa đóng", "Quá hạn"],
+    },
+    ngaydong: {
+        type: Date,
     },
     anhminhchung: {
         type: String,

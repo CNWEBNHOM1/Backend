@@ -11,10 +11,10 @@ const router = express.Router();
 //     <input type="file" name="minhchung" />
 //     <input type="submit" value="Upload Avatar" />
 // </form>
-router.post('/', auth(['Khách']), upload.single('minhchung'), userController.writeInfo);
+router.post('/register', auth(['Khách']), upload.single('minhchung'), userController.writeInfo);
 // Student route 
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
-router.get('/', auth(['Sinh viên']), userController.getListRoommates);
+router.get('/roomate', auth(['Sinh viên']), userController.getListRoommates);
 // Manager route
 router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
 router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
@@ -23,13 +23,21 @@ router.post ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.get ('/outDateBills', auth(['Quản lý']), userController.getAllOutDateBills);
 router.get ('/createBills', auth(['Quản lý']), userController.createBill);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);
-router.post ('/approvedStudent', auth(['Quản lý']), userController.approveStudentToRoom);
+router.get ('/searchStudent', auth(['Quản lý']), userController.searchStudent);
+router.get ('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
+router.get ('/getAllReports', auth(['Quản lý']), userController.getAllReports);
+router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.post ('/declineStundet', auth(['Quản lý']), userController.declineStudent);
 router.post ('/kickOne', auth(['Quản lý']), userController.kickOneStudent);
 router.post ('/kickAll', auth(['Quản lý']), userController.kickAllStudents);
 router.post ('/transferRoom', auth(['Quản lý']), userController.transferRoom);
 router.post ('/insertBills', auth(['Quản lý']), userController.insertBills);
 router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
-router.post ('/approveBill', auth(['Quản lý']), userController.approvedBill);
+router.post ('/createRoom', auth(['Quản lý']), userController.createRoom);
+
+router.put ('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
+router.put ('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
+router.put ('/updateBill/:id', auth(['Quản lý', 'Sinh viên']), userController.updateBill);
+router.put ('/updateReport/:id', auth(['Quản lý', 'Sinh viên']), userController.updateReport);
 
 module.exports = router;
