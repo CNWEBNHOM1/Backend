@@ -23,7 +23,7 @@ router.get ('/createBills', auth(['Quản lý']), userController.createBill);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);
 router.get ('/searchStudent', auth(['Quản lý']), userController.searchStudent);
 router.get ('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
-router.get ('/getAllReports', auth(['Quản lý']), userController.getAllReports);
+router.post ('/getAllReports', auth(['Quản lý']), userController.getAllReports);
 router.post ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.post ('/declineStundet', auth(['Quản lý']), userController.declineStudent);

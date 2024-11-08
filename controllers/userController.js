@@ -186,7 +186,7 @@ exports.getAllDepartments = async (req, res) => {
 }
 exports.getAllReports = async (req, res) => {
     try {
-        const data = await userService.getAllReports();
+        const data = await userService.getAllReports(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
