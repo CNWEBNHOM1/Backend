@@ -19,6 +19,9 @@ const ReportSchema = new mongoose.Schema({
         type: String,
         enum: ["Chưa xử lý", "Đã xử lý"],
     },
+    ngayxuly: {
+        type: Date,
+    },
     ghichu: {
         type: String,
     }
