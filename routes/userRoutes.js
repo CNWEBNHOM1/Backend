@@ -1,22 +1,22 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
-const uploadImage = require('../middlewares/uploadImage');
+const { uploadBillProof, uploadGuestProof } = require('../middlewares/uploadImage');
 
 const router = express.Router();
 
 // Guest route 
 router.post('/', auth(['Khách']), userController.writeInfo);
+router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);//xem phong trong
 // Student route 
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//student info
-router.get('/', auth(['Sinh viên']), userController.getListRoommates);
-router.get('/roomAvailable', auth(['Sinh viên']), userController.getAllRoomsAvailable);//done
+router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//xem ng cung phong
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//xem ds hoa don
 
-router.post('/uploadProof', auth(['Sinh viên']), uploadImage.single('image'), userController.uploadProof);//thanh toan phong
-router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
-router.post('/updateProfile', auth(['Sinh viên']), userController.updateStudentProfile);//update ttcn
-router.post('/roomRegister', auth(['Sinh viên']), userController.roomRegister);//done
+router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('image'), userController.uploadBillProof);//nop mc
+// router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
+// router.post('/updateProfile', auth(['Sinh viên']), userController.updateStudentProfile);//update ttcn
+// router.post('/roomRegister', auth(['Sinh viên']), userController.roomRegister);//done
 
 
 // Manager route

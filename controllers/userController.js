@@ -9,11 +9,20 @@ exports.writeInfo = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.getAllRoomsAvailable = async (req, res) => {
+    try {
+        const roomsAvailable = await userService.getAllRoomsAvailable();
+        res.status(200).json({ data: roomsAvailable, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 // Student controller 
 exports.getListRoommates = async (req, res) => {
     try {
-        const roommates = await userService.getListRoommates(req.body.room);
+        const email = req.body.email;
+        const roommates = await userService.getListRoommates(email);
         res.json({ data: roommates, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -28,11 +37,11 @@ exports.getMyInfo = async (req, res) => {
     }
 };
 
-exports.uploadProof = async (req, res) => {
+exports.uploadBillProof = async (req, res) => {
     try {
-        const semail = req.body;
+        const email = req.body.email;
         const image = req.file;
-        const paymentInformation = await userService.uploadProof(semail, image);
+        const paymentInformation = await userService.uploadBillProof(email, image);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -47,14 +56,7 @@ exports.createReport = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-exports.getAllRoomsAvailable = async (req, res) => {
-    try {
-        const roomsAvailable = await userService.getAllRoomsAvailable();
-        res.status(200).json({ data: roomsAvailable, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+
 exports.roomRegister = async (req, res) => {
     try {
         const { email, roomName, department } = req.body;

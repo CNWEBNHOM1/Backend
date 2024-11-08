@@ -14,38 +14,6 @@ require('dotenv').config();
 exports.writeInfo = async (info) => {
     return await StudentModel.create(info);
 }
-// Student Service 
-exports.getListRoommates = async (department, room) => {
-    return await StudentModel.find(
-        {
-            roomselected: room,
-            departmentselected: department,
-        }
-    );
-};
-exports.getMyInfo = async (email) => {
-    return await StudentModel.find(
-        {
-            email: email,
-        }
-    );
-};
-exports.uploadProof = async (semail, image) => {
-    if (!image) throw new Error('WTF')
-    const student = await studentModel.find({
-        email: semail
-    })
-    // if (!student) student = {};
-    return {
-        adu: "?",
-        student
-    }
-};
-exports.createReport = async () => {
-    return {
-
-    }
-}
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
         tinhtrang: 'Bình thường'
@@ -56,6 +24,62 @@ exports.getAllRoomsAvailable = async () => {
 
     return roomList;
 };
+// Student Service 
+exports.getListRoommates = async (email) => {
+
+    const student = await StudentModel.findOne(
+        {
+            email: email
+        }
+    );
+    if (!student) throw new Error("Student not found");
+    const listStudent = await StudentModel.find({
+        roomselected: student.roomselected,
+        department: student.department,
+        email: { $ne: email }
+    })
+    return listStudent;
+};
+exports.getMyInfo = async (email) => {
+    return await StudentModel.find(
+        {
+            email: email,
+        }
+    );
+};
+exports.uploadBillProof = async (email, image) => {
+    if (!image) throw new Error('Image is required')
+    const student = await studentModel.find({
+        email: email
+    })
+    // return student;
+    if (!student[0]) throw new Error("Student not found");
+
+    const roomNum = Number(student[0].roomselected);
+    if (isNaN(roomNum)) {
+        throw new Error("Undefined room");
+    }
+    else {
+        console.log(roomNum);
+    }
+
+
+    const bill = await billModel.find({
+        trangthai: "Chưa đóng",
+        department: student[0].departmentselected,
+        room: roomNum
+    })
+    if (!bill[0]) throw new Error("No pending bill found, or the bill may already be paid");
+    bill.anhminhchung = image.path;
+    bill.trangthai = "Chờ xác nhận";
+    await bill.save;
+    return bill;
+};
+exports.createReport = async () => {
+    return {
+
+    }
+}
 exports.roomRegister = async (data) => {
     const student = await studentModel.findOne({
         email: data.email
