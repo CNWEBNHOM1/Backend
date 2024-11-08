@@ -209,9 +209,62 @@ exports.transferRoom = async (email, department, room) => {
     r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async () => {
-    return await BillModel.find();
-}
+// exports.getAllBills = async () => {
+//     return await BillModel.find();
+// }
+exports.getAllBills = async (data) => {
+    const { page = 1, limit = 10, room = null, department = null, trangthai = null } = data;
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    // Tạo đối tượng filter dựa vào department, room và trangthai
+    const filter = {};
+
+    // Nếu department không null, tìm kiếm chính xác theo department
+    if (department) {
+        filter.department = department;
+    }
+
+    // Nếu room không null, tìm kiếm room theo kiểu bao gồm
+    if (room) {
+        filter.$expr = {
+            $regexMatch: {
+                input: { $toString: "$room" }, // Chuyển room thành chuỗi
+                regex: room.toString(), // Tìm kiếm bao gồm
+                options: 'i' // Không phân biệt chữ hoa/thường
+            }
+        };
+    }
+
+    // Nếu trangthai không null, tìm kiếm chính xác theo trangthai
+    if (trangthai) {
+        filter.trangthai = trangthai;
+    }
+
+    // Tính tổng số tài liệu dựa vào filter
+    const totalBills = await BillModel.countDocuments(filter);
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalBills / limitInt);
+
+    // Lấy danh sách hóa đơn đã phân trang dựa trên filter
+    const bills = await BillModel.find(filter)
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    // Trả về thông tin phân trang và danh sách hóa đơn đã lọc
+    return {
+        total: totalBills,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listBill: bills
+    };
+};
+
+
+
+
 exports.getOutDateBills = async () => {
     return await BillModel.find({ handong: { $lt: ngaydong } }); // trả về một mảng
 }

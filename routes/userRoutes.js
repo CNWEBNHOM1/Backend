@@ -19,7 +19,7 @@ router.get('/', auth(['Sinh viên']), userController.getListRoommates);
 router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
 router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.get ('/room', auth(['Quản lý']), userController.getAllRooms);
-router.get ('/allBills', auth(['Quản lý']), userController.getAllBills);
+router.post ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.get ('/outDateBills', auth(['Quản lý']), userController.getAllOutDateBills);
 router.get ('/createBills', auth(['Quản lý']), userController.createBill);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);

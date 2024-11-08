@@ -104,7 +104,7 @@ exports.transferRoom = async (req, res) => {
 }
 exports.getAllBills = async (req, res) => {
     try {
-        const data = await userService.getAllBills();
+        const data = await userService.getAllBills(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
