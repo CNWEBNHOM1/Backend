@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const StudentSchema = new mongoose.Schema({
+const RequestSchema = new mongoose.Schema({
     email: {
         type: String,
         // required: [true, "Please provide an Email!"],
@@ -73,26 +73,32 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         // required: [true, "Please provide a family member phone number"],
     },
-    department: {
+    departmentselected: {
         type: String,
         default: "none",
     },
-    room: {
+    roomselected: {
         type: String,
         default: "none",
     },
-    ngaydangky: {
+    minhchung: {
+        type: String,
+        // required: [true, "Please provide a minhchung!"],
+    },
+    ngaytao: {
         type: Date,
     },
-    ngayduocduyet: {
-        type: Date
-    },
-    expiry: {
-        type: Date,
+    trangthai: {
+        type: String,
+        enum: ["pending", "approved", "declined"],
+        default: "none",
     },
     ngaycapnhat: {
         type: Date,
     },
+    holdexpiry: { 
+        type: Date, 
+    }
 })
 
-module.exports = mongoose.models.Students || mongoose.model("Students", StudentSchema);
+module.exports = mongoose.models.Requests || mongoose.model("Requests", RequestSchema);
