@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
+const uploadImage = require('../middlewares/uploadImage');
 
 const router = express.Router();
 
@@ -9,12 +10,15 @@ router.post('/', auth(['Khách']), userController.writeInfo);
 // Student route 
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//student info
 router.get('/', auth(['Sinh viên']), userController.getListRoommates);
-
-router.post('/transfer', auth(['Sinh viên']), userController.transferPayment);//thanh toan phong
-router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
 router.get('/roomAvailable', auth(['Sinh viên']), userController.getAllRoomsAvailable);//done
+router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//xem ds hoa don
+
+router.post('/uploadProof', auth(['Sinh viên']), uploadImage.single('image'), userController.uploadProof);//thanh toan phong
+router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
 router.post('/updateProfile', auth(['Sinh viên']), userController.updateStudentProfile);//update ttcn
 router.post('/roomRegister', auth(['Sinh viên']), userController.roomRegister);//done
+
+
 // Manager route
 router.get('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
 router.get('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);

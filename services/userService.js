@@ -6,6 +6,7 @@ const BillModel = require("../db/billModel");
 const departmentModel = require('../db/departmentModel');
 const studentModel = require('../db/studentModel');
 const roomModel = require('../db/roomModel');
+const billModel = require('../db/billModel');
 
 require('dotenv').config();
 
@@ -29,23 +30,22 @@ exports.getMyInfo = async (email) => {
         }
     );
 };
-exports.transferPayment = async (req, res) => {
+exports.uploadProof = async (semail, image) => {
+    if (!image) throw new Error('WTF')
+    const student = await studentModel.find({
+        email: semail
+    })
+    // if (!student) student = {};
     return {
-        ok: 'ok'
-    };//chuyen trang thai thanh toan,vv
+        adu: "?",
+        student
+    }
 };
-exports.createReport = async (req, res) => {
+exports.createReport = async () => {
     return {
 
     }
 }
-// exports.getAllRoomsAvailable = async () => {
-//     // const roomList =
-//     return await RoomModel.find({
-//         occupiedSlots: { $lt: '$capacity' },
-//         tinhtrang: 'Bình thường'
-//     });
-// }
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
         tinhtrang: 'Bình thường'
@@ -94,6 +94,18 @@ exports.updateStudentProfile = async (data) => {
     student.trangthai = data.trangthai;
     await student.save();
     return student;
+}
+exports.getListBills = async (email) => {
+    const student = await studentModel.findOne({
+        email: email
+    })
+    if (!student) throw new Error('Student not found');
+    const bill = await billModel.findOne({
+        department: student.departmentselected,
+        room: student.roomselected
+    })
+    if (!bill) throw new Error('Bill not found');
+    return bill;
 }
 // Manager Service 
 exports.getAllStudents = async () => {

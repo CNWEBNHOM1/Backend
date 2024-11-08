@@ -28,13 +28,16 @@ exports.getMyInfo = async (req, res) => {
     }
 };
 
-exports.transferPayment = async (req, res) => {
+exports.uploadProof = async (req, res) => {
     try {
-        const paymentInformation = await userService.transferPayment();
+        const semail = req.body;
+        const image = req.file;
+        const paymentInformation = await userService.uploadProof(semail, image);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+
 };
 exports.createReport = async (req, res) => {
     try {
@@ -70,6 +73,15 @@ exports.updateStudentProfile = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+exports.getListBills = async (req, res) => {
+    try {
+        const email = req.body.email;
+        const listBills = await userService.getListBills(email);
+        res.json({ data: listBills, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 
 
 // Manager controller 
