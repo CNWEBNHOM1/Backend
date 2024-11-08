@@ -4,6 +4,7 @@ const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
 const BillModel = require("../db/billModel");
 const departmentModel = require('../db/departmentModel');
+const ReportModel = require('../db/reportModel');
 
 require('dotenv').config();
 
@@ -68,22 +69,6 @@ exports.getAllRoomsOfDepartment = async (data) => {
         listRoom
     };
 };
-exports.approveStudentToRoom = async (email) => {
-    const student = await StudentModel.findOne(
-        {
-            email: email,
-        }
-    );
-    const acc = await UserModel.findOne(
-        {
-            email: email,
-        }
-    );
-    acc.role = "Sinh viên";
-    student.trangthai = "approved";
-
-    return await student.save();
-}
 exports.declineStudent = async (email) => {
     const student = await StudentModel.findOne(
         {
@@ -103,6 +88,18 @@ exports.declineStudent = async (email) => {
 
     await room.save();
     return await student.save();
+}
+exports.updateStudent = async (id, data) => {
+    if (data.trangthai === "approved") {
+        UserModel.findOneAndUpdate(
+            {email: data.email}, 
+            {$set: {role: "Sinh viên"}},
+            {returnDocument: "before" | "after"},
+        );
+    } else if (data.trangthai === "pending") {
+
+    }
+    return StudentModel.findByIdAndUpdate(id, data, {new: true});
 }
 exports.kickOneStudents = async () => {
     const student = await StudentModel.findOne(
@@ -192,7 +189,7 @@ exports.transferRoom = async (email, department, room) => {
     r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async (f) => {
+exports.getAllBills = async () => {
     const data = await BillModel.find();
     for (item of data) {
         if (item.trangthai === "Chưa đóng" && item.handong < new Date()) {
@@ -205,12 +202,6 @@ exports.getAllBills = async (f) => {
 }
 exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
-}
-
-exports.approvedBill = async (id) => {
-    const bill = await BillModel.findById(id);
-    bill.trangthai = 'Đã đóng';
-    await (bill.save())
 }
 // Khởi tạo hóa đơn 
 exports.createBill = async () => {
@@ -242,6 +233,9 @@ exports.createBill = async () => {
     });
     BillModel.insertMany(bills);
     return bills;
+}
+exports.updateBill = async (id, data) => {
+    return await BillModel.findByIdAndUpdate(id, data);
 }
 exports.insertBills = async (data) => {
     return await BillModel.insertMany(data);
@@ -319,5 +313,11 @@ exports.searchStudents = async (query) => {
 };
 exports.getAllDepartments = async () => {
     return departmentModel.find();
+}
+exports.getAllReports = async () => {
+    return ReportModel.find();
+}
+exports.updateReport = async (id, data) => {
+    return await ReportModel.findByIdAndUpdate(id, data);
 }
 // Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel

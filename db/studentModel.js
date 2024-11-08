@@ -93,7 +93,7 @@ const StudentSchema = new mongoose.Schema({
     },
     trangthai: {
         type: String,
-        enum: ["pending", "approved", "kicked", "none"],
+        enum: ["pending", "approved", "declined", "kicked", "none"],
         default: "none",
     },
     holdexpiry: { 
