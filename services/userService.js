@@ -5,12 +5,20 @@ const UserModel = require("../db/userModel");
 const BillModel = require("../db/billModel");
 const departmentModel = require('../db/departmentModel');
 const ReportModel = require('../db/reportModel');
+const RequestModel = require('../db/requestModel');
 
 require('dotenv').config();
 
 // Guest Service 
-exports.writeInfo = async (info) => {
-    return await StudentModel.create(info);
+exports.createRequest = async (data) => {
+    const room = data.roomselected;
+    const department = data.departmentselected;
+    const target = RoomModel.findOne({ name: room, department: department });
+    if (target.occupiedSlots === target.capacity)
+        throw new Error("This room is full!");
+    target.occupiedSlots++;
+    target.save();
+    return await RequestModel.create(data);
 }
 
 // Student Service 
@@ -33,13 +41,13 @@ exports.getMyInfo = async (email) => {
 exports.getAllStudents = async () => {
     return await StudentModel.find()
 }
-exports.getAllWaitingStudents = async () => {
-    return await StudentModel.find(
-        {
-            trangthai: "pending"
-        }
-    )
-}
+// exports.getAllWaitingStudents = async () => {
+//     return await StudentModel.find(
+//         {
+//             trangthai: "pending"
+//         }
+//     )
+// }
 exports.createRoom = async (data) => {
     return await RoomModel.create(data);
 }
@@ -69,6 +77,9 @@ exports.getAllRoomsOfDepartment = async (data) => {
         listRoom
     };
 };
+exports.addStudent = async (data) => {
+    return StudentModel.create(data);
+};
 exports.declineStudent = async (email) => {
     const student = await StudentModel.findOne(
         {
@@ -92,14 +103,14 @@ exports.declineStudent = async (email) => {
 exports.updateStudent = async (id, data) => {
     if (data.trangthai === "approved") {
         UserModel.findOneAndUpdate(
-            {email: data.email}, 
-            {$set: {role: "Sinh viên"}},
-            {returnDocument: "before" | "after"},
+            { email: data.email },
+            { $set: { role: "Sinh viên" } },
+            { returnDocument: "before" | "after" },
         );
     } else if (data.trangthai === "pending") {
 
     }
-    return StudentModel.findByIdAndUpdate(id, data, {new: true});
+    return StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.kickOneStudents = async () => {
     const student = await StudentModel.findOne(
@@ -189,17 +200,78 @@ exports.transferRoom = async (email, department, room) => {
     r.save(); r_change.save();
     return await std.save();
 }
-exports.getAllBills = async () => {
-    const data = await BillModel.find();
-    for (item of data) {
-        if (item.trangthai === "Chưa đóng" && item.handong < new Date()) {
-            item.trangthai = "Quá hạn";
-        };
-        item.save();
+exports.getAllBills = async (data) => {
+    const { 
+        page = 1, 
+        limit = 10, 
+        room = null, 
+        department = null, 
+        trangthai = null, 
+        overdue = false, 
+        fromDate = null, 
+        toDate = null,
+        sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
+    } = data;
+    
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
+    const filter = {};
+
+    if (department) {
+        filter.department = department;
     }
 
-    return data;
-}
+    if (room) {
+        filter.$expr = {
+            $regexMatch: {
+                input: { $toString: "$room" },
+                regex: room.toString(),
+                options: 'i'
+            }
+        };
+    }
+
+    if (trangthai) {
+        filter.trangthai = trangthai;
+    }
+
+    if (overdue) {
+        const today = new Date();
+        filter.handong = { $lt: today };
+    }
+
+    if (fromDate || toDate) {
+        filter.handong = filter.handong || {};
+        if (fromDate) {
+            filter.handong.$gte = new Date(fromDate);
+        }
+        if (toDate) {
+            filter.handong.$lte = new Date(toDate);
+        }
+    }
+
+    // Tính tổng số tài liệu dựa vào filter
+    const totalBills = await BillModel.countDocuments(filter);
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalBills / limitInt);
+
+    // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
+    const bills = await BillModel.find(filter)
+        .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    return {
+        total: totalBills,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listBill: bills
+    };
+};
 exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
@@ -318,6 +390,26 @@ exports.getAllReports = async () => {
     return ReportModel.find();
 }
 exports.updateReport = async (id, data) => {
-    return await ReportModel.findByIdAndUpdate(id, data);
+    return await ReportModel.findByIdAndUpdate(id, data, { new: true });
+}
+exports.updateRequest = async (id, data, file) => {
+    if (data.trangthai === "approved") {
+        const std = data;
+        std.expiry = "2024-01-29"; delete std.holdexpiry;
+        std.ngaybatdau = std.ngaycapnhat;
+        delete std.trangthai;
+        delete std.ngaytao;
+        delete std.minhchung;
+        std.room = std.roomselected; delete std.roomselected;
+        std.department = std.departmentselected; delete std.departmentselected;
+        await this.addStudent(std);
+    } else if (data.trangthai === "declined") {
+        const target = RoomModel.findOne({ name: data.roomselected, department: data.departmentselected });
+        target.occupiedSlots--;
+        target.save();
+    } else if (file) {
+        data.minhchung = file.filename;
+    }
+    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
 }
 // Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel

@@ -81,10 +81,7 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         default: "none",
     },
-    ngaydangky: {
-        type: Date,
-    },
-    ngayduocduyet: {
+    ngaybatdau: {
         type: Date
     },
     expiry: {
