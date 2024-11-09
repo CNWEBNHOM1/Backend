@@ -77,10 +77,13 @@ exports.getAllRoomsOfDepartment = async (data) => {
     // Đếm tổng số phòng theo filter
     const totalRoom = await RoomModel.countDocuments(filter);
 
+    const totalPages = Math.ceil(totalRoom / limit);
+
     return {
         total: totalRoom,
         page: parseInt(page),
         pageSize: parseInt(limit),
+        totalPages,
         listRoom
     };
 };
@@ -381,11 +384,103 @@ exports.searchStudents = async (query) => {
         $or: searchConditions
     });
 };
-exports.getAllDepartments = async () => {
-    return departmentModel.find();
+exports.getAllDepartments = async (data) => {
+    const { 
+        page = 1, 
+        limit = 10, 
+        name = '' 
+    } = data;
+    
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const filter = {};
+    if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+    }
+
+    const totalDepartment = await departmentModel.countDocuments(filter);
+
+    const totalPages = Math.ceil(totalDepartment / limitInt);
+
+    const departments = await departmentModel.find(filter)
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    return {
+        total: totalDepartment,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listDepartment: departments
+    };
 }
-exports.getAllReports = async () => {
-    return ReportModel.find();
+exports.getAllReports = async (data) => {
+    const { 
+        page = 1, 
+        limit = 10, 
+        room = null, 
+        department = null, 
+        trangthai = null, 
+        fromDate = null, 
+        toDate = null,
+        sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
+    } = data;
+    
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
+    const filter = {};
+
+    if (department) {
+        filter.department = department;
+    }
+
+    if (room) {
+        filter.$expr = {
+            $regexMatch: {
+                input: { $toString: "$room" },
+                regex: room.toString(),
+                options: 'i'
+            }
+        };
+    }
+
+    if (trangthai) {
+        filter.trangthai = trangthai;
+    }
+
+
+    if (fromDate || toDate) {
+        filter.ngaygui = filter.ngaygui || {};
+        if (fromDate) {
+            filter.ngaygui.$gte = new Date(fromDate);
+        }
+        if (toDate) {
+            filter.ngaygui.$lte = new Date(toDate);
+        }
+    }
+
+    // Tính tổng số tài liệu dựa vào filter
+    const totalReports = await ReportModel.countDocuments(filter);
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalReports / limitInt);
+
+    // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
+    const bills = await ReportModel.find(filter)
+        .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    return {
+        total: totalReports,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listReport: bills
+    };
 }
 exports.updateReport = async (id, data) => {
     return await ReportModel.findByIdAndUpdate(id, data, { new: true });

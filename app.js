@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, 'uploads')));  // Thư mục để l
 
 // CORS headers
 app.use(cors({
-    origin: process.env.FE_URL,
+    origin: "http://localhost:4444",
     methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Specify allowed methods
     credentials: true  // If you want to allow cookies or authentication headers
 }));
