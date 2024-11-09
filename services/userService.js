@@ -97,13 +97,16 @@ exports.createReport = async (email, noidung) => {
     const room = Number(sRoom);
     const ngaygui = Date.now();
     const trangthai = "Chưa xử lý";
+
     const data =
     {
         department: department,
         room: room,
         ngaygui: ngaygui,
         trangthai: trangthai,
-        noidung: noidung
+        noidung: noidung,
+        ngayxuly: null,
+        ghichu: null,
 
     };
     // const report = await  reportModel.create(data)
