@@ -386,8 +386,36 @@ exports.searchStudents = async (query) => {
         $or: searchConditions
     });
 };
-exports.getAllDepartments = async () => {
-    return departmentModel.find();
+exports.getAllDepartments = async (data) => {
+    const { 
+        page = 1, 
+        limit = 10, 
+        name = '' 
+    } = data;
+    
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const filter = {};
+    if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+    }
+
+    const totalDepartment = await departmentModel.countDocuments(filter);
+
+    const totalPages = Math.ceil(totalDepartment / limitInt);
+
+    const departments = await departmentModel.find(filter)
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    return {
+        total: totalDepartment,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listDepartment: departments
+    };
 }
 exports.getAllReports = async (data) => {
     const { 
