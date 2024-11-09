@@ -53,7 +53,9 @@ exports.uploadBillProof = async (req, res) => {
 };
 exports.createReport = async (req, res) => {
     try {
-        const reportInfo = await userService.createReport();
+        const email = req.body.email;
+        const noidung = req.body.noidung;
+        const reportInfo = await userService.createReport(email, noidung);
         res.status(200).json({ data: reportInfo, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

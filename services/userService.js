@@ -85,10 +85,29 @@ exports.uploadBillProof = async (email, image) => {
     await bill.save;
     return bill;
 };
-exports.createReport = async () => {
-    return {
+exports.createReport = async (email, noidung) => {
+    const student = await studentModel.findOne({
+        email: email
+    })
+    if (!student) throw new Error("Student not found");
 
-    }
+    const department = student.department;
+    const sRoom = student.room;
+    if (department === "none" && sRoom === "none") throw new Error("Student not in any room");
+    const room = Number(sRoom);
+    const ngaygui = Date.now();
+    const trangthai = "Chưa xử lý";
+    const data =
+    {
+        department: department,
+        room: room,
+        ngaygui: ngaygui,
+        trangthai: trangthai,
+        noidung: noidung
+
+    };
+    // const report = await  reportModel.create(data)
+    return await ReportModel.create(data)
 }
 exports.roomRegister = async (data) => {
     const student = await studentModel.findOne({
@@ -134,7 +153,7 @@ exports.getListBills = async (email) => {
         email: email
     })
     if (!student) throw new Error('Student not found');
-    const bill = await billModel.findOne({
+    const bill = await billModel.find({
         department: student.departmentselected,
         room: student.roomselected
     })
@@ -308,18 +327,18 @@ exports.transferRoom = async (email, department, room) => {
     return await std.save();
 }
 exports.getAllBills = async (data) => {
-    const { 
-        page = 1, 
-        limit = 10, 
-        room = null, 
-        department = null, 
-        trangthai = null, 
-        overdue = false, 
-        fromDate = null, 
+    const {
+        page = 1,
+        limit = 10,
+        room = null,
+        department = null,
+        trangthai = null,
+        overdue = false,
+        fromDate = null,
         toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
-    
+
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
 
@@ -494,17 +513,17 @@ exports.getAllDepartments = async () => {
     return departmentModel.find();
 }
 exports.getAllReports = async (data) => {
-    const { 
-        page = 1, 
-        limit = 10, 
-        room = null, 
-        department = null, 
-        trangthai = null, 
-        fromDate = null, 
+    const {
+        page = 1,
+        limit = 10,
+        room = null,
+        department = null,
+        trangthai = null,
+        fromDate = null,
         toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
-    
+
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
 

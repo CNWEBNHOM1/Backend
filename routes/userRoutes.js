@@ -7,7 +7,7 @@ const upload = require('../middlewares/uploadImg');
 const router = express.Router();
 
 // Guest route 
-router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
+router.post('/createRequest', auth(['Khách']), uploadGuestProof.single('minhchung'), userController.createRequest);
 // Ví dụ nếu form ở frontend như sau:
 // <form action="/add" method="POST" enctype="multipart/form-data">
 //     <input type="file" name="minhchung" />
@@ -18,10 +18,9 @@ router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//student in
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//xem ng cung phong
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//xem ds hoa don
 
-router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('image'), userController.uploadBillProof);//nop mc
-// router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
+router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//nop mc
+router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
 // router.post('/updateProfile', auth(['Sinh viên']), userController.updateStudentProfile);//update ttcn
-// router.post('/roomRegister', auth(['Sinh viên']), userController.roomRegister);//done
 
 
 // Manager route
