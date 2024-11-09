@@ -472,7 +472,7 @@ exports.getAllReports = async (data) => {
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
     const bills = await ReportModel.find(filter)
-        .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
+        .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
 
