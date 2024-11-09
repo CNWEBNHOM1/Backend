@@ -1,12 +1,13 @@
 const userService = require('../services/userService');
 
 // Guest controller
-exports.writeInfo = async (req, res) => {
+exports.createRequest = async (req, res) => {
     try {
-        const { email, name, ngaysinh, sid, cccd, priority, phone, address, khoa, truong_khoa_vien, nganh, ma_nganh, lop, family, familyname, familyphone, ngaydangky, trangthai, holdexpiry } = req.body;
-        const minhchung = req.file ? req.file.filename : null;
-        const std = await userService.writeInfo({ email, name, ngaysinh, sid, cccd, priority, phone, address, khoa, truong_khoa_vien, nganh, ma_nganh, lop, family, familyname, familyphone, ngaydangky, trangthai, holdexpiry, minhchung });
-        res.json({ data: std, status: "success" });
+        const data = req.body;
+        data["minhchung"] = req.file ? req.file.filename : null;
+        data.holdexpiry = Date() + 15 * 60 * 1000;
+        const request = await userService.createRequest(data);
+        res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -97,14 +98,14 @@ exports.getAllStudents = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.getAllWaitingStudents = async (req, res) => {
-    try {
-        const data = await userService.getAllWaitingStudents();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
+// exports.getAllWaitingStudents = async (req, res) => {
+//     try {
+//         const data = await userService.getAllWaitingStudents();
+//         res.status(200).json({ data: data, status: "success" });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
 exports.getAllRooms = async (req, res) => {
     try {
         const allr = await userService.getAllRooms();
@@ -179,7 +180,7 @@ exports.updateRoom = async (req, res) => {
 }
 exports.getAllBills = async (req, res) => {
     try {
-        const data = await userService.getAllBills();
+        const data = await userService.getAllBills(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -245,7 +246,7 @@ exports.getAllDepartments = async (req, res) => {
 }
 exports.getAllReports = async (req, res) => {
     try {
-        const data = await userService.getAllReports();
+        const data = await userService.getAllReports(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -254,6 +255,14 @@ exports.getAllReports = async (req, res) => {
 exports.updateReport = async (req, res) => {
     try {
         const data = await userService.updateReport(req.params.id, req.body);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRequest = async (req, res) => {
+    try {
+        const data = await userService.updateRequest(req.params.id, req.body, req.file);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

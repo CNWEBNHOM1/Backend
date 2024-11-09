@@ -47,7 +47,10 @@ const RoomSchema = new mongoose.Schema({
     tinhtrang: {
         type: String,
         enum: ['Bình thường', 'Bị hỏng']
-    }
+    },
+    ngaycapnhat: {
+        type: Date,
+    },
 })
 
 module.exports = mongoose.models.Rooms || mongoose.model("Rooms", RoomSchema);

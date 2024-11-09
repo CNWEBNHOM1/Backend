@@ -16,7 +16,7 @@ const DepartmentSchema = new mongoose.Schema({
     },
     ngaycapnhat: {
         type: Date,
-    }
+    },
 })
 
 module.exports = mongoose.models.Departments || mongoose.model("Departments", DepartmentSchema);
