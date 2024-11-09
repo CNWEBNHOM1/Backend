@@ -7,6 +7,8 @@ const router = express.Router();
 
 // Guest route 
 router.post ('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
+router.put ('/updateRequest/:id', auth(['Khách']), upload.single('minhchung'), userController.updateRequest);
+
 // Ví dụ nếu form ở frontend như sau:
 // <form action="/add" method="POST" enctype="multipart/form-data">
 //     <input type="file" name="minhchung" />
@@ -24,6 +26,7 @@ router.get ('/', auth(['Quản lý']), userController.getAllStudents);
 router.get ('/searchStudent', auth(['Quản lý']), userController.searchStudent);
 router.get ('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
 router.get ('/getAllReports', auth(['Quản lý']), userController.getAllReports);
+
 router.post ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.post ('/declineStundet', auth(['Quản lý']), userController.declineStudent);
@@ -34,7 +37,7 @@ router.post ('/insertBills', auth(['Quản lý']), userController.insertBills);
 router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.post ('/createRoom', auth(['Quản lý']), userController.createRoom);
 
-router.put ('/updateRequest/:id', auth(['Quản lý', 'Khách']), upload.single('minhchung'), userController.updateRequest);
+router.put ('/handleRequest/:id', auth(['Quản lý']), userController.handleRequest);
 router.put ('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
 router.put ('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
 router.put ('/updateBill/:id', auth(['Quản lý', 'Sinh viên']), userController.updateBill);

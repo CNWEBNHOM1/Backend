@@ -8,6 +8,10 @@ const RoomSchema = new mongoose.Schema({
     department: {
         type: String,
     },
+    gender: {
+        type: String,
+        enum: ["Nam", "Nữ"],
+    },
     capacity: {
         type: Number,
         // required: [true, "Please provide a size"],

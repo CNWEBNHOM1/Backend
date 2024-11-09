@@ -208,3 +208,11 @@ exports.updateRequest = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.handleRequest = async (req, res) => {
+    try {
+        const data = await userService.handleRequest(req.params.id, req.params.action);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

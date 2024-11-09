@@ -18,6 +18,7 @@ exports.createRequest = async (data) => {
         throw new Error("This room is full!");
     target.occupiedSlots++;
     target.save();
+    data.trangthai = "pending";
     return await RequestModel.create(data);
 }
 
@@ -101,15 +102,6 @@ exports.declineStudent = async (email) => {
     return await student.save();
 }
 exports.updateStudent = async (id, data) => {
-    if (data.trangthai === "approved") {
-        UserModel.findOneAndUpdate(
-            { email: data.email },
-            { $set: { role: "Sinh viên" } },
-            { returnDocument: "before" | "after" },
-        );
-    } else if (data.trangthai === "pending") {
-
-    }
     return StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.kickOneStudents = async () => {
@@ -393,8 +385,15 @@ exports.updateReport = async (id, data) => {
     return await ReportModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.updateRequest = async (id, data, file) => {
-    if (data.trangthai === "approved") {
-        const std = data;
+    if (file) {
+        data.minhchung = file.filename;
+    }
+    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
+}
+exports.handleRequest = async (id, action) => {
+    const request = RequestModel.findById(id);
+    if (action === "approved") {
+        const std = request;
         std.expiry = "2024-01-29"; delete std.holdexpiry;
         std.ngaybatdau = std.ngaycapnhat;
         delete std.trangthai;
@@ -402,14 +401,38 @@ exports.updateRequest = async (id, data, file) => {
         delete std.minhchung;
         std.room = std.roomselected; delete std.roomselected;
         std.department = std.departmentselected; delete std.departmentselected;
+        std.trangthai = "Đang ở";
         await this.addStudent(std);
-    } else if (data.trangthai === "declined") {
-        const target = RoomModel.findOne({ name: data.roomselected, department: data.departmentselected });
+        const acc = UserModel.find(data.email);
+        acc.role = "Sinh viên";
+        acc.save();
+        request.trangthai = "approved";
+    } else if (action === "declined") {
+        const target = RoomModel.findOne({ name: request.roomselected, department: request.departmentselected });
         target.occupiedSlots--;
         target.save();
-    } else if (file) {
-        data.minhchung = file.filename;
+        request.trangthai = "Declined";
     }
-    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
+    await request.save();
 }
-// Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
+exports.checkExpiredRequests = async () => {
+    const now = new Date();
+    try {
+        const expiredRequests = await RequestModel.find({
+            trangthai: 'pending',
+            holdexpiry: { $lte: now },
+            minhchung: { $exists: false }
+        });
+        
+        if (expiredRequests.length > 0) {
+            for (const request of expiredRequests) {
+                request.trangthai = 'declined';
+                await request.save();
+            }
+            console.log(`Declined ${expiredRequests.length} expired requests.`);
+        }
+    } catch (error) {
+        console.error('Error checking expired requests:', error);
+    }
+};
+// Xuất hóa đơn cho từng phòng, danh sách excel

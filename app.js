@@ -6,7 +6,8 @@ const dbConnect = require('./db/dbConnect');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const path = require('path');
-
+const cron = require('node-cron');
+const handle = require('./services/userService')
 const app = express();
 
 // Kết nối đến database
@@ -23,6 +24,11 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Specify allowed methods
     credentials: true  // If you want to allow cookies or authentication headers
 }));
+
+cron.schedule('*/15 * * * *', () => {
+    console.log('Checking expired requests...');
+    handle.checkExpiredRequests();
+});
 
 // Routes
 app.use('/auth', authRoutes);
