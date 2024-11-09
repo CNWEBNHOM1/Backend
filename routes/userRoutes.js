@@ -14,13 +14,13 @@ router.post('/createRequest', auth(['Khách']), uploadGuestProof.single('minhchu
 //     <input type="submit" value="Upload Avatar" />
 // </form>
 // Student route 
-router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//student info
-router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//xem ng cung phong
-router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//xem ds hoa don
+router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//
+router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
+router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
-router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//nop mc
-router.post('/createReport', auth(['Sinh viên']), userController.createReport);//tao report
-// router.post('/updateProfile', auth(['Sinh viên']), userController.updateStudentProfile);//update ttcn
+router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
+router.post('/createReport', auth(['Sinh viên']), userController.createReport);//noidun
+
 
 
 // Manager route
