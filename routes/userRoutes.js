@@ -8,7 +8,7 @@ const router = express.Router();
 // Guest route 
 router.post ('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
 router.put ('/updateRequest/:id', auth(['Khách']), upload.single('minhchung'), userController.updateRequest);
-
+router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
 // <form action="/add" method="POST" enctype="multipart/form-data">
 //     <input type="file" name="minhchung" />

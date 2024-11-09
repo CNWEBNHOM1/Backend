@@ -12,6 +12,14 @@ exports.createRequest = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.getOwnRequest = async (req, res) => {
+    try {
+        const data = await userService.getOwnRequest(req.user.email);
+        res.json({data: data, status: "success"});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 // Student controller 
 // exports.getListRoommates = async (req, res) => {
 //     try {

@@ -21,7 +21,13 @@ exports.createRequest = async (data) => {
     data.trangthai = "pending";
     return await RequestModel.create(data);
 }
-
+exports.getOwnRequest = async (email) => {
+    return RequestModel.find(
+        {
+            email: email,
+        }
+    )
+}
 // Student Service 
 exports.getListRoommates = async (department, room) => {
     return await StudentModel.find(
