@@ -308,6 +308,7 @@ exports.createBill = async () => {
     return bills;
 }
 exports.updateBill = async (id, data) => {
+    data.thanhtien = (data.sodiencuoi - data.sodiendau) * data.dongia;
     return await BillModel.findByIdAndUpdate(id, data);
 }
 exports.insertBills = async (data) => {
