@@ -142,9 +142,9 @@ exports.getAllOutDateBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.createBill = async (req, res) => {
+exports.createBills = async (req, res) => {
     try {
-        const bills = await userService.createBill();
+        const bills = await userService.createBills();
         res.status(200).json({ data: bills, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

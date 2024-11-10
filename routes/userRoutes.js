@@ -21,7 +21,7 @@ router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 // router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
 router.get ('/room', auth(['Quản lý', 'Khách', 'Sinh viên']), userController.getAllRooms);
 router.get ('/outdateBills', auth(['Quản lý']), userController.getAllOutDateBills);
-router.get ('/createBills', auth(['Quản lý']), userController.createBill);
+router.get ('/createBills', auth(['Quản lý']), userController.createBills);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);
 router.get ('/searchStudent', auth(['Quản lý']), userController.searchStudent);
 router.post ('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);

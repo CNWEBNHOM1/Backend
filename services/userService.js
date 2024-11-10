@@ -13,7 +13,7 @@ require('dotenv').config();
 exports.createRequest = async (data) => {
     const room = data.roomselected;
     const department = data.departmentselected;
-    const target = RoomModel.findOne({ name: room, department: department });
+    const target = await RoomModel.findOne({ name: room, department: department });
     if (target.occupiedSlots === target.capacity)
         throw new Error("This room is full!");
     target.occupiedSlots++;
@@ -22,7 +22,7 @@ exports.createRequest = async (data) => {
     return await RequestModel.create(data);
 }
 exports.getOwnRequest = async (email) => {
-    return RequestModel.find(
+    return await RequestModel.find(
         {
             email: email,
         }
@@ -111,7 +111,7 @@ exports.declineStudent = async (email) => {
     return await student.save();
 }
 exports.updateStudent = async (id, data) => {
-    return StudentModel.findByIdAndUpdate(id, data, { new: true });
+    return await StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.kickOneStudents = async () => {
     const student = await StudentModel.findOne(
@@ -277,7 +277,7 @@ exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
 // Khởi tạo hóa đơn 
-exports.createBill = async () => {
+exports.createBills = async () => {
     const rooms = await RoomModel.find(
         {
             tinhtrang: 'Bình thường',
@@ -308,8 +308,11 @@ exports.createBill = async () => {
     return bills;
 }
 exports.updateBill = async (id, data) => {
-    data.thanhtien = (data.sodiencuoi - data.sodiendau) * data.dongia;
-    return await BillModel.findByIdAndUpdate(id, data);
+    const b = await BillModel.findById(id);
+    console.log(b.sodiendau);
+    b.sodiencuoi = data.sodiencuoi;
+    b.thanhtien = (b.sodiencuoi - b.sodiendau) * b.dongia;
+    return await b.save();
 }
 exports.insertBills = async (data) => {
     return await BillModel.insertMany(data);
@@ -328,9 +331,9 @@ exports.sendBills = async (data) => {
     };
 
     for (const item of data) {
-        const department = departmentModel.findOne({ name: item.department });
-        const room = RoomModel.findOne({ department: item.department, name: item.room });
-        const emails = StudentModel.find(
+        const department = await departmentModel.findOne({ name: item.department });
+        const room = await RoomModel.findOne({ department: item.department, name: item.room });
+        const emails = await StudentModel.find(
             {
                 roomselected: room.name,
                 departmentselected: department.name
@@ -493,7 +496,7 @@ exports.updateRequest = async (id, data, file) => {
     return await RequestModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.handleRequest = async (id, action) => {
-    const request = RequestModel.findById(id);
+    const request = await RequestModel.findById(id);
     if (action === "approved") {
         const std = request;
         std.expiry = "2024-01-29"; delete std.holdexpiry;
@@ -505,12 +508,12 @@ exports.handleRequest = async (id, action) => {
         std.department = std.departmentselected; delete std.departmentselected;
         std.trangthai = "Đang ở";
         await this.addStudent(std);
-        const acc = UserModel.find(data.email);
+        const acc = await UserModel.find(data.email);
         acc.role = "Sinh viên";
         acc.save();
         request.trangthai = "approved";
     } else if (action === "declined") {
-        const target = RoomModel.findOne({ name: request.roomselected, department: request.departmentselected });
+        const target = await RoomModel.findOne({ name: request.roomselected, department: request.departmentselected });
         target.occupiedSlots--;
         target.save();
         request.trangthai = "Declined";
