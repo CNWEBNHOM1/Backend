@@ -224,3 +224,59 @@ exports.handleRequest = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.createDepartment = async (req, res) => {
+    try {
+        const data = await userService.createDepartment(req.body);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailStudent = async (req, res) => {
+    try {
+        const data = await userService.detailStudent(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailRoom = async (req, res) => {
+    try {
+        const data = await userService.detailRoom(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailDepartment = async (req, res) => {
+    try {
+        const data = await userService.detailDepartment(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailBill = async (req, res) => {
+    try {
+        const data = await userService.detailBill(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailRequest = async (req, res) => {
+    try {
+        const data = await userService.detailRequest(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getDetailReport = async (req, res) => {
+    try {
+        const data = await userService.detailReport(req.params.id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

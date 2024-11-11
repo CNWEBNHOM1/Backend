@@ -309,14 +309,11 @@ exports.createBills = async () => {
 }
 exports.updateBill = async (id, data) => {
     const b = await BillModel.findById(id);
-    console.log(b.sodiendau);
     b.sodiencuoi = data.sodiencuoi;
     b.thanhtien = (b.sodiencuoi - b.sodiendau) * b.dongia;
     return await b.save();
 }
-exports.insertBills = async (data) => {
-    return await BillModel.insertMany(data);
-}
+
 exports.sendBills = async (data) => {
     let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -540,4 +537,25 @@ exports.checkExpiredRequests = async () => {
         console.error('Error checking expired requests:', error);
     }
 };
+exports.createDepartment = async (data) => {
+    return await departmentModel.create(data);
+}
+exports.detailStudent = async (id) => {
+    return await StudentModel.findById(id);
+}
+exports.detailRoom = async (id) => {
+    return await RoomModel.findById(id);
+}
+exports.detailBill = async (id) => {
+    return await BillModel.findById(id);
+}
+exports.detailDepartment = async (id) => {
+    return await departmentModel.findById(id);
+}
+exports.detailRequest = async (id) => {
+    return await RequestModel.findById(id);
+}
+exports.detailReport = async (id) => {
+    return await ReportModel.findById(id);
+}
 // Xuất hóa đơn cho từng phòng, danh sách excel

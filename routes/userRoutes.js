@@ -24,9 +24,15 @@ router.get ('/outdateBills', auth(['Quản lý']), userController.getAllOutDateB
 router.get ('/createBills', auth(['Quản lý']), userController.createBills);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);
 router.get ('/searchStudent', auth(['Quản lý']), userController.searchStudent);
+router.get ('/detailStudent/:id', auth(['Quản lý']), userController.getDetailStudent);
+router.get ('/detailRoom/:id', auth(['Quản lý']), userController.getDetailRoom);
+router.get ('/detailBill/:id', auth(['Quản lý']), userController.getDetailBill);
+router.get ('/detailRequest/:id', auth(['Quản lý']), userController.getDetailRequest);
+router.get ('/detailReport/:id', auth(['Quản lý']), userController.getDetailReport);
+router.get ('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
+
 router.post ('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
 router.post ('/getAllReports', auth(['Quản lý']), userController.getAllReports);
-
 router.post ('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.post ('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
 router.post ('/declineStundet', auth(['Quản lý']), userController.declineStudent);
@@ -36,6 +42,7 @@ router.post ('/transferRoom', auth(['Quản lý']), userController.transferRoom)
 router.post ('/insertBills', auth(['Quản lý']), userController.insertBills);
 router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.post ('/createRoom', auth(['Quản lý']), userController.createRoom);
+router.post ('/createDepartment', auth(['Quản lý']), userController.createDepartment);
 
 router.put ('/handleRequest/:id', auth(['Quản lý']), userController.handleRequest);
 router.put ('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
