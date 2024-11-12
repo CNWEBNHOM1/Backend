@@ -39,7 +39,6 @@ router.post ('/declineStundet', auth(['Quản lý']), userController.declineStud
 router.post ('/kickOne', auth(['Quản lý']), userController.kickOneStudent);
 router.post ('/kickAll', auth(['Quản lý']), userController.kickAllStudents);
 router.post ('/transferRoom', auth(['Quản lý']), userController.transferRoom);
-router.post ('/insertBills', auth(['Quản lý']), userController.insertBills);
 router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.post ('/createRoom', auth(['Quản lý']), userController.createRoom);
 router.post ('/createDepartment', auth(['Quản lý']), userController.createDepartment);

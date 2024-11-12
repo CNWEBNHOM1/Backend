@@ -158,14 +158,6 @@ exports.updateBill = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.insertBills = async (req, res) => {
-    try {
-        const insertedBills = await userService.insertBills(req.body);
-        res.status(200).json({ data: insertedBills, message: `${insertedBills.length} bills were successfully inserted.` });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
 exports.sendBills = async (req, res) => {
     let data = req.body;
     try {
