@@ -12,6 +12,10 @@ const StudentSchema = new mongoose.Schema({
     ngaysinh: {
         type: Date,
     },
+    gender: {
+        type: String,
+        enum: ["Nam", "Nữ"],
+    },
     sid: {
         type: String,
         // enum: ['student', 'manager', 'temp'], // Giới hạn giá trị cho trường "role"
@@ -86,6 +90,11 @@ const StudentSchema = new mongoose.Schema({
     },
     expiry: {
         type: Date,
+    },
+    trrangthai: {
+        type: String,
+        enum: ["Đang ở", "Dừng trước hạn"],
+        default: "Đang ở",
     },
     ngaycapnhat: {
         type: Date,

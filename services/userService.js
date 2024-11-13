@@ -16,11 +16,12 @@ require('dotenv').config();
 exports.createRequest = async (data) => {
     const room = data.roomselected;
     const department = data.departmentselected;
-    const target = RoomModel.findOne({ name: room, department: department });
+    const target = await RoomModel.findOne({ name: room, department: department });
     if (target.occupiedSlots === target.capacity)
         throw new Error("This room is full!");
     target.occupiedSlots++;
     target.save();
+    data.trangthai = "pending";
     return await RequestModel.create(data);
 }
 exports.getAllRoomsAvailable = async () => {
@@ -34,7 +35,13 @@ exports.getAllRoomsAvailable = async () => {
     return roomList;
 
 };
-
+exports.getOwnRequest = async (email) => {
+    return await RequestModel.find(
+        {
+            email: email,
+        }
+    )
+}
 // Student Service 
 exports.getListRoommates = async (email) => {
 
@@ -224,16 +231,7 @@ exports.declineStudent = async (email) => {
     return await student.save();
 }
 exports.updateStudent = async (id, data) => {
-    if (data.trangthai === "approved") {
-        UserModel.findOneAndUpdate(
-            { email: data.email },
-            { $set: { role: "Sinh viên" } },
-            { returnDocument: "before" | "after" },
-        );
-    } else if (data.trangthai === "pending") {
-
-    }
-    return StudentModel.findByIdAndUpdate(id, data, { new: true });
+    return await StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.kickOneStudents = async () => {
     const student = await StudentModel.findOne(
@@ -399,7 +397,7 @@ exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
 // Khởi tạo hóa đơn 
-exports.createBill = async () => {
+exports.createBills = async () => {
     const rooms = await RoomModel.find(
         {
             tinhtrang: 'Bình thường',
@@ -430,11 +428,12 @@ exports.createBill = async () => {
     return bills;
 }
 exports.updateBill = async (id, data) => {
-    return await BillModel.findByIdAndUpdate(id, data);
+    const b = await BillModel.findById(id);
+    b.sodiencuoi = data.sodiencuoi;
+    b.thanhtien = (b.sodiencuoi - b.sodiendau) * b.dongia;
+    return await b.save();
 }
-exports.insertBills = async (data) => {
-    return await BillModel.insertMany(data);
-}
+
 exports.sendBills = async (data) => {
     let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -449,9 +448,9 @@ exports.sendBills = async (data) => {
     };
 
     for (const item of data) {
-        const department = departmentModel.findOne({ name: item.department });
-        const room = RoomModel.findOne({ department: item.department, name: item.room });
-        const emails = StudentModel.find(
+        const department = await departmentModel.findOne({ name: item.department });
+        const room = await RoomModel.findOne({ department: item.department, name: item.room });
+        const emails = await StudentModel.find(
             {
                 roomselected: room.name,
                 departmentselected: department.name
@@ -506,8 +505,36 @@ exports.searchStudents = async (query) => {
         $or: searchConditions
     });
 };
-exports.getAllDepartments = async () => {
-    return departmentModel.find();
+exports.getAllDepartments = async (data) => {
+    const {
+        page = 1,
+        limit = 10,
+        name = ''
+    } = data;
+
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
+
+    const filter = {};
+    if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+    }
+
+    const totalDepartment = await departmentModel.countDocuments(filter);
+
+    const totalPages = Math.ceil(totalDepartment / limitInt);
+
+    const departments = await departmentModel.find(filter)
+        .skip((pageInt - 1) * limitInt)
+        .limit(limitInt);
+
+    return {
+        total: totalDepartment,
+        totalPages,
+        page: pageInt,
+        pageSize: limitInt,
+        listDepartment: departments
+    };
 }
 exports.getAllReports = async (data) => {
     const {
@@ -564,7 +591,7 @@ exports.getAllReports = async (data) => {
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
     const bills = await ReportModel.find(filter)
-        .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
+        .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
 
@@ -580,8 +607,15 @@ exports.updateReport = async (id, data) => {
     return await ReportModel.findByIdAndUpdate(id, data, { new: true });
 }
 exports.updateRequest = async (id, data, file) => {
-    if (data.trangthai === "approved") {
-        const std = data;
+    if (file) {
+        data.minhchung = file.filename;
+    }
+    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
+}
+exports.handleRequest = async (id, action) => {
+    const request = await RequestModel.findById(id);
+    if (action === "approved") {
+        const std = request;
         std.expiry = "2024-01-29"; delete std.holdexpiry;
         std.ngaybatdau = std.ngaycapnhat;
         delete std.trangthai;
@@ -589,14 +623,59 @@ exports.updateRequest = async (id, data, file) => {
         delete std.minhchung;
         std.room = std.roomselected; delete std.roomselected;
         std.department = std.departmentselected; delete std.departmentselected;
+        std.trangthai = "Đang ở";
         await this.addStudent(std);
-    } else if (data.trangthai === "declined") {
-        const target = RoomModel.findOne({ name: data.roomselected, department: data.departmentselected });
+        const acc = await UserModel.find(data.email);
+        acc.role = "Sinh viên";
+        acc.save();
+        request.trangthai = "approved";
+    } else if (action === "declined") {
+        const target = await RoomModel.findOne({ name: request.roomselected, department: request.departmentselected });
         target.occupiedSlots--;
         target.save();
-    } else if (file) {
-        data.minhchung = file.filename;
+        request.trangthai = "Declined";
     }
-    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
+    await request.save();
 }
-// Xuất hóa đơn cho từng phòng, danh sách pdf, excel, up pdf, excel
+exports.checkExpiredRequests = async () => {
+    const now = new Date();
+    try {
+        const expiredRequests = await RequestModel.find({
+            trangthai: 'pending',
+            holdexpiry: { $lte: now },
+            minhchung: { $exists: false }
+        });
+
+        if (expiredRequests.length > 0) {
+            for (const request of expiredRequests) {
+                request.trangthai = 'declined';
+                await request.save();
+            }
+            console.log(`Declined ${expiredRequests.length} expired requests.`);
+        }
+    } catch (error) {
+        console.error('Error checking expired requests:', error);
+    }
+};
+exports.createDepartment = async (data) => {
+    return await departmentModel.create(data);
+}
+exports.detailStudent = async (id) => {
+    return await StudentModel.findById(id);
+}
+exports.detailRoom = async (id) => {
+    return await RoomModel.findById(id);
+}
+exports.detailBill = async (id) => {
+    return await BillModel.findById(id);
+}
+exports.detailDepartment = async (id) => {
+    return await departmentModel.findById(id);
+}
+exports.detailRequest = async (id) => {
+    return await RequestModel.findById(id);
+}
+exports.detailReport = async (id) => {
+    return await ReportModel.findById(id);
+}
+// Xuất hóa đơn cho từng phòng, danh sách excel
