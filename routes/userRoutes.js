@@ -13,6 +13,7 @@ router.post('/createRequest', auth(['Khách']), uploadGuestProof.single('minhchu
 //     <input type="file" name="minhchung" />
 //     <input type="submit" value="Upload Avatar" />
 // </form>
+router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);
 // Student route 
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//

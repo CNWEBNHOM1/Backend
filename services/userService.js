@@ -30,8 +30,9 @@ exports.getAllRoomsAvailable = async () => {
     const roomList = rooms.filter(room => {
         return Number(room.occupiedSlots) < Number(room.capacity);
     });
-
+    if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
+
 };
 
 // Student Service 
