@@ -18,13 +18,13 @@ const fileFilter = (req, file, cb) => {
         file.mimetype == 'image/jpg' ||
         file.mimetype == 'image/png' ||
         file.mimetype == 'image/gif' ||
-        file.mimetype == 'image/gif' 
+        file.mimetype == 'image/jfif' 
     ) {
         cb(null, true)
     }
     else {
         cb(null, false);
-        cb(new Error('Only jpeg, jpg, png, and gif Image allow'))
+        cb(new Error('Only jpeg, jpg, png, gif and jfif Image allow'))
     }
 };
 

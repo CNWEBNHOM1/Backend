@@ -29,7 +29,7 @@ const BillSchema = new mongoose.Schema({
     },
     handong: {
         type: Date,
-        // require: [true, "Thiếu hạn đóng!"],
+        default: Date.now
     },
     trangthai: {
         type: String,

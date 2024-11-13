@@ -81,6 +81,9 @@ const RequestSchema = new mongoose.Schema({
         type: String,
         default: "none",
     },
+    sotienphaitra: {
+        type: Number,
+    },
     minhchung: {
         type: String,
         // required: [true, "Please provide a minhchung!"],
@@ -95,10 +98,11 @@ const RequestSchema = new mongoose.Schema({
     },
     ngaycapnhat: {
         type: Date,
+        default: Date.now
     },
-    holdexpiry: { 
-        type: Date, 
-    }
+    // holdexpiry: { 
+    //     type: Date, 
+    // }
 })
 
 module.exports = mongoose.models.Requests || mongoose.model("Requests", RequestSchema);

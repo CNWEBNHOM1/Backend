@@ -36,9 +36,9 @@ const RoomSchema = new mongoose.Schema({
     dongiadien: {
         type: Number,
     },
-    tongthu: {
-        type: Number,
-    },
+    // tongthu: {
+    //     type: Number,
+    // },
     sophongvs: {
         type: Number,
     },
@@ -54,6 +54,7 @@ const RoomSchema = new mongoose.Schema({
     },
     ngaycapnhat: {
         type: Date,
+        default: Date.now
     },
 })
 

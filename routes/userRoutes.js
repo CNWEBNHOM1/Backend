@@ -7,7 +7,8 @@ const router = express.Router();
 
 // Guest route 
 router.post ('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-router.put ('/updateRequest/:id', auth(['Khách']), upload.single('minhchung'), userController.updateRequest);
+router.post ('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
+router.post ('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
 router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
 // <form action="/add" method="POST" enctype="multipart/form-data">
@@ -15,11 +16,10 @@ router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 //     <input type="submit" value="Upload Avatar" />
 // </form>
 // Student route 
-// router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
-// router.get('/roomate', auth(['Sinh viên']), userController.getListRoommates);
+
 // Manager route
 // router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
-router.get ('/room', auth(['Quản lý', 'Khách', 'Sinh viên']), userController.getAllRooms);
+router.get ('/room', auth(['Quản lý', 'Khách']), userController.getAllRooms);
 router.get ('/outdateBills', auth(['Quản lý']), userController.getAllOutDateBills);
 router.get ('/createBills', auth(['Quản lý']), userController.createBills);
 router.get ('/', auth(['Quản lý']), userController.getAllStudents);
@@ -43,10 +43,10 @@ router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.post ('/createRoom', auth(['Quản lý']), userController.createRoom);
 router.post ('/createDepartment', auth(['Quản lý']), userController.createDepartment);
 
-router.put ('/handleRequest/:id', auth(['Quản lý']), userController.handleRequest);
+router.put ('/handleRequest/:id/:action', auth(['Quản lý']), userController.handleRequest);
 router.put ('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
 router.put ('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
-router.put ('/updateBill/:id', auth(['Quản lý', 'Sinh viên']), userController.updateBill);
-router.put ('/updateReport/:id', auth(['Quản lý', 'Sinh viên']), userController.updateReport);
+router.put ('/updateBill/:id', auth(['Quản lý']), userController.updateBill);
+router.put ('/updateReport/:id', auth(['Quản lý']), userController.updateReport);
 
 module.exports = router;

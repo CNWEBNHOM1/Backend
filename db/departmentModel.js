@@ -16,6 +16,7 @@ const DepartmentSchema = new mongoose.Schema({
     },
     ngaycapnhat: {
         type: Date,
+        default: Date.now
     },
 })
 

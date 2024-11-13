@@ -3,10 +3,7 @@ const userService = require('../services/userService');
 // Guest controller
 exports.createRequest = async (req, res) => {
     try {
-        const data = req.body;
-        data["minhchung"] = req.file ? req.file.filename : null;
-        data.holdexpiry = Date() + 15 * 60 * 1000;
-        const request = await userService.createRequest(data);
+        const request = await userService.createRequest(req.body, req.file);
         res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -16,6 +13,22 @@ exports.getOwnRequest = async (req, res) => {
     try {
         const data = await userService.getOwnRequest(req.user.email);
         res.json({data: data, status: "success"});
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRequest1 = async (req, res) => {
+    try {
+        const data = await userService.updateRequest1(req.body.roomId);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRequest2 = async (req, res) => {
+    try {
+        const data = await userService.updateRequest2(req.body.roomId);
+        res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -195,14 +208,6 @@ exports.getAllReports = async (req, res) => {
 exports.updateReport = async (req, res) => {
     try {
         const data = await userService.updateReport(req.params.id, req.body);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.updateRequest = async (req, res) => {
-    try {
-        const data = await userService.updateRequest(req.params.id, req.body, req.file);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -10,16 +10,21 @@ const RequestModel = require('../db/requestModel');
 require('dotenv').config();
 
 // Guest Service 
-exports.createRequest = async (data) => {
-    const room = data.roomselected;
-    const department = data.departmentselected;
-    const target = await RoomModel.findOne({ name: room, department: department });
-    if (target.occupiedSlots === target.capacity)
-        throw new Error("This room is full!");
-    target.occupiedSlots++;
-    target.save();
-    data.trangthai = "pending";
-    return await RequestModel.create(data);
+exports.createRequest = async (data, file) => {
+    const { email, name, ngaysinh, sid, cccd, priority, phone, address, khoa, truong_khoa_vien, nganh, ma_nganh, lop, family, familyname, familyphone, roomId } = data;
+    data.minhchung = file.filename;
+    const room = RoomModel.find(data.roomId);
+    if (room.occupiedSlots < room.capacity) {
+        data.roomselected = room.name;
+        data.departmentselected = room.department;
+        data.ngaytao = Date.now();
+        data.trangthai = "pending";
+        data.sotienphaitra = room.giatrangbi + room.tieno * 5 + room.tiennuoc;
+        delete data.roomId;
+        return await RequestModel.create(data);
+    } else {
+        throw new Error("Room is fully booked!");
+    }
 }
 exports.getOwnRequest = async (email) => {
     return await RequestModel.find(
@@ -27,6 +32,20 @@ exports.getOwnRequest = async (email) => {
             email: email,
         }
     )
+}
+exports.updateRequest1 = async (roomId) => {
+    return await RoomModel.findByIdAndUpdate(
+        roomId,
+        { $inc: { occupiedSlots: 1 } },
+        {new: true},
+    );
+}
+exports.updateRequest2 = async (roomId) => {
+    return await RoomModel.findByIdAndUpdate(
+        roomId,
+        { $inc: { occupiedSlots: -1 } },
+        {new: true},
+    );
 }
 // Student Service 
 exports.getListRoommates = async (department, room) => {
@@ -202,18 +221,18 @@ exports.transferRoom = async (email, department, room) => {
     return await std.save();
 }
 exports.getAllBills = async (data) => {
-    const { 
-        page = 1, 
-        limit = 10, 
-        room = null, 
-        department = null, 
-        trangthai = null, 
-        overdue = false, 
-        fromDate = null, 
+    const {
+        page = 1,
+        limit = 10,
+        room = null,
+        department = null,
+        trangthai = null,
+        overdue = false,
+        fromDate = null,
         toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
-    
+
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
 
@@ -386,12 +405,12 @@ exports.searchStudents = async (query) => {
     });
 };
 exports.getAllDepartments = async (data) => {
-    const { 
-        page = 1, 
-        limit = 10, 
-        name = '' 
+    const {
+        page = 1,
+        limit = 10,
+        name = ''
     } = data;
-    
+
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
 
@@ -417,17 +436,17 @@ exports.getAllDepartments = async (data) => {
     };
 }
 exports.getAllReports = async (data) => {
-    const { 
-        page = 1, 
-        limit = 10, 
-        room = null, 
-        department = null, 
-        trangthai = null, 
-        fromDate = null, 
+    const {
+        page = 1,
+        limit = 10,
+        room = null,
+        department = null,
+        trangthai = null,
+        fromDate = null,
         toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
-    
+
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
 
@@ -486,17 +505,11 @@ exports.getAllReports = async (data) => {
 exports.updateReport = async (id, data) => {
     return await ReportModel.findByIdAndUpdate(id, data, { new: true });
 }
-exports.updateRequest = async (id, data, file) => {
-    if (file) {
-        data.minhchung = file.filename;
-    }
-    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
-}
 exports.handleRequest = async (id, action) => {
     const request = await RequestModel.findById(id);
     if (action === "approved") {
         const std = request;
-        std.expiry = "2024-01-29"; delete std.holdexpiry;
+        std.expiry = "2024-01-29";
         std.ngaybatdau = std.ngaycapnhat;
         delete std.trangthai;
         delete std.ngaytao;
@@ -517,26 +530,6 @@ exports.handleRequest = async (id, action) => {
     }
     await request.save();
 }
-exports.checkExpiredRequests = async () => {
-    const now = new Date();
-    try {
-        const expiredRequests = await RequestModel.find({
-            trangthai: 'pending',
-            holdexpiry: { $lte: now },
-            minhchung: { $exists: false }
-        });
-        
-        if (expiredRequests.length > 0) {
-            for (const request of expiredRequests) {
-                request.trangthai = 'declined';
-                await request.save();
-            }
-            console.log(`Declined ${expiredRequests.length} expired requests.`);
-        }
-    } catch (error) {
-        console.error('Error checking expired requests:', error);
-    }
-};
 exports.createDepartment = async (data) => {
     return await departmentModel.create(data);
 }

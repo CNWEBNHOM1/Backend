@@ -11,6 +11,7 @@ const ReportSchema = new mongoose.Schema({
     },
     ngaygui: {
         type: Date,
+        default: Date.now
     },
     noidung: {
         type: String,

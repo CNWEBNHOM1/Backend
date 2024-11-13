@@ -98,6 +98,7 @@ const StudentSchema = new mongoose.Schema({
     },
     ngaycapnhat: {
         type: Date,
+        default: Date.now
     },
 })
 
