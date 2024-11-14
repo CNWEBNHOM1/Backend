@@ -80,7 +80,15 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-
+// exports.fix = async (req, res) => {
+//     try {
+//         const email = req.user.userEmail;
+//         const data = await userService.fix(email);
+//         res.json({ data: data, status: "success" });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
 
 // Manager controller 
 exports.getAllStudents = async (req, res) => {

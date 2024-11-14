@@ -21,6 +21,7 @@ router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
+// router.post('/fix', auth(['Sinh viên']), userController.fix);
 router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
 router.post('/createReport', auth(['Sinh viên']), userController.createReport);//noidun
 

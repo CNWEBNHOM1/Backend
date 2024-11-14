@@ -52,10 +52,11 @@ exports.getListRoommates = async (email) => {
     );
     if (!student) throw new Error("Student not found");
     const listStudent = await StudentModel.find({
-        roomselected: student.roomselected,
+        roomselected: student.room,
         department: student.department,
         email: { $ne: email }
     })
+    if (!listStudent[0]) throw new Error("phong ko co ai ngoai ban")
     return listStudent;
 };
 exports.getMyInfo = async (email) => {
@@ -151,17 +152,30 @@ exports.roomRegister = async (data) => {
         student, room
     };
 }
-
+// exports.fix = async (email) => {
+//     const student = await studentModel.findOne({
+//         email: email
+//     })
+//     if (!student) throw new Error('Student not found');
+//     student.room = '101';
+//     student.department = 'B5';
+//     delete student.roomselected;
+//     delete student.departmentselected;
+//     console.log(student);
+//     return await student.save();
+// }
 exports.getListBills = async (email) => {
     const student = await studentModel.findOne({
         email: email
     })
     if (!student) throw new Error('Student not found');
+    if (student.room === "none" && student.department === "none") throw new Error("Student not in any room");
+    // console.log(student)
     const bill = await billModel.find({
-        department: student.departmentselected,
-        room: student.roomselected
+        department: student.department,
+        room: student.room
     })
-    if (!bill) throw new Error('Bill not found');
+    if (!bill[0]) throw new Error('Bill not found ');
     return bill;
 }
 // Manager Service 
