@@ -51,8 +51,9 @@ exports.getMyInfo = async (req, res) => {
 exports.uploadBillProof = async (req, res) => {
     try {
         const email = req.user.userEmail;
+        const billId = req.body.id;
         const image = req.file;
-        const paymentInformation = await userService.uploadBillProof(email, image);
+        const paymentInformation = await userService.uploadBillProof(email, image, billId);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

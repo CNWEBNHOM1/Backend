@@ -66,7 +66,7 @@ exports.getMyInfo = async (email) => {
         }
     );
 };
-exports.uploadBillProof = async (email, image) => {
+exports.uploadBillProof = async (email, image, billId) => {
     if (!image) throw new Error('Image is required')
     const student = await studentModel.findOne({
         email: email
@@ -74,7 +74,7 @@ exports.uploadBillProof = async (email, image) => {
     // return student;
     if (!student) throw new Error("Student not found");
 
-    const roomNum = Number(student.roomselected);
+    const roomNum = Number(student.room);
     if (isNaN(roomNum)) {
         throw new Error("Undefined room");
     }
@@ -83,16 +83,33 @@ exports.uploadBillProof = async (email, image) => {
     }
 
 
-    const bill = await billModel.find({
-        trangthai: "Chưa đóng",
-        department: student.departmentselected,
-        room: roomNum
-    })
-    if (!bill[0]) throw new Error("No pending bill found, or the bill may already be paid");
-    bill.anhminhchung = image.path;
+    const bill = await BillModel.findById(billId);
+    if (!bill) throw new Error("No pending bill found, or the bill may already be paid");
+    bill.anhminhchung = image.filename;
     bill.trangthai = "Chờ xác nhận";
-    await bill.save;
-    return bill;
+    return await bill.save();
+    // bill.forEach(ChangeStateBill);
+    // for (var i = 0; i < bill.length; i++) {
+    //     const bill = bills[i]
+    //     bill.anhminhchung = image.filename;
+    //     bill.trangthai = "Chờ xác nhận";
+    //     await bill.save();
+    //     // await bill[i].save;
+
+    // }
+    // const bill = await BillModel.find({
+    //     trangthai: "Chờ xác nhận",
+    //     department: student.department,
+    //     room: roomNum
+    // })
+    // for (var i = 0; i < bill.length; i++) {
+    //     bill[i].anhminhchung = "";
+    //     bill[i].trangthai = "Chưa đóng";
+    //     await bill[i].save;
+
+    // }
+    // console.log(bills);
+    // return await bills.save;
 };
 exports.createReport = async (email, noidung) => {
     console.log(email);
@@ -156,13 +173,12 @@ exports.roomRegister = async (data) => {
 //     const student = await studentModel.findOne({
 //         email: email
 //     })
-//     if (!student) throw new Error('Student not found');
-//     student.room = '101';
-//     student.department = 'B5';
-//     delete student.roomselected;
-//     delete student.departmentselected;
-//     console.log(student);
-//     return await student.save();
+
+//     const bill = await ReportModel.find();
+//     return {
+//         length: bill.length,
+//         bill
+//     };
 // }
 exports.getListBills = async (email) => {
     const student = await studentModel.findOne({
