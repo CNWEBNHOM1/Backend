@@ -183,7 +183,7 @@ exports.createBill = async (req, res) => {
 }
 exports.updateBill = async (req, res) => {
     try {
-        const data = await userService.updateBill(req.params.id, req.body);
+        const data = await userService.updateBill(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
