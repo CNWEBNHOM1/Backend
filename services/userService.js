@@ -428,8 +428,7 @@ exports.createBill = async (data) => {
     return await newBill.save();
 }
 exports.updateBill = async (id, action) => {
-    BillModel.findByIdAndUpdate(id, )
-    return await b.save();
+    return BillModel.findByIdAndUpdate(id, { trangthai: action }, { new: true });
 }
 
 // exports.sendBills = async (data) => {
@@ -643,7 +642,14 @@ exports.getAllReports = async (data) => {
     const totalPages = Math.ceil(totalReports / limitInt);
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const bills = await ReportModel.find(filter)
+    const reports = await ReportModel.find(filter)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        })
         .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
@@ -653,7 +659,7 @@ exports.getAllReports = async (data) => {
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        listReport: bills
+        listReport: reports
     };
 }
 exports.updateReport = async (id, data) => {
