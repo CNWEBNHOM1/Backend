@@ -410,7 +410,7 @@ exports.createBill = async (data) => {
     const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
 
     // Tính tổng tiền
-    const thanhtien = (sodiencuoi - sodiendau) * dongiadien;
+    const thanhtien = (sodiencuoi - sodiendau) * dongia;
     const handong = new Date();
     handong.setDate(handong.getDate() + 15);
     // Tạo bill mới
