@@ -421,7 +421,7 @@ exports.createBill = async (data) => {
         dongia,
         thanhtien,
         handong,
-        trangthai: "Chờ xác nhận",
+        trangthai: "Chưa đóng",
     });
 
     // Lưu vào database
