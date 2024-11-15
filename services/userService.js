@@ -334,7 +334,13 @@ exports.getAllBills = async (data) => {
     const totalPages = Math.ceil(totalBills / limitInt);
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const bills = await BillModel.find(filter)
+    const bills = await BillModel.find(filter).populate({
+        path: 'room', // Nối thông tin phòng
+        populate: {
+            path: 'department', // Nối thông tin department trong room
+            model: 'Departments' // Đảm bảo đúng model cho department
+        }
+    })
         .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
