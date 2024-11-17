@@ -1,46 +1,33 @@
 const mongoose = require("mongoose");
 
 const BillSchema = new mongoose.Schema({
-    department: {
-        type: String,
-        // required: [true, "Department name"],
-    },
     room: {
-        type: Number,
-        // required: [true, "Room number"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rooms',  // Liên kết với Room
+        required: true,
     },
     sodiendau: {
         type: Number,
-        // required: [true, "Số điện đầu!"],
     },
     sodiencuoi: {
         type: Number,
-        // required: [true, "Số điện cuối!"],
     },
     dongia: {
         type: Number,
-        // required: [true, "Giá điện!"],
     },
     thanhtien: {
         type: Number,
     },
-    ngaytao: {
-        type: Date,
-    },
     handong: {
         type: Date,
-        // require: [true, "Thiếu hạn đóng!"],
     },
     trangthai: {
         type: String,
         enum: ["Chờ xác nhận", "Đã đóng", "Chưa đóng", "Quá hạn"],
     },
-    ngaydong: {
-        type: Date,
-    },
     anhminhchung: {
         type: String,
     },
-})
+}, {timestamps: true});
 
 module.exports = mongoose.models.Bills || mongoose.model("Bills", BillSchema);

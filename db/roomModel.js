@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const RoomSchema = new mongoose.Schema({
     name: {
         type: String,
-        // required: [true, "Please provide a name"],
     },
     department: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Departments',  // Liên kết với Department
+        required: true,
     },
     gender: {
         type: String,
@@ -14,15 +15,14 @@ const RoomSchema = new mongoose.Schema({
     },
     capacity: {
         type: Number,
-        // required: [true, "Please provide a size"],
     },
     occupiedSlots: {
         type: Number,
-        required: [true],
+        required: true,
         default: 0,
     },
     giatrangbi: {
-        type: Number
+        type: Number,
     },
     tieno: {
         type: Number,
@@ -30,13 +30,7 @@ const RoomSchema = new mongoose.Schema({
     tiennuoc: {
         type: Number,
     },
-    sodiencuoi: {
-        type: Number,
-    },
     dongiadien: {
-        type: Number,
-    },
-    tongthu: {
         type: Number,
     },
     sophongvs: {
@@ -50,11 +44,9 @@ const RoomSchema = new mongoose.Schema({
     },
     tinhtrang: {
         type: String,
-        enum: ['Bình thường', 'Bị hỏng']
+        enum: ['Bình thường', 'Bị hỏng'],
+        default: "Bình thường",
     },
-    ngaycapnhat: {
-        type: Date,
-    },
-})
+}, {timestamps: true});
 
 module.exports = mongoose.models.Rooms || mongoose.model("Rooms", RoomSchema);

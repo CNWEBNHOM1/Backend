@@ -3,7 +3,7 @@ const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
 const BillModel = require("../db/billModel");
-const departmentModel = require('../db/departmentModel');
+const DepartmentModel = require('../db/departmentModel');
 const studentModel = require('../db/studentModel');
 const roomModel = require('../db/roomModel');
 const billModel = require('../db/billModel');
@@ -12,17 +12,39 @@ const RequestModel = require('../db/requestModel');
 
 require('dotenv').config();
 
+const moment = require('moment');
+
+const formatDate = (date) => {
+    return moment(date).format('HH:mm:ss DD/MM/YYYY');
+};
+
 // Guest Service 
-exports.createRequest = async (data) => {
-    const room = data.roomselected;
-    const department = data.departmentselected;
-    const target = await RoomModel.findOne({ name: room, department: department });
-    if (target.occupiedSlots === target.capacity)
-        throw new Error("This room is full!");
-    target.occupiedSlots++;
-    target.save();
-    data.trangthai = "pending";
-    return await RequestModel.create(data);
+exports.createRequest = async (data, file) => {
+    data.minhchung = file ? file.filename : null;
+    const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
+
+    const room = await RoomModel.findById(roomId);
+    sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
+
+    const newRequest = new RequestModel({
+        user: userId,
+        room: roomId,
+        name,
+        ngaysinh,
+        gender,
+        sid,
+        cccd,
+        priority,
+        phone,
+        address,
+        khoa,
+        school,
+        lop,
+        sotienphaitra,
+        trangthai: 'pending',
+    });
+    console.log(newRequest);
+    return await newRequest.save();
 }
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
@@ -41,6 +63,21 @@ exports.getOwnRequest = async (email) => {
             email: email,
         }
     )
+}
+exports.updateRequest1 = async (roomId) => {
+    const room = await RoomModel.findById(roomId);
+    return await RoomModel.findOneAndUpdate(
+        { _id: roomId, occupiedSlots: { $lt: room.capacity } },
+        { $inc: { occupiedSlots: 1 } },
+        { new: true },
+    );
+}
+exports.updateRequest2 = async (roomId) => {
+    return await RoomModel.findByIdAndUpdate(
+        roomId,
+        { $inc: { occupiedSlots: -1 } },
+        { new: true },
+    );
 }
 // Student Service 
 exports.getListRoommates = async (email) => {
@@ -205,14 +242,57 @@ exports.getAllStudents = async () => {
 //         }
 //     )
 // }
-exports.createRoom = async (data) => {
-    return await RoomModel.create(data);
+// sửa 15/11
+exports.getAllUsers = async () => {
+    return UserModel.find();
 }
+// sửa 15/11 
+exports.createRoom = async (data) => {
+    const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, sodiencuoi, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
+
+    // Kiểm tra xem department có tồn tại không
+    const departmentExists = await DepartmentModel.findById(department);
+    if (!departmentExists) {
+        return res.status(404).json({ message: 'Department not found' });
+    }
+
+    const newRoom = new RoomModel({
+        name,
+        department,
+        gender,
+        capacity,
+        giatrangbi,
+        tieno,
+        tiennuoc,
+        sodiencuoi,
+        dongiadien,
+        sophongvs,
+        binhnuocnong,
+        dieuhoa
+    });
+
+    return await newRoom.save();
+}
+// sửa 15/11
 exports.updateRoom = async (id, data) => {
-    return await RoomModel.findByIdAndUpdate(id, data);
+    const {
+        name, department, gender, capacity, occupiedSlots, giatrangbi, tieno, tiennuoc, sodiencuoi,
+        dongiadien, sophongvs, binhnuocnong, dieuhoa, tinhtrang
+    } = data;
+    // Tìm và cập nhật room dựa vào id
+    const updatedRoom = await RoomModel.findByIdAndUpdate(
+        id,
+        {
+            name, department, gender, capacity, occupiedSlots, giatrangbi, tieno, tiennuoc, sodiencuoi,
+            dongiadien, sophongvs, binhnuocnong, dieuhoa, tinhtrang
+        },
+        { new: true, runValidators: true } // Trả về phòng đã được cập nhật và kiểm tra validation
+    );
+
+    return updatedRoom;
 }
 exports.getAllRooms = async () => {
-    return await RoomModel.find().sort({ department: 1 });
+    return await RoomModel.find().sort({ department: 1 }).populate('department');
 }
 exports.getAllRoomsOfDepartment = async (data) => {
     const { page = 1, limit = 10, department } = data;
@@ -220,7 +300,7 @@ exports.getAllRoomsOfDepartment = async (data) => {
     // Tạo filter, nếu department có giá trị thì thêm điều kiện, nếu không thì lấy tất cả
     const filter = department ? { department: department } : {};
 
-    const listRoom = await RoomModel.find(filter)
+    const listRoom = await RoomModel.find(filter).populate('department')
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
 
@@ -410,7 +490,13 @@ exports.getAllBills = async (data) => {
     const totalPages = Math.ceil(totalBills / limitInt);
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const bills = await BillModel.find(filter)
+    const bills = await BillModel.find(filter).populate({
+        path: 'room', // Nối thông tin phòng
+        populate: {
+            path: 'department', // Nối thông tin department trong room
+            model: 'Departments' // Đảm bảo đúng model cho department
+        }
+    })
         .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
@@ -427,44 +513,144 @@ exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
 // Khởi tạo hóa đơn 
-exports.createBills = async () => {
-    const rooms = await RoomModel.find(
-        {
-            tinhtrang: 'Bình thường',
-        },
-        {
-            department: 1,
-            name: 1,
-            sodiencuoi: 1,
-            dongiadien: 1,
-        }
-    ).sort({ department: 1 });
-    const bills = rooms.map(room => {
-        const handong = new Date();
-        handong.setDate(handong.getDate() + 15);
-        return {
-            department: room.department,
-            room: room.name,
-            sodiendau: room.sodiencuoi,
-            sodiencuoi: 0,
-            dongia: room.dongiadien,
-            thanhtien: 0,
-            handong: handong,
-            trangthai: "Chưa đóng",
-            anhminhchung: "",
-        };
+// exports.createBills = async () => {
+//     const rooms = await RoomModel.find(
+//         {
+//             tinhtrang: 'Bình thường',
+//         },
+//         {
+//             department: 1,
+//             name: 1,
+//             sodiencuoi: 1,
+//             dongiadien: 1,
+//         }
+//     ).sort({ department: 1 });
+//     const bills = rooms.map(room => {
+//         const handong = new Date();
+//         handong.setDate(handong.getDate() + 15);
+//         return {
+//             department: room.department,
+//             room: room.name,
+//             sodiendau: room.sodiencuoi,
+//             sodiencuoi: 0,
+//             dongia: room.dongiadien,
+//             thanhtien: 0,
+//             handong: handong,
+//             trangthai: "Chưa đóng",
+//             anhminhchung: "",
+//         };
+//     });
+//     BillModel.insertMany(bills);
+//     return bills;
+// }
+// sửa 15/11 - post
+exports.createBill = async (data) => {
+    const { room, sodiencuoi } = data;
+
+    // Tìm phòng để lấy giá trị 'dongiadien'
+    const foundRoom = await RoomModel.findById(room);
+    if (!foundRoom) {
+        return res.status(404).json({
+            message: "Room not found"
+        });
+    }
+    const dongia = foundRoom.dongiadien;
+    // Tìm bill gần nhất để lấy số điện cuối làm số điện đầu
+    const lastBill = await BillModel.findOne({ room }).sort({ createdAt: -1 });
+    const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
+
+    // Tính tổng tiền
+    const thanhtien = (sodiencuoi - sodiendau) * dongia;
+    const handong = new Date();
+    handong.setDate(handong.getDate() + 15);
+    // Tạo bill mới
+    const newBill = new BillModel({
+        room,
+        sodiendau,
+        sodiencuoi,
+        dongia,
+        thanhtien,
+        handong,
+        trangthai: "Chưa đóng",
     });
-    BillModel.insertMany(bills);
-    return bills;
+
+    // Lưu vào database
+    return await newBill.save();
 }
-exports.updateBill = async (id, data) => {
-    const b = await BillModel.findById(id);
-    b.sodiencuoi = data.sodiencuoi;
-    b.thanhtien = (b.sodiencuoi - b.sodiendau) * b.dongia;
-    return await b.save();
+exports.updateBill = async (id, action) => {
+    return BillModel.findByIdAndUpdate(id, { trangthai: action }, { new: true });
 }
 
-exports.sendBills = async (data) => {
+// exports.sendBills = async (data) => {
+//     let transporter = nodemailer.createTransport({
+//         service: 'gmail',
+//         auth: {
+//             user: process.env.mailUser,
+//             pass: process.env.mailPass
+//         }
+//     });
+//     let mailOptions = {
+//         from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
+//         subject: `Tiền phòng KTX tháng ${data[0].handong.getMonth() + 1}`,
+//     };
+
+//     for (const item of data) {
+//         const department = await DepartmentModel.findOne({ name: item.department });
+//         const room = await RoomModel.findOne({ department: item.department, name: item.room });
+//         const emails = await StudentModel.find(
+//             {
+//                 roomselected: room.name,
+//                 departmentselected: department.name
+//             },
+//             {
+//                 email: 1,
+//             }
+//         );
+//         mailOptions.to = emails.join(", ");
+//         mailOptions.html = `
+//             <h3>Hóa đơn tiền điện</h3>
+//             <table border="1" cellpadding="10" cellspacing="0">
+//             <thead>
+//                 <tr>
+//                     <th>Phòng</th>
+//                     <th>Tòa</th>
+//                     <th>Số điện đầu</th>
+//                     <th>Số điện cuối</th>
+//                     <th>Đơn giá</th>
+//                     <th>Thành tiền</th>
+//                     <th>Hạn đóng</th>
+//                 </tr>
+//             </thead>
+//             <tbody>
+//                 <tr>
+//                     <td>${item.department}</td>
+//                     <td>${item.room}</td>
+//                     <td>${item.sodiendau}</td>
+//                     <td>${item.sodiencuoi}</td>
+//                     <td>${item.dongia}</td>
+//                     <td>${item.thanhtien}</td>
+//                     <td>${item.handong}</td>
+//                 </tr>
+//             </tbody>
+//             </table>
+//         `;
+//         transporter.sendMail(mailOptions);
+//     }
+//     return;
+// }
+exports.sendBill = async (id) => {
+    const bill = await BillModel.findById(id)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    const room = bill.room;
+    const department = room.department;
+    const studentsInRoom = await StudentModel.find({ room: room._id }).populate('user');
+    const emails = studentsInRoom.map(student => student.user.email);
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -474,51 +660,37 @@ exports.sendBills = async (data) => {
     });
     let mailOptions = {
         from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
-        subject: `Tiền phòng KTX tháng ${data[0].handong.getMonth() + 1}`,
-    };
-
-    for (const item of data) {
-        const department = await departmentModel.findOne({ name: item.department });
-        const room = await RoomModel.findOne({ department: item.department, name: item.room });
-        const emails = await StudentModel.find(
-            {
-                roomselected: room.name,
-                departmentselected: department.name
-            },
-            {
-                email: 1,
-            }
-        );
-        mailOptions.to = emails.join(", ");
-        mailOptions.html = `
+        subject: `Tiền điện phòng ${department.name} - ${room.name} tháng ${bill.handong.getMonth() + 1}`,
+        to: emails.join(", "),  // Gửi đến tất cả sinh viên trong phòng
+        html: `
             <h3>Hóa đơn tiền điện</h3>
             <table border="1" cellpadding="10" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Phòng</th>
-                    <th>Tòa</th>
-                    <th>Số điện đầu</th>
-                    <th>Số điện cuối</th>
-                    <th>Đơn giá</th>
-                    <th>Thành tiền</th>
-                    <th>Hạn đóng</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>${item.department}</td>
-                    <td>${item.room}</td>
-                    <td>${item.sodiendau}</td>
-                    <td>${item.sodiencuoi}</td>
-                    <td>${item.dongia}</td>
-                    <td>${item.thanhtien}</td>
-                    <td>${item.handong}</td>
-                </tr>
-            </tbody>
+                <thead>
+                    <tr>
+                        <th>Tòa</th>
+                        <th>Phòng</th>
+                        <th>Số điện đầu</th>
+                        <th>Số điện cuối</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                        <th>Hạn đóng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${department.name}</td>
+                        <td>${room.name}</td>
+                        <td>${bill.sodiendau}</td>
+                        <td>${bill.sodiencuoi}</td>
+                        <td>${bill.dongia} đ</td>
+                        <td>${bill.thanhtien} đ</td>
+                        <td>Trước ${formatDate(bill.handong)}</td>
+                    </tr>
+                </tbody>
             </table>
-        `;
-        transporter.sendMail(mailOptions);
-    }
+        `,
+    };
+    await transporter.sendMail(mailOptions);
     return;
 }
 exports.searchStudents = async (query) => {
@@ -550,11 +722,11 @@ exports.getAllDepartments = async (data) => {
         filter.name = { $regex: name, $options: 'i' };
     }
 
-    const totalDepartment = await departmentModel.countDocuments(filter);
+    const totalDepartment = await DepartmentModel.countDocuments(filter);
 
     const totalPages = Math.ceil(totalDepartment / limitInt);
 
-    const departments = await departmentModel.find(filter)
+    const departments = await DepartmentModel.find(filter)
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
 
@@ -620,7 +792,14 @@ exports.getAllReports = async (data) => {
     const totalPages = Math.ceil(totalReports / limitInt);
 
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const bills = await ReportModel.find(filter)
+    const reports = await ReportModel.find(filter)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        })
         .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
@@ -630,82 +809,188 @@ exports.getAllReports = async (data) => {
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        listReport: bills
+        listReport: reports
     };
 }
 exports.updateReport = async (id, data) => {
     return await ReportModel.findByIdAndUpdate(id, data, { new: true });
 }
-exports.updateRequest = async (id, data, file) => {
-    if (file) {
-        data.minhchung = file.filename;
-    }
-    return await RequestModel.findByIdAndUpdate(id, data, { new: true });
-}
 exports.handleRequest = async (id, action) => {
-    const request = await RequestModel.findById(id);
+    const request = await RequestModel.findById(id).populate('user').populate('room');
+    request.trangthai = action;
+    await request.save();
+
     if (action === "approved") {
-        const std = request;
-        std.expiry = "2024-01-29"; delete std.holdexpiry;
-        std.ngaybatdau = std.ngaycapnhat;
-        delete std.trangthai;
-        delete std.ngaytao;
-        delete std.minhchung;
-        std.room = std.roomselected; delete std.roomselected;
-        std.department = std.departmentselected; delete std.departmentselected;
-        std.trangthai = "Đang ở";
-        await this.addStudent(std);
-        const acc = await UserModel.find(data.email);
-        acc.role = "Sinh viên";
-        acc.save();
-        request.trangthai = "approved";
+        let student = await StudentModel.findOne({ user: request.user });
+        if (!student) {
+            // Create new student if not exists
+            student = new StudentModel({
+                user: request.user,
+                email: request.email,
+                name: request.name,
+                ngaysinh: request.ngaysinh,
+                gender: request.gender,
+                sid: request.sid,
+                cccd: request.cccd,
+                priority: request.priority,
+                phone: request.phone,
+                address: request.address,
+                room: request.room._id,
+                khoa: request.khoa,
+                school: request.school,
+                lop: request.class,
+                kyhoc: [{
+                    ky: '20241',
+                    phong: request.room.name,
+                    thoigianbatdau: new Date(),
+                    trangthai: 'Đang ở',
+                }],
+                trangthai: 'Đang ở',
+            });
+
+            await student.save();
+        } else {
+            // Add room to kyhoc (room history)
+            student.kyhoc.push({
+                ky: 'Current',
+                phong: request.room.name,
+                thoigianbatdau: new Date(),
+                trangthai: 'Đang ở',
+            });
+            student.room = request.room._id; // Update current room
+            await student.save();
+        }
     } else if (action === "declined") {
-        const target = await RoomModel.findOne({ name: request.roomselected, department: request.departmentselected });
-        target.occupiedSlots--;
-        target.save();
+        const ROOM = RoomModel.findById(request.room);
+        ROOM.occupiedSlots--;
         request.trangthai = "Declined";
     }
     await request.save();
 }
-exports.checkExpiredRequests = async () => {
-    const now = new Date();
-    try {
-        const expiredRequests = await RequestModel.find({
-            trangthai: 'pending',
-            holdexpiry: { $lte: now },
-            minhchung: { $exists: false }
-        });
-
-        if (expiredRequests.length > 0) {
-            for (const request of expiredRequests) {
-                request.trangthai = 'declined';
-                await request.save();
-            }
-            console.log(`Declined ${expiredRequests.length} expired requests.`);
-        }
-    } catch (error) {
-        console.error('Error checking expired requests:', error);
-    }
-};
+// sửa 15/11
 exports.createDepartment = async (data) => {
-    return await departmentModel.create(data);
+    const { name, room_count, broken_room } = data;
+    const newDepartment = new DepartmentModel({
+        name,
+        room_count,
+        broken_room
+    });
+    return await newDepartment.save();
 }
+// sửa 15/11
 exports.detailStudent = async (id) => {
-    return await StudentModel.findById(id);
+    const student = await StudentModel.findById(id).populate.apply('user')
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    if (student) return student;
 }
 exports.detailRoom = async (id) => {
-    return await RoomModel.findById(id);
+    const room = await RoomModel.findById(id).populate('department');
+    if (room) return room;
 }
 exports.detailBill = async (id) => {
-    return await BillModel.findById(id);
+    const bill = await BillModel.findById(id)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    if (bill) return bill;
 }
 exports.detailDepartment = async (id) => {
-    return await departmentModel.findById(id);
+    const department = await DepartmentModel.findById(id);
+    if (department) return department;
 }
 exports.detailRequest = async (id) => {
-    return await RequestModel.findById(id);
+    const request = await RequestModel.findById(id).populate('user')
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    if (request) return request;
 }
 exports.detailReport = async (id) => {
-    return await ReportModel.findById(id);
+    const report = await ReportModel.findById(id)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    if (report) return report;
 }
+// --------
+exports.getStudentsOfOneRoom = async (id) => {
+    const room = await RoomModel.findById(id);
+    return await StudentModel.find(
+        { room: room.name }
+    )
+}
+// sửa 15/11
+exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
+    // Convert page và limit thành số
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageLimit = parseInt(limit, 10) || 10;
+
+    // Tính toán các thông số phân trang
+    const skip = (pageNumber - 1) * pageLimit;
+
+    // Lọc theo các tham số filters
+    const filterConditions = {};
+
+    // Nếu có status, thêm vào điều kiện lọc
+    if (filters.status) {
+        filterConditions.trangthai = filters.status;
+    }
+    // Nếu có room, thêm vào điều kiện lọc
+    if (filters.room) {
+        filterConditions.room = filters.room;
+    }
+    // Nếu có tên, thêm vào điều kiện lọc
+    if (filters.name) {
+        filterConditions.name = { $regex: filters.name, $options: 'i' }; // Lọc tên không phân biệt hoa thường
+    }
+    // Nếu có cccd, thêm vào điều kiện lọc
+    if (filters.cccd) {
+        filterConditions.cccd = filters.cccd;
+    }
+
+    // Tìm các request với các điều kiện lọc và phân trang
+    const requests = await RequestModel.find(filterConditions)
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        })
+        .populate('user')
+        .skip(skip)  // Bỏ qua các kết quả trước đó
+        .limit(pageLimit)  // Giới hạn số kết quả trả về
+        .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
+
+    // Lấy tổng số request để tính số trang
+    const totalRequests = await RequestModel.countDocuments(filterConditions);
+
+    // Tính toán tổng số trang
+    const totalPages = Math.ceil(totalRequests / pageLimit);
+    return {
+        data: requests,
+        totalRequests,
+        totalPages,
+        currentPage: pageNumber,
+        pageLimit
+    };
+};
 // Xuất hóa đơn cho từng phòng, danh sách excel

@@ -14,9 +14,6 @@ const DepartmentSchema = new mongoose.Schema({
         type: Number,
         // required: [true, "Please provide a number of broken room!"],
     },
-    ngaycapnhat: {
-        type: Date,
-    },
-})
+}, {timestamps: true})
 
 module.exports = mongoose.models.Departments || mongoose.model("Departments", DepartmentSchema);

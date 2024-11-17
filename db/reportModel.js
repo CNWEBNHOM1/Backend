@@ -1,16 +1,10 @@
 const mongoose = require("mongoose");
 
 const ReportSchema = new mongoose.Schema({
-    department: {
-        type: String,
-        // required: [true, "Department name"],
-    },
     room: {
-        type: Number,
-        // required: [true, "Room number"],
-    },
-    ngaygui: {
-        type: Date,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rooms',  // Liên kết với Room
+        required: true,
     },
     noidung: {
         type: String,
@@ -19,12 +13,9 @@ const ReportSchema = new mongoose.Schema({
         type: String,
         enum: ["Chưa xử lý", "Đã xử lý"],
     },
-    ngayxuly: {
-        type: Date,
-    },
     ghichu: {
         type: String,
-    }
-})
+    },
+}, {timestamps: true});
 
 module.exports = mongoose.models.Reports || mongoose.model("Reports", ReportSchema);

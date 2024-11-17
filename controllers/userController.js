@@ -3,10 +3,8 @@ const userService = require('../services/userService');
 // Guest controller
 exports.createRequest = async (req, res) => {
     try {
-        const data = req.body;
-        data["minhchung"] = req.file ? req.file.filename : null;
-        data.holdexpiry = Date() + 15 * 60 * 1000;
-        const request = await userService.createRequest(data);
+        req.body.userId = req.user.userId;
+        const request = await userService.createRequest(req.body, req.file);
         res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -25,6 +23,22 @@ exports.getOwnRequest = async (req, res) => {
     try {
         const data = await userService.getOwnRequest(req.user.email);
         res.json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRequest1 = async (req, res) => {
+    try {
+        const data = await userService.updateRequest1(req.body.roomId);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.updateRequest2 = async (req, res) => {
+    try {
+        const data = await userService.updateRequest2(req.body.roomId);
+        res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -164,6 +178,15 @@ exports.transferRoom = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+// sửa 15/11
+exports.getAllUsers = async (req, res) => {
+    try {
+        const data = await userService.getAllUsers();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+} 
 exports.createRoom = async (req, res) => {
     try {
         const data = await userService.createRoom(req.body);
@@ -204,9 +227,17 @@ exports.createBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.createBill = async (req, res) => {
+    try {
+        const bill = await userService.createBill(req.body);
+        res.status(200).json({ data: bill, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 exports.updateBill = async (req, res) => {
     try {
-        const data = await userService.updateBill(req.params.id, req.body);
+        const data = await userService.updateBill(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -216,6 +247,14 @@ exports.sendBills = async (req, res) => {
     let data = req.body;
     try {
         await authService.sendBills(data);
+        res.status(200).json({ message: "Bills sent successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to send bills" });
+    }
+}
+exports.sendBill = async (req, res) => {
+    try {
+        await userService.sendBill(req.params.id);
         res.status(200).json({ message: "Bills sent successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send bills" });
@@ -249,14 +288,6 @@ exports.getAllReports = async (req, res) => {
 exports.updateReport = async (req, res) => {
     try {
         const data = await userService.updateReport(req.params.id, req.body);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.updateRequest = async (req, res) => {
-    try {
-        const data = await userService.updateRequest(req.params.id, req.body, req.file);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -326,3 +357,29 @@ exports.getDetailReport = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.getStudentsOfOneRoom = async (req, res) => {
+    try {
+        const { query } = req.query;
+        const data = await userService.getStudentsOfOneRoom(query);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+// sửa 15/11
+exports.getAllRequests = async (req, res) => {
+    try {
+        const { status, room, name, cccd, page, limit } = req.query;
+        // Gọi service để lấy dữ liệu với các tham số lọc và phân trang
+        const result = await userService.getAllRequest(
+            { status, room, name, cccd }, 
+            page, 
+            limit
+        );
+        // Trả về kết quả cho client
+        res.status(200).json(result);
+    } catch (error) {
+        // console.error('Error in getAllRequests controller:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
