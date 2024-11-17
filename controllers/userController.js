@@ -181,9 +181,9 @@ exports.createBill = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.updateBill = async (req, res) => {
+exports.handleBill = async (req, res) => {
     try {
-        const data = await userService.updateBill(req.params.id, req.params.action);
+        const data = await userService.handleBill(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -231,9 +231,9 @@ exports.getAllReports = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.updateReport = async (req, res) => {
+exports.handleReport = async (req, res) => {
     try {
-        const data = await userService.updateReport(req.params.id, req.body);
+        const data = await userService.handleReport(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
