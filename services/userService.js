@@ -81,159 +81,101 @@ exports.updateRequest2 = async (roomId) => {
 }
 // Student Service 
 exports.getListRoommates = async (email) => {
+    const user = await UserModel.findOne({
+        email: email
+    });
+    if (!user) throw new Error('User not exist');
 
-    const student = await StudentModel.findOne(
-        {
-            email: email
-        }
-    );
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
+
     if (!student) throw new Error("Student not found");
     const listStudent = await StudentModel.find({
-        roomselected: student.room,
-        department: student.department,
-        email: { $ne: email }
+        room: student.room,
+        user: { $ne: student.user }
     })
     if (!listStudent[0]) throw new Error("phong ko co ai ngoai ban")
     return listStudent;
 };
 exports.getMyInfo = async (email) => {
-    return await StudentModel.find(
-        {
-            email: email,
-        }
-    );
-};
-exports.uploadBillProof = async (email, image, billId) => {
-    if (!image) throw new Error('Image is required')
-    const student = await studentModel.findOne({
+    const user = await UserModel.findOne({
         email: email
-    })
-    // return student;
+    });
+    if (!user) throw new Error('User not exist');
+
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
+    // const student = await StudentModel.find({ user: "6736c42a20ada4d09902ddc7" });
+    if (!student) throw new Error('Student not found');
+    return student;
+};
+exports.fix = async (email) => {
+    return await BillModel.find().populate('room');
+}
+exports.uploadBillProof = async (email, image, billId) => {
+    if (!image) throw new Error('Image is required');
+    const user = await UserModel.findOne({
+        email: email
+    });
+    if (!user) throw new Error('User not exist');
+
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
     if (!student) throw new Error("Student not found");
 
-    const roomNum = Number(student.room);
-    if (isNaN(roomNum)) {
-        throw new Error("Undefined room");
-    }
-    else {
-        console.log(roomNum);
-    }
 
-
-    const bill = await BillModel.findById(billId);
+    const bill = await BillModel.findOne({
+        room: student.room,
+        _id: billId
+    });
     if (!bill) throw new Error("No pending bill found, or the bill may already be paid");
+    console.log(bill);
     bill.anhminhchung = image.filename;
     bill.trangthai = "Chờ xác nhận";
+    console.log(bill);
     return await bill.save();
-    // bill.forEach(ChangeStateBill);
-    // for (var i = 0; i < bill.length; i++) {
-    //     const bill = bills[i]
-    //     bill.anhminhchung = image.filename;
-    //     bill.trangthai = "Chờ xác nhận";
-    //     await bill.save();
-    //     // await bill[i].save;
 
-    // }
-    // const bill = await BillModel.find({
-    //     trangthai: "Chờ xác nhận",
-    //     department: student.department,
-    //     room: roomNum
-    // })
-    // for (var i = 0; i < bill.length; i++) {
-    //     bill[i].anhminhchung = "";
-    //     bill[i].trangthai = "Chưa đóng";
-    //     await bill[i].save;
-
-    // }
-    // console.log(bills);
-    // return await bills.save;
 };
 exports.createReport = async (email, noidung) => {
-    console.log(email);
-    const student = await studentModel.findOne({
+    const user = await UserModel.findOne({
         email: email
-    })
+    });
+    if (!user) throw new Error('User not exist');
+
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
     if (!student) throw new Error("Student not found");
 
-    const department = student.department;
-    const sRoom = student.room;
-    if (department === "none" && sRoom === "none") throw new Error("Student not in any room");
-    const room = Number(sRoom);
-    const ngaygui = Date.now();
+    const ghichu = "";
     const trangthai = "Chưa xử lý";
 
     const data =
     {
-        department: department,
-        room: room,
-        ngaygui: ngaygui,
+
+        room: student.room,
         trangthai: trangthai,
         noidung: noidung,
-        ngayxuly: null,
-        ghichu: null,
+        ghichu: ghichu,
 
     };
     // const report = await  reportModel.create(data)
     return await ReportModel.create(data)
 }
-exports.roomRegister = async (data) => {
-    const student = await studentModel.findOne({
-        email: data.email
-    });
-    if (!student) {
-        throw new Error('Student not found');
-    };
-    if (student.roomselected && student.trangthai === "approved") {
-        throw new Error('Student has already been assigned a room and approved');
-    }
-    const room = await roomModel.findOne({
-        name: data.roomName,
-        department: data.department
-    });
-    if (!room) {
-        throw new Error('Room not found');
-    };
-    if (room.occupiedSlots >= room.capacity) {
-        throw new Error('Room is fully occupied');
-    };
-    student.roomselected = room.name;
-    student.departmentselected = room.department;
-    student.trangthai = "pending";
-    room.occupiedSlots += 1;
-    await student.save();
-    await room.save();
-    return {
-        student, room
-    };
-}
-// exports.fix = async (email) => {
-//     const student = await studentModel.findOne({
-//         email: email
-//     })
-
-//     const bill = await ReportModel.find();
-//     return {
-//         length: bill.length,
-//         bill
-//     };
-// }
 exports.getListBills = async (email) => {
-    const student = await studentModel.findOne({
+    const user = await UserModel.findOne({
         email: email
-    })
-    if (!student) throw new Error('Student not found');
-    if (student.room === "none" && student.department === "none") throw new Error("Student not in any room");
-    // console.log(student)
+    });
+    if (!user) throw new Error('User not exist');
+
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
+
+    if (!student) throw new Error("Student not found");
+
     const bill = await billModel.find({
-        department: student.department,
         room: student.room
-    })
+    }).populate('room');
     if (!bill[0]) throw new Error('Bill not found ');
     return bill;
 }
 // Manager Service 
 exports.getAllStudents = async () => {
-    return await StudentModel.find()
+    return await StudentModel.find().populate('user');
 }
 // exports.getAllWaitingStudents = async () => {
 //     return await StudentModel.find(

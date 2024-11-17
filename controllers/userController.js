@@ -95,15 +95,15 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-// exports.fix = async (req, res) => {
-//     try {
-//         const email = req.user.userEmail;
-//         const data = await userService.fix(email);
-//         res.json({ data: data, status: "success" });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// }
+exports.fix = async (req, res) => {
+    try {
+        const email = req.user.userEmail;
+        const data = await userService.fix(email);
+        res.json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
@@ -186,7 +186,7 @@ exports.getAllUsers = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-} 
+}
 exports.createRoom = async (req, res) => {
     try {
         const data = await userService.createRoom(req.body);
@@ -372,8 +372,8 @@ exports.getAllRequests = async (req, res) => {
         const { status, room, name, cccd, page, limit } = req.query;
         // Gọi service để lấy dữ liệu với các tham số lọc và phân trang
         const result = await userService.getAllRequest(
-            { status, room, name, cccd }, 
-            page, 
+            { status, room, name, cccd },
+            page,
             limit
         );
         // Trả về kết quả cho client
