@@ -2,12 +2,13 @@ const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
 const upload = require('../middlewares/uploadImg');
+const limiter = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
 // Guest route 
 router.post ('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-router.post ('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
+router.post ('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
 router.post ('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
 router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:

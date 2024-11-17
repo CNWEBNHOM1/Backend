@@ -697,8 +697,8 @@ exports.handleRequest = async (id, action) => {
                 }],
                 trangthai: 'Đang ở',
             });
-
             await student.save();
+            await UserModel.findOneAndUpdate({_id: student.user}, {role: "Sinh viên"});
         } else {
             // Add room to kyhoc (room history)
             student.kyhoc.push({
