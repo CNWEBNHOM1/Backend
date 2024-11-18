@@ -85,4 +85,4 @@ const StudentSchema = new mongoose.Schema({
     },
 }, {timestamps: true});
 
-module.exports = mongoose.models.Students || mongoose.model("Students", StudentSchema);
+module.exports = mongoose.models.Students || mongoose.model("students", StudentSchema);
