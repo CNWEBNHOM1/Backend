@@ -9,6 +9,9 @@ const ReportSchema = new mongoose.Schema({
     noidung: {
         type: String,
     },
+    minhchung: {
+        type: String,
+    },
     trangthai: {
         type: String,
         enum: ["Chưa xử lý", "Đã xử lý"],

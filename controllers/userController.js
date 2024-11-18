@@ -13,7 +13,7 @@ exports.createRequest = async (req, res) => {
 exports.getOwnRequest = async (req, res) => {
     try {
         const data = await userService.getOwnRequest(req.user.email);
-        res.json({data: data, status: "success"});
+        res.json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -132,7 +132,7 @@ exports.getAllUsers = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-} 
+}
 exports.createRoom = async (req, res) => {
     try {
         const data = await userService.createRoom(req.body);
@@ -233,7 +233,7 @@ exports.getAllReports = async (req, res) => {
 }
 exports.handleReport = async (req, res) => {
     try {
-        const data = await userService.handleReport(req.params.id, req.params.action);
+        const data = await userService.handleReport(req.params.id, req.params.action, req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -318,8 +318,8 @@ exports.getAllRequests = async (req, res) => {
         const { status, room, name, cccd, page, limit } = req.query;
         // Gọi service để lấy dữ liệu với các tham số lọc và phân trang
         const result = await userService.getAllRequest(
-            { status, room, name, cccd }, 
-            page, 
+            { status, room, name, cccd },
+            page,
             limit
         );
         // Trả về kết quả cho client

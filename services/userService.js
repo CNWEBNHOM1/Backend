@@ -662,8 +662,9 @@ exports.getAllReports = async (data) => {
         listReport: reports
     };
 }
-exports.handleReport = async (id, action) => {
-    return await ReportModel.findByIdAndUpdate(id, {trangthai: action}, { new: true });
+exports.handleReport = async (id, action, data) => {
+    const { ghichu } = data;
+    return await ReportModel.findByIdAndUpdate(id, { trangthai: action, ghichu: ghichu }, { new: true });
 }
 exports.handleRequest = async (id, action) => {
     const request = await RequestModel.findById(id).populate('user').populate('room');
@@ -698,7 +699,7 @@ exports.handleRequest = async (id, action) => {
                 trangthai: 'Đang ở',
             });
             await student.save();
-            await UserModel.findOneAndUpdate({_id: student.user}, {role: "Sinh viên"});
+            await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên" });
         } else {
             // Add room to kyhoc (room history)
             student.kyhoc.push({
