@@ -521,7 +521,7 @@ exports.createBill = async (data) => {
     // Lưu vào database
     return await newBill.save();
 }
-exports.updateBill = async (id, action) => {
+exports.handleBill = async (id, action) => {
     return BillModel.findByIdAndUpdate(id, { trangthai: action }, { new: true });
 }
 
@@ -756,8 +756,9 @@ exports.getAllReports = async (data) => {
         listReport: reports
     };
 }
-exports.updateReport = async (id, data) => {
-    return await ReportModel.findByIdAndUpdate(id, data, { new: true });
+exports.handleReport = async (id, action, data) => {
+    const { ghichu } = data;
+    return await ReportModel.findByIdAndUpdate(id, { trangthai: action, ghichu: ghichu }, { new: true });
 }
 exports.handleRequest = async (id, action) => {
     const request = await RequestModel.findById(id).populate('user').populate('room');

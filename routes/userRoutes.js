@@ -64,7 +64,7 @@ router.post('/createDepartment', auth(['Quản lý']), userController.createDepa
 router.put('/handleRequest/:id/:action', auth(['Quản lý']), userController.handleRequest);
 router.put('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
 router.put('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
-router.put('/updateBill/:id/:action', auth(['Quản lý']), userController.updateBill);
-router.put('/updateReport/:id', auth(['Quản lý']), userController.updateReport);
+router.put('/handleBill/:id/:action', auth(['Quản lý']), userController.handleBill);
+router.put('/handleReport/:id/:action', auth(['Quản lý']), userController.handleReport);
 
 module.exports = router;
