@@ -1,7 +1,7 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
-const { uploadBillProof, uploadGuestProof } = require('../middlewares/uploadImage');
+const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
 const upload = require('../middlewares/uploadImg');
 const limiter = require('../middlewares/rateLimiter');
 
@@ -25,7 +25,7 @@ router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
 router.post('/fix', auth(['Sinh viên']), userController.fix);//test
 router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
-router.post('/createReport', auth(['Sinh viên']), userController.createReport);//noidun
+router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
 
 
 

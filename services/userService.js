@@ -133,7 +133,8 @@ exports.uploadBillProof = async (email, image, billId) => {
     return await bill.save();
 
 };
-exports.createReport = async (email, noidung) => {
+exports.createReport = async (email, image, noidung) => {
+    if (!image) throw new Error('Image is required');
     const user = await UserModel.findOne({
         email: email
     });
@@ -152,6 +153,7 @@ exports.createReport = async (email, noidung) => {
         trangthai: trangthai,
         noidung: noidung,
         ghichu: ghichu,
+        minhchung: image.filename
 
     };
     // const report = await  reportModel.create(data)
@@ -790,7 +792,7 @@ exports.handleRequest = async (id, action) => {
                 trangthai: 'Đang ở',
             });
             await student.save();
-            await UserModel.findOneAndUpdate({_id: student.user}, {role: "Sinh viên"});
+            await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên" });
         } else {
             // Add room to kyhoc (room history)
             student.kyhoc.push({
