@@ -175,6 +175,36 @@ exports.getListBills = async (email) => {
     if (!bill[0]) throw new Error('Bill not found ');
     return bill;
 }
+exports.requestChangeRoom = async (email, noidung, roomId) => {
+    if (!noidung) throw new Error('Yeu cau khong hop le');
+    const user = await UserModel.findOne({
+        email: email
+    });
+    if (!user) throw new Error('User not exist');
+    const student = await StudentModel.findOne({ user: user._id }).populate('user');
+    if (!student) throw new Error("Student not found");
+    if (roomId === student.room) throw new Error('Yeu cau khong hop le');
+    const roomChange = await RoomModel.findOne({ _id: roomId });
+    if (roomChange.occupiedSlots == roomChange.capacity) throw new Error('room full');
+    const data =
+    {
+        user: user._id,
+        room: roomChange._id,
+        name: student.name,
+        ngaysinh: student.ngaysinh,
+        gender: student.gender,
+        priority: student.priority,
+        phone: student.phone,
+        address: student.address,
+        khoa: student.khoa,
+        school: student.school,
+        lop: student.lop,
+        noidung: noidung,
+        trangthai: "pending"
+    };
+    // console.log(data);
+    return await RequestModel.create(data)
+}
 // Manager Service 
 exports.getAllStudents = async () => {
     return await StudentModel.find().populate('user');
@@ -938,4 +968,38 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         pageLimit
     };
 };
+exports.handleChangeRoomRequest = async (id, action) => {
+    const request = await RequestModel.findById(id).populate('user').populate('room');
+    request.trangthai = action;
+    await request.save();
+
+    if (action === "approved") {
+        const student = await StudentModel.findOne({ user: request.user });
+        {
+            const prevRoom = await RoomModel.findOne({ _id: student.room });
+            console.log(prevRoom);
+            // Add room to kyhoc (room history)
+            student.kyhoc.push({
+                ky: 'Current',
+                phong: request.room.name,
+                thoigianbatdau: new Date(),
+                trangthai: 'Đang ở',
+            });
+            student.room = request.room; // Update current room
+            await student.save();
+            // request.trangthai = "approved";
+            const postRoom = await RoomModel.findOne({ _id: request.room });
+            console.log(postRoom);
+            prevRoom.occupiedSlots--;
+            postRoom.occupiedSlots++;
+            //xu ly room
+            await prevRoom.save();
+            await postRoom.save();
+        }
+    } else if (action === "declined") {
+
+        request.trangthai = "declined";
+    }
+    return await request.save();
+}
 // Xuất hóa đơn cho từng phòng, danh sách excel

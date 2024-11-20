@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
 router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
 router.post('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
-router.get('/myRequest', auth(['Khách']), userController.getOwnRequest);
+router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
 // <form action="/add" method="POST" enctype="multipart/form-data">
 //     <input type="file" name="minhchung" />
@@ -23,10 +23,10 @@ router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
-router.post('/fix', auth(['Sinh viên']), userController.fix);//test
+// router.post('/fix', auth(['Sinh viên']), userController.fix);//test
 router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
 router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
-
+router.post('/changeRoomRequest', auth(['Sinh viên']), userController.requestChangeRoom);
 
 
 // Manager route
@@ -66,5 +66,5 @@ router.put('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userControl
 router.put('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
 router.put('/handleBill/:id/:action', auth(['Quản lý']), userController.handleBill);
 router.put('/handleReport/:id/:action', auth(['Quản lý']), userController.handleReport);
-
+router.put('/handleChangeRoomRequest/:id/:action', auth(['Quản lý']), userController.handleChangeRoomRequest)
 module.exports = router;

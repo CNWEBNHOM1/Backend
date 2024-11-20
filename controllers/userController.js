@@ -96,16 +96,26 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.fix = async (req, res) => {
+// exports.fix = async (req, res) => {
+//     try {
+//         const email = req.user.userEmail;
+//         const data = await userService.fix(email);
+//         res.json({ data: data, status: "success" });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
+exports.requestChangeRoom = async (req, res) => {
     try {
         const email = req.user.userEmail;
-        const data = await userService.fix(email);
+        const noidung = req.body.noidung;
+        const roomId = req.body.roomId;
+        const data = await userService.requestChangeRoom(email, noidung, roomId);
         res.json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
-
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
@@ -384,3 +394,11 @@ exports.getAllRequests = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+exports.handleChangeRoomRequest = async (req, res) => {
+    try {
+        const data = await userService.handleChangeRoomRequest(req.params.id, req.params.action);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
