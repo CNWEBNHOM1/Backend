@@ -54,12 +54,21 @@ exports.updateRequest2 = async (req, res) => {
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
-        const allstd = await userService.getAllStudents();
-        res.status(200).json({ data: allstd, status: "success" });
+        const { trangthai, room, name, cccd, gender, sid, khoa, kyhoc, page, limit } = req.query;
+
+        // Gọi service với các tham số lọc
+        const result = await userService.getAllStudents(
+            { trangthai, room, name, cccd, gender, sid, khoa, kyhoc },
+            page,
+            limit
+        );
+
+        // Trả về kết quả cho client
+        res.status(200).json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}
+};
 // exports.getAllWaitingStudents = async (req, res) => {
 //     try {
 //         const data = await userService.getAllWaitingStudents();

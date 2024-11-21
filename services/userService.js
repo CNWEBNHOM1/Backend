@@ -82,9 +82,91 @@ exports.getMyInfo = async (email) => {
     );
 };
 // Manager Service 
-exports.getAllStudents = async () => {
-    return await StudentModel.find()
-}
+exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
+    // Convert page và limit thành số
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageLimit = parseInt(limit, 10) || 10;
+
+    // Tính toán các thông số phân trang
+    const skip = (pageNumber - 1) * pageLimit;
+
+    // Lọc theo các tham số filters
+    const filterConditions = {};
+
+    // Lọc theo name (không phân biệt hoa thường)
+    if (filters.name) {
+        filterConditions.name = { $regex: filters.name, $options: 'i' };
+    }
+
+    // Lọc theo room
+    if (filters.room) {
+        filterConditions.room = filters.room;
+    }
+
+    // Lọc theo department (nối từ room)
+    // if (filters.department) {
+    //     filterConditions['room.department'] = filters.department;
+    // }
+    if (filters.department) {
+        const roomsInDepartment = await RoomModel.find({ department: filters.department }).select('_id');
+        filterConditions.room = { $in: roomsInDepartment.map(room => room._id) };
+    }
+
+    // Lọc theo gender
+    if (filters.gender) {
+        filterConditions.gender = filters.gender;
+    }
+
+    // Lọc theo sid
+    if (filters.sid) {
+        filterConditions.sid = { $regex: filters.sid, $options: 'i' };
+    }
+
+    // Lọc theo cccd
+    if (filters.cccd) {
+        filterConditions.cccd = filters.cccd;
+    }
+
+    // Lọc theo khoa
+    if (filters.khoa) {
+        filterConditions.khoa = filters.khoa;
+    }
+
+    // Lọc theo kyhoc
+    if (filters.kyhoc) {
+        filterConditions['kyhoc.ky'] = { $regex: filters.kyhoc, $options: 'i' };
+    }
+
+    // Lấy danh sách sinh viên
+    const students = await StudentModel.find(filterConditions)
+        .populate({
+            path: 'room',
+            populate: {
+                path: 'department', // Nối với department
+                model: 'Departments'
+            }
+        })
+        .populate('user') // Nối với thông tin user
+        .skip(skip)
+        .limit(pageLimit)
+        .sort({ createdAt: -1 });
+
+    // Tổng số sinh viên khớp với điều kiện lọc
+    const totalStudents = await StudentModel.countDocuments(filterConditions);
+
+    // Tổng số trang
+    const totalPages = Math.ceil(totalStudents / pageLimit);
+
+    // Trả về kết quả
+    return {
+        data: students,
+        totalStudents,
+        totalPages,
+        currentPage: pageNumber,
+        pageLimit
+    };
+};
+
 // exports.getAllWaitingStudents = async () => {
 //     return await StudentModel.find(
 //         {
@@ -94,7 +176,7 @@ exports.getAllStudents = async () => {
 // }
 // sửa 15/11
 exports.getAllUsers = async () => {
-    return UserModel.find();
+    return UserModel.find().populate('users');
 }
 // sửa 15/11 
 exports.createRoom = async (data) => {
@@ -329,7 +411,7 @@ exports.getAllBills = async (data) => {
             filter.handong.$gte = new Date(fromDate);
         }
         if (toDate) {
-            filter.handong.$lte = new Date(toDate);
+            filter.handong.$lt = new Date(toDate);
         }
     }
 
