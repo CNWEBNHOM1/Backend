@@ -98,6 +98,10 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
         filterConditions.name = { $regex: filters.name, $options: 'i' };
     }
 
+    if (filters.trangthai) {
+        filterConditions.trangthai = filters.trangthai;
+    }
+
     // Lọc theo room
     if (filters.room) {
         filterConditions.room = filters.room;
