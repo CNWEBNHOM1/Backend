@@ -56,31 +56,21 @@ const StudentSchema = new mongoose.Schema({
     lop: {
         type: String
     },
-    kyhoc: [{
-        ky: {
-            type: String,
-            required: true,
-        },
-        phong: {
-            type: String,
-            required: true,
-        },
-        thoigianbatdau: {
-            type: Date,
-            required: true,
-        },
-        thoigianketthuc: {
-            type: Date,
-        },
-        trangthai: {
-            type: String,
-            enum: ["Đang ở", "Dừng trước hạn", "Đã ở từ kỳ trước"],
-            default: "Đang ở",
-        },
-    }],
+    // history: [{
+    //     semester: {
+    //         type: mongoose.Schema.Types.ObjectId,
+    //         ref: 'Semesters',  // Liên kết với kỳ học
+    //         required: true,
+    //     },
+    //     room: {
+    //         type: mongoose.Schema.Types.ObjectId,
+    //         ref: 'Rooms',  // Liên kết với phòng
+    //         required: true,
+    //     }
+    // }],
     trangthai: {
         type: String,
-        enum: ["Đang ở", "Dừng trước hạn", "Đã ở từ kỳ trước"],
+        enum: ["Đang ở", "Dừng trước hạn"],
         default: "Đang ở",
     },
 }, {timestamps: true});

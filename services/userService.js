@@ -6,6 +6,7 @@ const BillModel = require("../db/billModel");
 const DepartmentModel = require('../db/departmentModel');
 const ReportModel = require('../db/reportModel');
 const RequestModel = require('../db/requestModel');
+const SemeterModel = require('../db/semesterModel');
 
 require('dotenv').config();
 
@@ -135,12 +136,6 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
     if (filters.khoa) {
         filterConditions.khoa = filters.khoa;
     }
-
-    // Lọc theo kyhoc
-    if (filters.kyhoc) {
-        filterConditions['kyhoc.ky'] = { $regex: filters.kyhoc, $options: 'i' };
-    }
-
     // Lấy danh sách sinh viên
     const students = await StudentModel.find(filterConditions)
         .populate({
@@ -150,6 +145,14 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
                 model: 'Departments'
             }
         })
+        // .populate({
+        //     path: 'kyhoc.semester',
+        //     model: 'Semesters' // Nối với model Semesters
+        // })
+        // .populate({
+        //     path: 'kyhoc.room',
+        //     model: 'Rooms' // Nối với model Rooms trong kyhoc
+        // })
         .populate('user') // Nối với thông tin user
         .skip(skip)
         .limit(pageLimit)
@@ -776,24 +779,24 @@ exports.handleRequest = async (id, action) => {
                 khoa: request.khoa,
                 school: request.school,
                 lop: request.class,
-                kyhoc: [{
-                    ky: '20241',
-                    phong: request.room.name,
-                    thoigianbatdau: new Date(),
-                    trangthai: 'Đang ở',
-                }],
+                // kyhoc: [{
+                //     ky: '20241',
+                //     phong: request.room.name,
+                //     thoigianbatdau: new Date(),
+                //     trangthai: 'Đang ở',
+                // }],
                 trangthai: 'Đang ở',
             });
             await student.save();
             await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên" });
         } else {
             // Add room to kyhoc (room history)
-            student.kyhoc.push({
-                ky: 'Current',
-                phong: request.room.name,
-                thoigianbatdau: new Date(),
-                trangthai: 'Đang ở',
-            });
+            // student.kyhoc.push({
+            //     ky: 'Current',
+            //     phong: request.room.name,
+            //     thoigianbatdau: new Date(),
+            //     trangthai: 'Đang ở',
+            // });
             student.room = request.room._id; // Update current room
             await student.save();
         }

@@ -54,11 +54,11 @@ exports.updateRequest2 = async (req, res) => {
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
-        const { trangthai, room, name, cccd, gender, sid, khoa, kyhoc, page, limit } = req.query;
+        const { trangthai, room, name, cccd, gender, sid, khoa, page, limit } = req.query;
 
         // Gọi service với các tham số lọc
         const result = await userService.getAllStudents(
-            { trangthai, room, name, cccd, gender, sid, khoa, kyhoc },
+            { trangthai, room, name, cccd, gender, sid, khoa },
             page,
             limit
         );
