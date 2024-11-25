@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const bodyParser = require('body-parser')
 
 // Guest controller
 exports.createRequest = async (req, res) => {

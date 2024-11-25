@@ -23,7 +23,7 @@ const formatDate = (date) => {
 exports.createRequest = async (data, file) => {
     data.minhchung = file ? file.filename : null;
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
-
+    console.log(address)
     const room = await RoomModel.findById(roomId);
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
 
@@ -43,6 +43,7 @@ exports.createRequest = async (data, file) => {
         lop,
         sotienphaitra,
         trangthai: 'pending',
+        minhchung
     });
     console.log(newRequest);
     return await newRequest.save();
@@ -186,7 +187,7 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
 // }
 // sửa 15/11
 exports.getAllUsers = async () => {
-    return UserModel.find().populate('users');
+    return UserModel.find();
 }
 // sửa 15/11 
 exports.createRoom = async (data) => {
@@ -850,6 +851,7 @@ exports.handleRequest = async (id, action) => {
         ROOM.occupiedSlots--;
         request.trangthai = "declined";
     }
+
     await request.save();
 }
 // sửa 15/11
