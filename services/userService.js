@@ -1,4 +1,7 @@
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
 const UserModel = require("../db/userModel");
@@ -757,13 +760,13 @@ exports.handleReport = async (id, action, data) => {
 }
 exports.handleRequest = async (id, action) => {
     const request = await RequestModel.findById(id).populate('user')
-    .populate({
-        path: 'room',
-        populate: {
-            path: 'department', // Nối với department
-            model: 'Departments'
-        }
-    });
+        .populate({
+            path: 'room',
+            populate: {
+                path: 'department', // Nối với department
+                model: 'Departments'
+            }
+        });
     request.trangthai = action;
     await request.save();
 
@@ -795,7 +798,6 @@ exports.handleRequest = async (id, action) => {
                 trangthai: 'Đang ở',
             });
             await student.save();
-            await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên" });
         } else {
             // Add room to kyhoc (room history)
             // student.kyhoc.push({
@@ -807,7 +809,10 @@ exports.handleRequest = async (id, action) => {
             student.room = request.room._id; // Update current room
             await student.save();
         }
-        console.log(request.user.email)
+        // const newPassword = crypto.randomBytes(16).toString('hex');
+        const newPassword = '1234';
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên", password: hashedPassword });
         let transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -829,9 +834,12 @@ exports.handleRequest = async (id, action) => {
                     <li><strong>Phòng đăng ký: </strong>${request.room.name}</li>
                     <li><strong>Mức thu xác nhận đã đóng: </strong>${request.sotienphaitra} VNĐ</li>
                     <li><strong>Thời gian sử dụng:</strong> Kỳ 2024.1 - ${formatDate(Date.now())} - 31/1/2025</li>
+                    <li><strong>Địa điểm nhận phòng:</strong> D3-5 - 201, Đại học Bách khoa Hà Nội.</li>
                 </ul>
-                <p>Sinh viên không cần mang theo giấy tờ gì khi đến nhận phòng. Địa điểm nhận phòng: D3-5 - 201, Đại học Bách khoa Hà Nội.</p>
-                <p>Mọi thắc mắc vui lòng liên hệ đến số: 039 430 5264 (giờ hành chính).</p>
+
+                <p>Sinh viên không cần mang theo giấy tờ gì khi đến nhận phòng.</p>
+                <p>Tài khoản bạn sử dụng để đăng ký đã được đặt lại mật khẩu. Mật khẩu mới là: <strong>${newPassword}</strong>.</p>
+                <p>Mọi thắc mắc vui lòng liên hệ đến số: +84 394 305 264 (giờ hành chính).</p>
                 <p>Trân trọng,</p>
                 <p><strong>Nhóm 1, học phần Công nghệ Web, học kỳ 2024.1</strong></p>
             `,
@@ -840,7 +848,7 @@ exports.handleRequest = async (id, action) => {
     } else if (action === "declined") {
         const ROOM = RoomModel.findById(request.room);
         ROOM.occupiedSlots--;
-        request.trangthai = "Declined";
+        request.trangthai = "declined";
     }
     await request.save();
 }

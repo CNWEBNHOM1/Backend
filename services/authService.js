@@ -51,9 +51,7 @@ exports.resetPasswordMail = async (email) => {
     if (!usr) {
         return res.status(404).json({ message: "Email not found" });
     }
-    console.log(usr);
     const newPassword = crypto.randomBytes(16).toString('hex');
-    console.log(newPassword);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     usr.password = hashedPassword;
     await usr.save();
