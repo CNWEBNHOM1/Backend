@@ -864,7 +864,7 @@ exports.createDepartment = async (data) => {
 }
 // sửa 15/11
 exports.detailStudent = async (id) => {
-    const student = await StudentModel.findById(id).populate.apply('user')
+    const student = await StudentModel.findById(id).populate('user')
         .populate({
             path: 'room', // Nối thông tin phòng
             populate: {
