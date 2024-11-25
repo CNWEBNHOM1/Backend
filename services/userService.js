@@ -756,7 +756,14 @@ exports.handleReport = async (id, action, data) => {
     return await ReportModel.findByIdAndUpdate(id, { trangthai: action, ghichu: ghichu }, { new: true });
 }
 exports.handleRequest = async (id, action) => {
-    const request = await RequestModel.findById(id).populate('user').populate('room');
+    const request = await RequestModel.findById(id).populate('user')
+    .populate({
+        path: 'room',
+        populate: {
+            path: 'department', // Nối với department
+            model: 'Departments'
+        }
+    });
     request.trangthai = action;
     await request.save();
 
@@ -765,8 +772,8 @@ exports.handleRequest = async (id, action) => {
         if (!student) {
             // Create new student if not exists
             student = new StudentModel({
-                user: request.user,
-                email: request.email,
+                user: request.user._id,
+                email: request.user.email,
                 name: request.name,
                 ngaysinh: request.ngaysinh,
                 gender: request.gender,
@@ -778,7 +785,7 @@ exports.handleRequest = async (id, action) => {
                 room: request.room._id,
                 khoa: request.khoa,
                 school: request.school,
-                lop: request.class,
+                lop: request.lop,
                 // kyhoc: [{
                 //     ky: '20241',
                 //     phong: request.room.name,
@@ -800,6 +807,36 @@ exports.handleRequest = async (id, action) => {
             student.room = request.room._id; // Update current room
             await student.save();
         }
+        console.log(request.user.email)
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.mailUser,
+                pass: process.env.mailPass
+            }
+        });
+        let mailOptions = {
+            from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
+            subject: `Xác nhận đăng ký phòng ở ký túc xá`,
+            to: request.user.email,
+            html: `
+                <h1>Đăng ký thành công</h1>
+                <p><strong>Xin chào ${request.name}!</strong></p>
+                <p>Cảm ơn bạn đã lựa chọn ký túc xá làm nơi lưu trú. Nhóm 1 môn Công nghệ Web xin xác nhận nội dung đăng ký phòng thành công của bạn.</p>
+                <p><strong>Thông tin về phòng ở bao gồm:</strong></p>
+                <ul>
+                    <li><strong>Tòa nhà đăng ký: </strong>${request.room.department.name}</li>
+                    <li><strong>Phòng đăng ký: </strong>${request.room.name}</li>
+                    <li><strong>Mức thu xác nhận đã đóng: </strong>${request.sotienphaitra} VNĐ</li>
+                    <li><strong>Thời gian sử dụng:</strong> Kỳ 2024.1 - ${formatDate(Date.now())} - 31/1/2025</li>
+                </ul>
+                <p>Sinh viên không cần mang theo giấy tờ gì khi đến nhận phòng. Địa điểm nhận phòng: D3-5 - 201, Đại học Bách khoa Hà Nội.</p>
+                <p>Mọi thắc mắc vui lòng liên hệ đến số: 039 430 5264 (giờ hành chính).</p>
+                <p>Trân trọng,</p>
+                <p><strong>Nhóm 1, học phần Công nghệ Web, học kỳ 2024.1</strong></p>
+            `,
+        };
+        await transporter.sendMail(mailOptions);
     } else if (action === "declined") {
         const ROOM = RoomModel.findById(request.room);
         ROOM.occupiedSlots--;
