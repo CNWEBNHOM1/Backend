@@ -65,6 +65,9 @@ const RequestSchema = new mongoose.Schema({
         enum: ["pending", "approved", "declined"],
         default: "none",
     },
-}, {timestamps: true});
+    noidung: {
+        type: String,
+    },
+}, { timestamps: true });
 
 module.exports = mongoose.models.Requests || mongoose.model("Requests", RequestSchema);

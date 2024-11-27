@@ -11,6 +11,15 @@ exports.createRequest = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.getAllRoomsAvailable = async (req, res) => {
+    try {
+        const roomsAvailable = await userService.getAllRoomsAvailable();
+        res.status(200).json({ data: roomsAvailable, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 exports.getOwnRequest = async (req, res) => {
     try {
         const data = await userService.getOwnRequest(req.user.email);
@@ -44,22 +53,78 @@ exports.getAllRoomsAvailable = async (req, res) => {
     }
 };
 // Student controller 
-// exports.getListRoommates = async (req, res) => {
+exports.getListRoommates = async (req, res) => {
+    try {
+        const email = req.user.userEmail;
+        const roommates = await userService.getListRoommates(email);
+        res.json({ data: roommates, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+exports.getMyInfo = async (req, res) => {
+    try {
+        const roommates = await userService.getMyInfo(req.user.userEmail);
+        res.json({ data: roommates, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.uploadBillProof = async (req, res) => {
+    try {
+        const email = req.user.userEmail;
+        const billId = req.body.id;
+        const image = req.file;
+        const paymentInformation = await userService.uploadBillProof(email, image, billId);
+        res.status(200).json({ data: paymentInformation, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+
+};
+exports.createReport = async (req, res) => {
+    try {
+        const image = req.file;
+        const email = req.user.userEmail;
+        const noidung = req.body.noidung;
+        const reportInfo = await userService.createReport(email, image, noidung);
+        res.status(200).json({ data: reportInfo, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
+exports.getListBills = async (req, res) => {
+    try {
+        const email = req.user.userEmail;
+        const listBills = await userService.getListBills(email);
+        res.json({ data: listBills, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+// exports.fix = async (req, res) => {
 //     try {
-//         const roommates = await userService.getListRoommates(req.body.room);
-//         res.json({ data: roommates, status: "success" });
+//         const email = req.user.userEmail;
+//         const data = await userService.fix(email);
+//         res.json({ data: data, status: "success" });
 //     } catch (err) {
 //         res.status(500).json({ error: err.message });
 //     }
-// };
-// exports.getMyInfo = async (req, res) => {
-//     try {
-//         const roommates = await userService.getMyInfo(req.body.email);
-//         res.json({ data: roommates, status: "success" });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// };
+// }
+exports.requestChangeRoom = async (req, res) => {
+    try {
+        const email = req.user.userEmail;
+        const noidung = req.body.noidung;
+        const roomId = req.body.roomId;
+        const data = await userService.requestChangeRoom(email, noidung, roomId);
+        res.json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
@@ -347,3 +412,11 @@ exports.getAllRequests = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+exports.handleChangeRoomRequest = async (req, res) => {
+    try {
+        const data = await userService.handleChangeRoomRequest(req.params.id, req.params.action);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

@@ -73,6 +73,6 @@ const StudentSchema = new mongoose.Schema({
         enum: ["Đang ở", "Dừng trước hạn"],
         default: "Đang ở",
     },
-}, {timestamps: true});
+}, { timestamps: true });
 
 module.exports = mongoose.models.Students || mongoose.model("Students", StudentSchema);
