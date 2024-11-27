@@ -26,7 +26,6 @@ const RequestSchema = new mongoose.Schema({
     },
     cccd: {
         type: String,
-        unique: [true, "cccd Exist"],
     },
     priority: {
         type: Boolean,
