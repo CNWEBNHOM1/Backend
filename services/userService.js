@@ -84,7 +84,7 @@ exports.updateRequest2 = async (roomId) => {
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
         tinhtrang: 'Bình thường'
-    });
+    }).populate('department');
     const roomList = rooms.filter(room => {
         return Number(room.occupiedSlots) < Number(room.capacity);
     });
