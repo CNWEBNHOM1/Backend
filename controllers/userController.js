@@ -35,6 +35,14 @@ exports.updateRequest2 = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.getAllRoomsAvailable = async (req, res) => {
+    try {
+        const roomsAvailable = await userService.getAllRoomsAvailable();
+        res.status(200).json({ data: roomsAvailable, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 // Student controller 
 // exports.getListRoommates = async (req, res) => {
 //     try {

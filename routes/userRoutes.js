@@ -16,6 +16,7 @@ router.get ('/myRequest', auth(['Khách']), userController.getOwnRequest);
 //     <input type="file" name="minhchung" />
 //     <input type="submit" value="Upload Avatar" />
 // </form>
+router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);
 // Student route 
 
 // Manager route

@@ -70,6 +70,17 @@ exports.updateRequest2 = async (roomId) => {
         { new: true },
     );
 }
+exports.getAllRoomsAvailable = async () => {
+    const rooms = await RoomModel.find({
+        tinhtrang: 'Bình thường'
+    });
+    const roomList = rooms.filter(room => {
+        return Number(room.occupiedSlots) < Number(room.capacity);
+    });
+    if (!roomList[0]) throw new Error("Het phong roi");
+    return roomList;
+
+};
 // Student Service 
 exports.getListRoommates = async (department, room) => {
     return await StudentModel.find(
@@ -286,7 +297,7 @@ exports.declineStudent = async (email) => {
 exports.updateStudent = async (id, data) => {
     return await StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
-exports.kickOneStudents = async () => {
+exports.kickOneStudents = async (id) => {
     const student = await StudentModel.findOne(
         {
             email: email,
@@ -306,7 +317,7 @@ exports.kickOneStudents = async () => {
         }
     )
     r.occupiedSlots--;
-    acc.role = "Khách";
+    acc .role = "Khách";
     student.trangthai = "kicked";
     student.roomselected = "none";
     student.departmentselected = "none";
