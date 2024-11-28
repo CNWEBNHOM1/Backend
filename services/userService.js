@@ -418,93 +418,61 @@ exports.declineStudent = async (email) => {
 exports.updateStudent = async (id, data) => {
     return await StudentModel.findByIdAndUpdate(id, data, { new: true });
 }
-exports.kickOneStudents = async (id) => {
-    const student = await StudentModel.findOne(
-        {
-            email: email,
-        }
-    );
-
-    const acc = await UserModel.findOne(
-        {
-            email: email,
-        }
-    );
-
-    const r = await RoomModel.findOne(
-        {
-            name: student.roomselected,
-            department: student.departmentselected,
-        }
+exports.handleStudent = async (id, action) => {
+    const student = await StudentModel.findById(id).populate('user')
+        .populate({
+            path: 'room', // Nối thông tin phòng
+            populate: {
+                path: 'department', // Nối thông tin department trong room
+                model: 'Departments' // Đảm bảo đúng model cho department
+            }
+        });
+    student.trangthai = action;
+    if (action === 'Dừng trước hạn') {
+        await RoomModel.findByIdAndUpdate(
+            student.room,
+            { $inc: { occupiedSlots: -1 } }
+        )
+    } else {
+        const ROOM = await RoomModel.findById(student.room);
+        if (ROOM.occupiedSlots < ROOM.capacity) {
+            ROOM.occupiedSlots++;
+            await ROOM.save();
+        } else throw new Error("This room is full");
+    }
+    await student.save();
+}
+exports.handleUser = async (id, action) => {
+    await UserModel.findByIdAndUpdate(
+        id,
+        { status: action },
+        { new: true }
     )
-    r.occupiedSlots--;
-    acc .role = "Khách";
-    student.trangthai = "kicked";
-    student.roomselected = "none";
-    student.departmentselected = "none";
+}
+exports.transferRoom = async (student_id, new_room_id) => {
+    const student = await StudentModel.findById(student_id);
+    const new_room = await RoomModel.findById(new_room_id);
 
-    r.save();
-    acc.save();
-    student.save();
-
+    if (new_room_id.toString() === student.room.toString())
+        throw new Error('This student is already in this room')
+  
+    if (new_room.occupiedSlots < new_room.capacity) {
+        await RoomModel.findByIdAndUpdate(student.room, { $inc: { occupiedSlots: -1 } });
+        student.room = new_room_id;
+        await RoomModel.findByIdAndUpdate(new_room_id, { $inc: { occupiedSlots: 1 } });
+        await student.save();
+    } else {
+        throw new Error("New room is full");
+    }
     return;
 }
-exports.kickAllStudents = async () => {
-    await StudentModel.updateMany(
-        { roomselected: { $ne: "none" } },
-        {
-            $set: {
-                roomselected: "none",
-                departmentselected: "none",
-                status: "none",
-            },
-        }
-    );
-    await RoomModel.updateMany(
-        { occupiedSlots: { $gt: 0 } },
-        {
-            $set: {
-                occupiedSlots: 0,
-            },
-        }
-    );
-    await UserModel.updateMany(
-        { role: "Student" },
-        {
-            $set: {
-                role: "Guest",
-            },
-        }
-    );
+exports.transfer2Student = async (student1, student2) => {
+    const s1 = StudentModel.findById(student1);
+    const s2 = StudentModel.findById(student2);
+    const tmp = s1.room;
+    s1.room = s2.room; await s1.save();
+    s2.room = tmp; await s2.save();
     return;
-}
-exports.transferRoom = async (email, department, room) => {
-    const r_change = await RoomModel.find(
-        {
-            name: room,
-            department: department,
-        }
-    );
-    if (r_change.occupiedSlots == r_change.capacity) throw new Error("New room is full!");
-    const std = await StudentModel.findOne(
-        {
-            email: email,
-        }
-    );
-    const r = await RoomModel.findOne(
-        {
-            department: std.departmentselected,
-            name: std.roomselected,
-        }
-    )
-
-    std.roomselected = room;
-    std.departmentselected = department;
-    r.occupiedSlots--;
-    r_change.occupiedSlots++;
-
-    r.save(); r_change.save();
-    return await std.save();
 }
 exports.getAllBills = async (data) => {
     const {
@@ -1112,38 +1080,4 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         pageLimit
     };
 };
-exports.handleChangeRoomRequest = async (id, action) => {
-    const request = await RequestModel.findById(id).populate('user').populate('room');
-    request.trangthai = action;
-    await request.save();
-
-    if (action === "approved") {
-        const student = await StudentModel.findOne({ user: request.user });
-        {
-            const prevRoom = await RoomModel.findOne({ _id: student.room });
-            console.log(prevRoom);
-            // Add room to kyhoc (room history)
-            student.kyhoc.push({
-                ky: 'Current',
-                phong: request.room.name,
-                thoigianbatdau: new Date(),
-                trangthai: 'Đang ở',
-            });
-            student.room = request.room; // Update current room
-            await student.save();
-            // request.trangthai = "approved";
-            const postRoom = await RoomModel.findOne({ _id: request.room });
-            console.log(postRoom);
-            prevRoom.occupiedSlots--;
-            postRoom.occupiedSlots++;
-            //xu ly room
-            await prevRoom.save();
-            await postRoom.save();
-        }
-    } else if (action === "declined") {
-
-        request.trangthai = "declined";
-    }
-    return await request.save();
-}
 // Xuất hóa đơn cho từng phòng, danh sách excel
