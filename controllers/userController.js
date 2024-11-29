@@ -175,17 +175,9 @@ exports.declineStudent = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.updateStudent = async (req, res) => {
+exports.handleStudent = async (req, res) => {
     try {
-        const data = await userService.updateStudent(req.params.id, req.body);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.kickOneStudent = async (req, res) => {
-    try {
-        const data = await userService.kickOneStudents(req.body.email);
+        const data = await userService.handleStudent(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -201,7 +193,15 @@ exports.kickAllStudents = async (req, res) => {
 }
 exports.transferRoom = async (req, res) => {
     try {
-        const data = await userService.transferRoom(req.body.email, req.body.department, req.body.room);
+        const data = await userService.transferRoom(req.params.student_id, req.params.new_room_id);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.transfer2Student = async (req, res) => {
+    try {
+        const data = await userService.transfer2Student(req.params.student1, req.params.student2);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -412,9 +412,9 @@ exports.getAllRequests = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
-exports.handleChangeRoomRequest = async (req, res) => {
+exports.handleUser = async (req, res) => {
     try {
-        const data = await userService.handleChangeRoomRequest(req.params.id, req.params.action);
+        const data = await userService.handleUser(req.params.id, req.params.action);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

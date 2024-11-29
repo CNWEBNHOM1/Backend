@@ -52,19 +52,19 @@ router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDep
 router.post('/getAllReports', auth(['Quản lý']), userController.getAllReports);
 router.post('/allBills', auth(['Quản lý']), userController.getAllBills);
 router.post('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
-router.post('/declineStundet', auth(['Quản lý']), userController.declineStudent);
-router.post('/kickOne', auth(['Quản lý']), userController.kickOneStudent);
+router.post('/declineStudent', auth(['Quản lý']), userController.declineStudent);
 router.post('/kickAll', auth(['Quản lý']), userController.kickAllStudents);
-router.post('/transferRoom', auth(['Quản lý']), userController.transferRoom);
 // router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.get('/sendBill/:id', auth(['Quản lý']), userController.sendBill);
 router.post('/createRoom', auth(['Quản lý']), userController.createRoom);
 router.post('/createDepartment', auth(['Quản lý']), userController.createDepartment);
 
 router.put('/handleRequest/:id/:action', auth(['Quản lý']), userController.handleRequest);
-router.put('/updateStudent/:id', auth(['Quản lý', 'Sinh viên']), userController.updateStudent);
+router.put('/handleStudent/:id/:action', auth(['Quản lý']), userController.handleStudent);
+router.put('/handleUser/:id/:action', auth(['Quản lý']), userController.handleUser);
 router.put('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
 router.put('/handleBill/:id/:action', auth(['Quản lý']), userController.handleBill);
 router.put('/handleReport/:id/:action', auth(['Quản lý']), userController.handleReport);
-router.put('/handleChangeRoomRequest/:id/:action', auth(['Quản lý']), userController.handleChangeRoomRequest)
+router.put('/transferRoom/:student_id/:new_room_id', auth(['Quản lý']), userController.transferRoom);
+router.put('/transfer2Student/:student1/:student2', auth(['Quản lý']), userController.transfer2Student);
 module.exports = router;
