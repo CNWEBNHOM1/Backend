@@ -19,14 +19,14 @@ router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRe
 // </form>
 router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);
 // Student route 
-router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//
+router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//studentInfo+room
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
-// router.post('/fix', auth(['Sinh viên']), userController.fix);//test
+
 router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
 router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
-router.post('/changeRoomRequest', auth(['Sinh viên']), userController.requestChangeRoom);
+// router.post('/changeRoomRequest', auth(['Sinh viên']), userController.requestChangeRoom);
 
 
 // Manager route

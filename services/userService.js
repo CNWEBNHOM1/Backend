@@ -115,7 +115,7 @@ exports.getMyInfo = async (email) => {
     });
     if (!user) throw new Error('User not exist');
 
-    const student = await StudentModel.findOne({ user: user._id }).populate('user');
+    const student = await StudentModel.findOne({ user: user._id }).populate('user').populate('room');
     // const student = await StudentModel.find({ user: "6736c42a20ada4d09902ddc7" });
     if (!student) throw new Error('Student not found');
     return student;
@@ -182,42 +182,43 @@ exports.getListBills = async (email) => {
 
     if (!student) throw new Error("Student not found");
 
-    const bill = await billModel.find({
+    const bill = await BillModel.find({
         room: student.room
     }).populate('room');
     if (!bill[0]) throw new Error('Bill not found ');
     return bill;
 }
-exports.requestChangeRoom = async (email, noidung, roomId) => {
-    if (!noidung) throw new Error('Yeu cau khong hop le');
-    const user = await UserModel.findOne({
-        email: email
-    });
-    if (!user) throw new Error('User not exist');
-    const student = await StudentModel.findOne({ user: user._id }).populate('user');
-    if (!student) throw new Error("Student not found");
-    if (roomId === student.room) throw new Error('Yeu cau khong hop le');
-    const roomChange = await RoomModel.findOne({ _id: roomId });
-    if (roomChange.occupiedSlots == roomChange.capacity) throw new Error('room full');
-    const data =
-    {
-        user: user._id,
-        room: roomChange._id,
-        name: student.name,
-        ngaysinh: student.ngaysinh,
-        gender: student.gender,
-        priority: student.priority,
-        phone: student.phone,
-        address: student.address,
-        khoa: student.khoa,
-        school: student.school,
-        lop: student.lop,
-        noidung: noidung,
-        trangthai: "pending"
-    };
-    // console.log(data);
-    return await RequestModel.create(data)
-}
+
+// exports.requestChangeRoom = async (email, noidung, roomId) => {
+//     if (!noidung) throw new Error('Yeu cau khong hop le');
+//     const user = await UserModel.findOne({
+//         email: email
+//     });
+//     if (!user) throw new Error('User not exist');
+//     const student = await StudentModel.findOne({ user: user._id }).populate('user');
+//     if (!student) throw new Error("Student not found");
+//     if (roomId === student.room) throw new Error('Yeu cau khong hop le');
+//     const roomChange = await RoomModel.findOne({ _id: roomId });
+//     if (roomChange.occupiedSlots == roomChange.capacity) throw new Error('room full');
+//     const data =
+//     {
+//         user: user._id,
+//         room: roomChange._id,
+//         name: student.name,
+//         ngaysinh: student.ngaysinh,
+//         gender: student.gender,
+//         priority: student.priority,
+//         phone: student.phone,
+//         address: student.address,
+//         khoa: student.khoa,
+//         school: student.school,
+//         lop: student.lop,
+//         noidung: noidung,
+//         trangthai: "pending"
+//     };
+//     // console.log(data);
+//     return await RequestModel.create(data)
+// }
 // Manager Service 
 exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
     // Convert page và limit thành số
@@ -455,7 +456,7 @@ exports.transferRoom = async (student_id, new_room_id) => {
 
     if (new_room_id.toString() === student.room.toString())
         throw new Error('This student is already in this room')
-  
+
     if (new_room.occupiedSlots < new_room.capacity) {
         await RoomModel.findByIdAndUpdate(student.room, { $inc: { occupiedSlots: -1 } });
         student.room = new_room_id;

@@ -64,8 +64,8 @@ exports.getListRoommates = async (req, res) => {
 };
 exports.getMyInfo = async (req, res) => {
     try {
-        const roommates = await userService.getMyInfo(req.user.userEmail);
-        res.json({ data: roommates, status: "success" });
+        const info = await userService.getMyInfo(req.user.userEmail);
+        res.json({ data: info, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -105,26 +105,18 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-// exports.fix = async (req, res) => {
+
+// exports.requestChangeRoom = async (req, res) => {
 //     try {
 //         const email = req.user.userEmail;
-//         const data = await userService.fix(email);
+//         const noidung = req.body.noidung;
+//         const roomId = req.body.roomId;
+//         const data = await userService.requestChangeRoom(email, noidung, roomId);
 //         res.json({ data: data, status: "success" });
 //     } catch (err) {
 //         res.status(500).json({ error: err.message });
 //     }
 // }
-exports.requestChangeRoom = async (req, res) => {
-    try {
-        const email = req.user.userEmail;
-        const noidung = req.body.noidung;
-        const roomId = req.body.roomId;
-        const data = await userService.requestChangeRoom(email, noidung, roomId);
-        res.json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
