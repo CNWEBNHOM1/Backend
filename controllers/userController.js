@@ -98,8 +98,10 @@ exports.createReport = async (req, res) => {
 
 exports.getListBills = async (req, res) => {
     try {
+        const { trangthai, page, limit, sortBy, order } = req.query;//sorBy: thanhtien hoặc createdAt
+        //trangthai: "Chờ xác nhận", "Đã đóng", "Chưa đóng", "Quá hạn"
         const email = req.user.userEmail;
-        const listBills = await userService.getListBills(email);
+        const listBills = await userService.getListBills(email, req.query);
         res.json({ data: listBills, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -117,6 +119,8 @@ exports.getListBills = async (req, res) => {
 //         res.status(500).json({ error: err.message });
 //     }
 // }
+
+
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {

@@ -172,22 +172,43 @@ exports.createReport = async (email, image, noidung) => {
     // const report = await  reportModel.create(data)
     return await ReportModel.create(data)
 }
-exports.getListBills = async (email) => {
-    const user = await UserModel.findOne({
-        email: email
-    });
+exports.getListBills = async (email, query) => {
+    const user = await UserModel.findOne({ email: email });
     if (!user) throw new Error('User not exist');
 
     const student = await StudentModel.findOne({ user: user._id }).populate('user');
-
     if (!student) throw new Error("Student not found");
 
-    const bill = await BillModel.find({
-        room: student.room
-    }).populate('room');
-    if (!bill[0]) throw new Error('Bill not found ');
-    return bill;
+    const { trangthai, page, limit, sortBy = 'createAt', order = 'asc' } = query;
+
+    const validSortBy = ['thanhtien', 'createAt'];
+    const validOrder = ['asc', 'desc'];
+
+    const filters = { room: student.room };
+    if (trangthai) filters.trangthai = trangthai;
+
+
+    const sort = validSortBy.includes(sortBy) ? sortBy : 'createAt';
+    const direction = validOrder.includes(order) ? order : 'asc';
+
+
+    const pageNumber = Math.max(1, parseInt(page) || 1);
+    const pageLimit = Math.max(1, parseInt(limit) || 10);
+
+    const bills = await BillModel.find(filters)
+        .populate('room')
+        .sort({ [sort]: direction === 'desc' ? -1 : 1 })
+        .skip((pageNumber - 1) * pageLimit)
+        .limit(pageLimit);
+
+    if (!bills.length) throw new Error('Bill not found');
+
+    return {
+        total: bills.length,
+        bills
+    };
 }
+
 
 // exports.requestChangeRoom = async (email, noidung, roomId) => {
 //     if (!noidung) throw new Error('Yeu cau khong hop le');
