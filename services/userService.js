@@ -349,10 +349,8 @@ exports.createRoom = async (data) => {
 
     // Kiểm tra xem department có tồn tại không
     const departmentExists = await DepartmentModel.findById(department);
-    if (!departmentExists) {
-        return res.status(404).json({ message: 'Department not found' });
-    }
-
+    if (!departmentExists)
+        throw new Error('Department not found');
     const newRoom = new RoomModel({
         name,
         department,
@@ -615,9 +613,7 @@ exports.createBill = async (data) => {
     // Tìm phòng để lấy giá trị 'dongiadien'
     const foundRoom = await RoomModel.findById(room);
     if (!foundRoom) {
-        return res.status(404).json({
-            message: "Room not found"
-        });
+        throw new Error('Room not found')
     }
     const dongia = foundRoom.dongiadien;
     // Tìm bill gần nhất để lấy số điện cuối làm số điện đầu
@@ -625,6 +621,8 @@ exports.createBill = async (data) => {
     const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
 
     // Tính tổng tiền
+    if (sodiencuoi <= sodiendau)
+        return new Error('Invalid sodiencuoi');
     const thanhtien = (sodiencuoi - sodiendau) * dongia;
     const handong = new Date();
     handong.setDate(handong.getDate() + 15);
