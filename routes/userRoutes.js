@@ -47,6 +47,10 @@ router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailRe
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
 router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStudentsOfOneRoom);
 router.get('/statisticBills/', auth(['Quản lý']), userController.statisticBills);
+router.get('/statisticReports/', auth(['Quản lý']), userController.statisticReports);
+router.get('/statisticRequests/', auth(['Quản lý']), userController.statisticRequests);
+router.get('/statisticRooms/', auth(['Quản lý']), userController.statisticRooms);
+router.get('/statisticStudents/', auth(['Quản lý']), userController.statisticStudents);
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);

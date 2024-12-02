@@ -424,3 +424,35 @@ exports.statisticBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.statisticReports = async (req, res) => {
+    try {
+        const data = await userService.statisticReports();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticRequests = async (req, res) => {
+    try {
+        const data = await userService.statisticRequests();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticRooms = async (req, res) => {
+    try {
+        const data = await userService.statisticRooms();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticStudents = async (req, res) => {
+    try {
+        const data = await userService.statisticStudents();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

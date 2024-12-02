@@ -1101,11 +1101,40 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
     };
 };
 exports.statisticBills = async () => {
-    const count_pending = await BillModel.countDocuments({trangthai: 'Chờ xác nhận'});
-    const count_paid = await BillModel.countDocuments({trangthai: 'Đã đóng'});
-    const count_notYetPaid = await BillModel.countDocuments({trangthai: 'Chưa đóng'});
-    const count_overdue = await BillModel.countDocuments({trangthai: 'Quá hạn'});
+    const count_pending = await BillModel.countDocuments({ trangthai: 'Chờ xác nhận' });
+    const count_paid = await BillModel.countDocuments({ trangthai: 'Đã đóng' });
+    const count_notYetPaid = await BillModel.countDocuments({ trangthai: 'Chưa đóng' });
+    const count_overdue = await BillModel.countDocuments({ trangthai: 'Quá hạn' });
     const total = await BillModel.countDocuments();
     return { count_pending, count_paid, count_notYetPaid, count_overdue, total }
+}
+exports.statisticReports = async () => {
+    const count_pending = await ReportModel.countDocuments({ trangthai: 'Chưa xử lý' });
+    const count_done = await ReportModel.countDocuments({ trangthai: 'Đã xử lý' });
+    const total = await ReportModel.countDocuments();
+    return { count_pending, count_done, total }
+}
+exports.statisticRequests = async () => {
+    const count_pending = await RequestModel.countDocuments({ trangthai: 'pending' });
+    const count_approved = await RequestModel.countDocuments({ trangthai: 'approved' });
+    const count_declined = await RequestModel.countDocuments({ trangthai: 'declined' });
+    const total = await RequestModel.countDocuments();
+    return { count_pending, count_approved, count_declined, total }
+}
+exports.statisticRooms = async () => {
+    const count_male_available = await RoomModel.countDocuments({ tinhtrang: 'Bình thường', gender: 'Nam' });
+    const count_male_unavailable = await RoomModel.countDocuments({ tinhtrang: 'Bị hỏng', gender: 'Nam' });
+    const count_female_available = await RoomModel.countDocuments({ tinhtrang: 'Bình thường', gender: 'Nữ' });
+    const count_female_unavailable = await RoomModel.countDocuments({ tinhtrang: 'Bị hỏng', gender: 'Nữ' });
+    const total = await RoomModel.countDocuments();
+    return { count_male_available, count_male_unavailable, count_female_available, count_female_unavailable, total }
+}
+exports.statisticStudents = async () => {
+    const count_male_living = await StudentModel.countDocuments({ gender: 'Nam', trangthai: 'Đang ở' })
+    const count_male_stop_living = await StudentModel.countDocuments({ gender: 'Nam', trangthai: 'Dừng trước hạn' })
+    const count_female_living = await StudentModel.countDocuments({ gender: 'Nữ', trangthai: 'Đang ở' })
+    const count_female_stop_living = await StudentModel.countDocuments({ gender: 'Nữ', trangthai: 'Dừng trước hạn' })
+    const total = await StudentModel.countDocuments();
+    return { count_male_living, count_male_stop_living, count_female_living, count_female_stop_living, total };
 }
 // Xuất hóa đơn cho từng phòng, danh sách excel
