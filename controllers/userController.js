@@ -416,3 +416,11 @@ exports.handleUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.statisticBills = async (req, res) => {
+    try {
+        const data = await userService.statisticBills();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

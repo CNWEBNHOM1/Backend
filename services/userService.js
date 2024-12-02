@@ -1102,4 +1102,12 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         pageLimit
     };
 };
+exports.statisticBills = async () => {
+    const count_pending = await BillModel.countDocuments({trangthai: 'Chờ xác nhận'});
+    const count_paid = await BillModel.countDocuments({trangthai: 'Đã đóng'});
+    const count_notYetPaid = await BillModel.countDocuments({trangthai: 'Chưa đóng'});
+    const count_overdue = await BillModel.countDocuments({trangthai: 'Quá hạn'});
+    const total = await BillModel.countDocuments();
+    return { count_pending, count_paid, count_notYetPaid, count_overdue, total }
+}
 // Xuất hóa đơn cho từng phòng, danh sách excel
