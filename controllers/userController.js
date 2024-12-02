@@ -13,6 +13,7 @@ exports.createRequest = async (req, res) => {
 }
 exports.getAllRoomsAvailable = async (req, res) => {
     try {
+        console.log('djdjd');
         const roomsAvailable = await userService.getAllRoomsAvailable();
         res.status(200).json({ data: roomsAvailable, status: "success" });
     } catch (err) {

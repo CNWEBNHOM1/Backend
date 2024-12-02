@@ -51,13 +51,12 @@ exports.createRequest = async (data, file) => {
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
         tinhtrang: 'Bình thường'
-    });
+    }).populate('department');
     const roomList = rooms.filter(room => {
         return Number(room.occupiedSlots) < Number(room.capacity);
     });
     if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
-
 };
 exports.getOwnRequest = async (email) => {
     return await RequestModel.find(
