@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const CsvParser = require('json2csv').Parser;
+const PDFDocument = require('pdfkit');
 
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
@@ -1247,3 +1248,25 @@ exports.exportAllStudentByRoom = async (departmentName, roomName) => {
     // const departmentName = department.name;
     return csvData;
 };
+exports.getBills = async (billId) => {
+    // billId = "6736ae6da885f02a9bd15b38";
+    const bill = await BillModel.findById(billId).populate('room');
+    if (!bill) throw new Error("Hoá đơn không tồn tại");
+    // console.log(bill);
+
+    const { room, sodiendau, sodiencuoi, dongia, thanhtien, handong, trangthai } = bill;
+
+    const department = await DepartmentModel.findById(bill.room.department);
+    const data = {
+        department: department.name,
+        room: room.name,
+        sodiendau,
+        sodiencuoi,
+        dongia,
+        thanhtien,
+        handong,
+        trangthai,
+    };
+    // console.log(data);
+    return data;
+};             

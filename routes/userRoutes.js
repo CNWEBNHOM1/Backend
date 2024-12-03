@@ -51,6 +51,9 @@ router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStuden
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
 router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);
 router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);
+//exports pdf hoá đơn theo id
+router.get('/exportBills', auth(['Quản lý']), userController.exportBills);
+
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);

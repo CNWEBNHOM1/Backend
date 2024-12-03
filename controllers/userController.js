@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const bodyParser = require('body-parser')
+const generateInvoicePdf = require('../middlewares/exportInvoice');
 
 // Guest controller
 exports.createRequest = async (req, res) => {
@@ -447,5 +448,22 @@ exports.exportAllStudentByRoom = async (req, res) => {
         res.status(200).end(csvData);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+}
+exports.exportBills = async (req, res, next) => {
+    try {
+        const billId = req.body.billId;
+
+        // console.log(billId);
+        const billData = await userService.getBills(billId);
+
+        if (!billData) {
+            return res.status(404).json({ message: 'Hóa đơn không tồn tại.' });
+        }
+        // console.log("2");
+        generateInvoicePdf(res, billData);
+
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi xuất hóa đơn.', details: err.message });
     }
 }
