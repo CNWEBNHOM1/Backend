@@ -60,10 +60,14 @@ exports.getAllRoomsAvailable = async () => {
     if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
 };
-exports.getOwnRequest = async (email) => {
+exports.getOwnRequest = async (Email) => {
+    const user = await UserModel.findOne({
+        email: Email
+    });
+    if (!user) throw new Error("User không tồn tại");
     return await RequestModel.find(
         {
-            email: email,
+            user: user._id,
         }
     )
 }
