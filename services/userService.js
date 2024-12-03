@@ -204,10 +204,8 @@ exports.getListBills = async (email, query) => {
 
     if (!bills.length) throw new Error('Bill not found');
 
-    return {
-        total: bills.length,
-        bills
-    };
+    return bills
+        ;
 }
 
 
