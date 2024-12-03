@@ -47,7 +47,10 @@ router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailRe
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
 router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStudentsOfOneRoom);
 
+//export ra excel
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
+router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);
+router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);

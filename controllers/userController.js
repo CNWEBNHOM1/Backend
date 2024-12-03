@@ -420,7 +420,30 @@ exports.exportAllStudent = async (req, res) => {
     try {
         const csvData = await userService.exportAllStudent();
         res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", "attachment: filename=allStudentData.csv");
+        res.setHeader("Content-Disposition", "attachment; filename=allStudentData.csv");
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.exportAllStudentByDepartment = async (req, res) => {
+    try {
+        const departmentName = req.body.department;
+        const csvData = await userService.exportAllStudentByDepartment(departmentName);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${departmentName}Student.csv\"`);
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.exportAllStudentByRoom = async (req, res) => {
+    try {
+        const department = req.body.department;
+        const room = req.body.room;
+        const csvData = await userService.exportAllStudentByRoom(department, room);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${department}-${room}Student.csv\"`);
         res.status(200).end(csvData);
     } catch (err) {
         res.status(500).json({ error: err.message });
