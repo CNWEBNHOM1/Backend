@@ -9,7 +9,8 @@ const router = express.Router();
 
 // Guest route 
 router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
+// router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
+router.post('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
 router.post('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
 router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
@@ -46,6 +47,11 @@ router.get('/detailRequest/:id', auth(['Quản lý']), userController.getDetailR
 router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailReport);
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
 router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStudentsOfOneRoom);
+router.get('/statisticBills/', auth(['Quản lý']), userController.statisticBills);
+router.get('/statisticReports/', auth(['Quản lý']), userController.statisticReports);
+router.get('/statisticRequests/', auth(['Quản lý']), userController.statisticRequests);
+router.get('/statisticRooms/', auth(['Quản lý']), userController.statisticRooms);
+router.get('/statisticStudents/', auth(['Quản lý']), userController.statisticStudents);
 
 //export ra excel
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);

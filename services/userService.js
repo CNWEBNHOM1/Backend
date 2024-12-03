@@ -53,13 +53,12 @@ exports.createRequest = async (data, file) => {
 exports.getAllRoomsAvailable = async () => {
     const rooms = await RoomModel.find({
         tinhtrang: 'Bình thường'
-    });
+    }).populate('department');
     const roomList = rooms.filter(room => {
         return Number(room.occupiedSlots) < Number(room.capacity);
     });
     if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
-
 };
 exports.getOwnRequest = async (email) => {
     return await RequestModel.find(
@@ -349,10 +348,8 @@ exports.createRoom = async (data) => {
 
     // Kiểm tra xem department có tồn tại không
     const departmentExists = await DepartmentModel.findById(department);
-    if (!departmentExists) {
-        return res.status(404).json({ message: 'Department not found' });
-    }
-
+    if (!departmentExists)
+        throw new Error('Department not found');
     const newRoom = new RoomModel({
         name,
         department,
@@ -615,9 +612,7 @@ exports.createBill = async (data) => {
     // Tìm phòng để lấy giá trị 'dongiadien'
     const foundRoom = await RoomModel.findById(room);
     if (!foundRoom) {
-        return res.status(404).json({
-            message: "Room not found"
-        });
+        throw new Error('Room not found')
     }
     const dongia = foundRoom.dongiadien;
     // Tìm bill gần nhất để lấy số điện cuối làm số điện đầu
@@ -625,6 +620,8 @@ exports.createBill = async (data) => {
     const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
 
     // Tính tổng tiền
+    if (sodiencuoi <= sodiendau)
+        return new Error('Invalid sodiencuoi');
     const thanhtien = (sodiencuoi - sodiendau) * dongia;
     const handong = new Date();
     handong.setDate(handong.getDate() + 15);
@@ -1269,4 +1266,43 @@ exports.getBills = async (billId) => {
     };
     // console.log(data);
     return data;
-};             
+};
+
+exports.statisticBills = async () => {
+    const count_pending = await BillModel.countDocuments({ trangthai: 'Chờ xác nhận' });
+    const count_paid = await BillModel.countDocuments({ trangthai: 'Đã đóng' });
+    const count_notYetPaid = await BillModel.countDocuments({ trangthai: 'Chưa đóng' });
+    const count_overdue = await BillModel.countDocuments({ trangthai: 'Quá hạn' });
+    const total = await BillModel.countDocuments();
+    return { count_pending, count_paid, count_notYetPaid, count_overdue, total }
+}
+exports.statisticReports = async () => {
+    const count_pending = await ReportModel.countDocuments({ trangthai: 'Chưa xử lý' });
+    const count_done = await ReportModel.countDocuments({ trangthai: 'Đã xử lý' });
+    const total = await ReportModel.countDocuments();
+    return { count_pending, count_done, total }
+}
+exports.statisticRequests = async () => {
+    const count_pending = await RequestModel.countDocuments({ trangthai: 'pending' });
+    const count_approved = await RequestModel.countDocuments({ trangthai: 'approved' });
+    const count_declined = await RequestModel.countDocuments({ trangthai: 'declined' });
+    const total = await RequestModel.countDocuments();
+    return { count_pending, count_approved, count_declined, total }
+}
+exports.statisticRooms = async () => {
+    const count_male_available = await RoomModel.countDocuments({ tinhtrang: 'Bình thường', gender: 'Nam' });
+    const count_male_unavailable = await RoomModel.countDocuments({ tinhtrang: 'Bị hỏng', gender: 'Nam' });
+    const count_female_available = await RoomModel.countDocuments({ tinhtrang: 'Bình thường', gender: 'Nữ' });
+    const count_female_unavailable = await RoomModel.countDocuments({ tinhtrang: 'Bị hỏng', gender: 'Nữ' });
+    const total = await RoomModel.countDocuments();
+    return { count_male_available, count_male_unavailable, count_female_available, count_female_unavailable, total }
+}
+exports.statisticStudents = async () => {
+    const count_male_living = await StudentModel.countDocuments({ gender: 'Nam', trangthai: 'Đang ở' })
+    const count_male_stop_living = await StudentModel.countDocuments({ gender: 'Nam', trangthai: 'Dừng trước hạn' })
+    const count_female_living = await StudentModel.countDocuments({ gender: 'Nữ', trangthai: 'Đang ở' })
+    const count_female_stop_living = await StudentModel.countDocuments({ gender: 'Nữ', trangthai: 'Dừng trước hạn' })
+    const total = await StudentModel.countDocuments();
+    return { count_male_living, count_male_stop_living, count_female_living, count_female_stop_living, total };
+}
+
