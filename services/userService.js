@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const CsvParser = require('json2csv').Parser;
 
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
@@ -1103,3 +1104,43 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
     };
 };
 // Xuất hóa đơn cho từng phòng, danh sách excel
+exports.exportAllStudent = async () => {
+    let Students = [];
+    const StudentData = await StudentModel.find().populate({
+        path: 'room',
+        populate: {
+            path: 'department'
+        }
+    });
+    // console.log(StudentData);
+    StudentData.forEach((student) => {
+        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
+        const stringRoom = `${room.department.name} - ${room.name}`;
+        const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
+        Students.push({
+            UserID: user,
+            Email: email,
+            Name: name,
+            DOB: stringNgaySinh,
+            Gender: gender,
+            IDCard: cccd,
+            Priority: priority,
+            Phone: phone,
+            Address: stringAddress,
+            Room: stringRoom,
+            AcademicYear: khoa,
+            School: school,
+            Class: lop,
+            Status: trangthai,
+            CreatedAt: createdAt
+        });
+    });
+
+
+    const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    const csvData = csvParser.parse(Students);
+
+    return csvData;
+};

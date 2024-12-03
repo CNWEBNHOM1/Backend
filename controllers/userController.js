@@ -416,3 +416,13 @@ exports.handleUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.exportAllStudent = async (req, res) => {
+    try {
+        const csvData = await userService.exportAllStudent();
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", "attachment: filename=allStudentData.csv");
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

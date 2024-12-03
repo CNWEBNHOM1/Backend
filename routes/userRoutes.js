@@ -22,7 +22,7 @@ router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailab
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//studentInfo+room
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
-
+//them getImage 
 
 router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
 router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
@@ -46,6 +46,8 @@ router.get('/detailRequest/:id', auth(['Quản lý']), userController.getDetailR
 router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailReport);
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
 router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStudentsOfOneRoom);
+
+router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
