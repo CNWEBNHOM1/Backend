@@ -55,10 +55,10 @@ router.get('/statisticStudents/', auth(['Quản lý']), userController.statistic
 
 //export ra excel
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
-router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);
-router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);
+router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
+router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
 //exports pdf hoá đơn theo id
-router.get('/exportBills', auth(['Quản lý']), userController.exportBills);
+router.get('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
 
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);

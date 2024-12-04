@@ -1111,15 +1111,17 @@ exports.exportAllStudent = async () => {
         populate: {
             path: 'department'
         }
-    });
+    }).populate('user');
     // console.log(StudentData);
     StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
         const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
+        const UID = user._id;
         Students.push({
-            UserID: user,
+            UserID: UID,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,
@@ -1136,17 +1138,21 @@ exports.exportAllStudent = async () => {
             CreatedAt: createdAt
         });
     });
+    return Students;
 
-
-    const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
-    const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
-    const csvData = csvParser.parse(Students);
-
-    return csvData;
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // console.log(csvData);
+    // return csvData;
 };
 exports.exportAllStudentByDepartment = async (departmentName) => {
-    // departmentId = "6736a1cba7e99f28cae7bf8f";
+    // const departmentId = "6736da2513a0a5ef1c7fcb15";
     let Students = [];
+    // const department = await DepartmentModel.findOne({
+    //     _id: departmentId
+    // })
+    // console.log(department);
     const department = await DepartmentModel.findOne({
         name: departmentName
     });
@@ -1160,15 +1166,17 @@ exports.exportAllStudentByDepartment = async (departmentName) => {
             path: 'department',
             // match: { _id: departmentId },
         }
-    });
+    }).populate('user');
+    // console.log(StudentData);
     StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
         const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
         if (room.department.name != departmentName) return;
         Students.push({
-            UserID: user,
+            UserID: user._id,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,
@@ -1185,13 +1193,14 @@ exports.exportAllStudentByDepartment = async (departmentName) => {
             CreatedAt: createdAt
         });
     });
+    return Students;
     // console.log(Students);
-    if (!Students[0]) throw new Error("Tòa này không có ai");
-    const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
-    const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
-    const csvData = csvParser.parse(Students);
-    // const departmentName = department.name;
-    return csvData;
+    // if (!Students[0]) throw new Error("Tòa này không có ai");
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // const departmentName = department.name;
+    // return csvData;
 };
 exports.exportAllStudentByRoom = async (departmentName, roomName) => {
     // departmentName = "B9";
@@ -1215,16 +1224,17 @@ exports.exportAllStudentByRoom = async (departmentName, roomName) => {
             path: 'department',
             // match: { _id: departmentId },
         }
-    });
+    }).populate('user');
     // console.log(StudentData);
     StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
         const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
         // if (room.department.name != departmentName) return;
         Students.push({
-            UserID: user,
+            UserID: user._id,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,
@@ -1242,12 +1252,13 @@ exports.exportAllStudentByRoom = async (departmentName, roomName) => {
         });
     });
     // console.log(Students);
-    if (!Students[0]) throw new Error("Tòa này không có ai");
-    const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
-    const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
-    const csvData = csvParser.parse(Students);
-    // const departmentName = department.name;
-    return csvData;
+    if (!Students[0]) throw new Error("Phòng này không có ai");
+    return Students;
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // const departmentName = department.name;
+    // return csvData;
 };
 exports.getBills = async (billId) => {
     // billId = "6736ae6da885f02a9bd15b38";
