@@ -14,7 +14,6 @@ const SemeterModel = require('../db/semesterModel');
 require('dotenv').config();
 
 const moment = require('moment');
-const { devNull } = require('os');
 
 const formatDate = (date) => {
     return moment(date).format('HH:mm:ss DD/MM/YYYY');
@@ -24,7 +23,6 @@ const formatDate = (date) => {
 exports.createRequest = async (data, file) => {
     data.minhchung = file ? file.filename : null;
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
-    console.log(address)
     const room = await RoomModel.findById(roomId);
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
 
