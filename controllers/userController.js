@@ -1,5 +1,5 @@
 const userService = require('../services/userService');
-const bodyParser = require('body-parser')
+// const generateInvoicePdf = require('../middlewares/exportInvoice');
 
 // Guest controller
 exports.createRequest = async (req, res) => {
@@ -108,20 +108,6 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-
-// exports.requestChangeRoom = async (req, res) => {
-//     try {
-//         const email = req.user.userEmail;
-//         const noidung = req.body.noidung;
-//         const roomId = req.body.roomId;
-//         const data = await userService.requestChangeRoom(email, noidung, roomId);
-//         res.json({ data: data, status: "success" });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// }
-
-
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
@@ -139,51 +125,27 @@ exports.getAllStudents = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-};
-// exports.getAllWaitingStudents = async (req, res) => {
+}
+exports.getAllRooms = async (req, res) => {
+    try {
+        const data = await userService.getAllRooms(req.body);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+// exports.removeStudent = async (req, res) => {
 //     try {
-//         const data = await userService.getAllWaitingStudents();
+//         const data = await userService.removeStudent(req.body.email);
 //         res.status(200).json({ data: data, status: "success" });
 //     } catch (err) {
 //         res.status(500).json({ error: err.message });
 //     }
 // }
-exports.getAllRooms = async (req, res) => {
+exports.removeStudent = async (req, res) => {
     try {
-        const allr = await userService.getAllRooms();
-        res.status(200).json({ data: allr, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.getAllRoomsOfDepartment = async (req, res) => {
-    try {
-        const data = await userService.getAllRoomsOfDepartment(req.body);
+        const data = await userService.removeStudent(req.params.id);
         res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.declineStudent = async (req, res) => {
-    try {
-        const data = await userService.declineStudent(req.body.email);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.handleStudent = async (req, res) => {
-    try {
-        const data = await userService.handleStudent(req.params.id, req.params.action);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.kickAllStudents = async (req, res) => {
-    try {
-        await userService.kickAllStudents();
-        res.status(200).json({ message: 'All students have been kicked from their rooms' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -455,5 +417,56 @@ exports.statisticStudents = async (req, res) => {
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+}
+// export csv, bill
+exports.exportAllStudent = async (req, res) => {
+    try {
+        const csvData = await userService.exportAllStudent();
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", "attachment; filename=allStudentData.csv");
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.exportAllStudentByDepartment = async (req, res) => {
+    try {
+        const departmentName = req.body.department;
+        const csvData = await userService.exportAllStudentByDepartment(departmentName);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${departmentName}Student.csv\"`);
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.exportAllStudentByRoom = async (req, res) => {
+    try {
+        const department = req.body.department;
+        const room = req.body.room;
+        const csvData = await userService.exportAllStudentByRoom(department, room);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${department}-${room}Student.csv\"`);
+        res.status(200).end(csvData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.exportBills = async (req, res, next) => {
+    try {
+        const billId = req.body.billId;
+
+        // console.log(billId);
+        const billData = await userService.getBills(billId);
+
+        if (!billData) {
+            return res.status(404).json({ message: 'Hóa đơn không tồn tại.' });
+        }
+        // console.log("2");
+        generateInvoicePdf(res, billData);
+
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi xuất hóa đơn.', details: err.message });
     }
 }

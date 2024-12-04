@@ -19,12 +19,12 @@ exports.createUser = async (email, password) => {
 exports.loginUser = async (email, password, role) => {
     if (role !== 'Quản lý' && !emailRegex.test(email))
         throw new Error('You must use HUST email');
-
     const user = await User.findOne({ email, role });
     if (!user) throw new Error('Email or role is invalid');
     const passwordCheck = await bcrypt.compare(password, user.password);
     if (!passwordCheck) throw new Error('Invalid password');
-
+    if (user.status === 'blocked')
+        throw new Error('This email has been blocked by admin');
     const token = jwt.sign(
         { userId: user._id, userEmail: user.email, role: user.role },
         process.env.JWT_TOKEN,
