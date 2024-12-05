@@ -897,6 +897,11 @@ exports.handleRequest = async (id, action) => {
 // sửa 15/11
 exports.createDepartment = async (data) => {
     const { name, room_count, broken_room } = data;
+    const existingDepartment = await DepartmentModel.findOne({ name: name });
+    if (existingDepartment) {
+        // Nếu phòng đã tồn tại, ném ngoại lệ
+        throw new Error('Department with this name already exists');
+    }
     const newDepartment = new DepartmentModel({
         name,
         room_count,
