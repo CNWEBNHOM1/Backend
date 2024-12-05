@@ -441,15 +441,16 @@ exports.exportAllStudent = async (req, res) => {
             }
         ];
         const headers = [
-            'UID', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
             'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
-            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày tạo'
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
         ];
+        let stt = 1;
         const headerRow = worksheet.addRow(headers);
         headerRow.font = { bold: true };
         students.forEach(student => {
             worksheet.addRow([
-                student.UserID,
+                stt++,
                 student.Email,
                 student.Name,
                 student.DOB,
@@ -506,15 +507,16 @@ exports.exportAllStudentByDepartment = async (req, res) => {
             }
         ];
         const headers = [
-            'UID', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
             'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
-            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày tạo'
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.font = { bold: true };
+        let stt = 1;
         students.forEach(student => {
             worksheet.addRow([
-                student.UserID,
+                stt++,
                 student.Email,
                 student.Name,
                 student.DOB,
@@ -561,7 +563,7 @@ exports.exportAllStudentByRoom = async (req, res) => {
     try {
         let department = req.body.department;
         let room = req.body.room;
-        // room = 101;
+        // room = "101";
         // department = "B9";
         const students = await userService.exportAllStudentByRoom(department, room);
         const workbook = new ExcelJS.Workbook();
@@ -574,15 +576,16 @@ exports.exportAllStudentByRoom = async (req, res) => {
             }
         ];
         const headers = [
-            'UID', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
             'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
-            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày tạo'
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
         ];
         const headerRow = worksheet.addRow(headers);
         headerRow.font = { bold: true };
+        let stt = 1;
         students.forEach(student => {
             worksheet.addRow([
-                student.UserID,
+                stt++,
                 student.Email,
                 student.Name,
                 student.DOB,
@@ -618,8 +621,8 @@ exports.statisticRequests = async (req, res) => {
 }
 exports.exportBills = async (req, res, next) => {
     try {
-        const billId = req.body.billId;
-
+        let billId = req.body.billId;
+        billId = "6736ae6da885f02a9bd15b38";
         // console.log(billId);
         const billData = await userService.getBills(billId);
 

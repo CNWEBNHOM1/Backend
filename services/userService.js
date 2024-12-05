@@ -144,7 +144,7 @@ exports.uploadBillProof = async (email, image, billId) => {
         _id: billId
     });
     if (!bill) throw new Error("No pending bill found, or the bill may already be paid");
-    console.log(bill);
+    // console.log(bill);
     bill.anhminhchung = image.filename;
     bill.trangthai = "Chờ xác nhận";
     console.log(bill);
@@ -206,7 +206,7 @@ exports.getListBills = async (email, query) => {
         .skip((pageNumber - 1) * pageLimit)
         .limit(pageLimit);
 
-    if (!bills.length) throw new Error('Bill not found');
+    // if (!bills.length) throw new Error('Bill not found');
 
     return bills
         ;
@@ -1012,6 +1012,8 @@ exports.detailBill = async (id) => {
                 model: 'Departments' // Đảm bảo đúng model cho department
             }
         });
+
+    console.log(bill);
     if (bill) return bill;
 }
 exports.detailDepartment = async (id) => {
@@ -1116,7 +1118,7 @@ exports.exportAllStudent = async () => {
     StudentData.forEach((student) => {
         let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
         email = user.email;
-        const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
+        const stringAddress = `${address.xa},${address.thanh},${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
         const UID = user._id;
@@ -1171,7 +1173,7 @@ exports.exportAllStudentByDepartment = async (departmentName) => {
     StudentData.forEach((student) => {
         let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
         email = user.email;
-        const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
+        const stringAddress = `${address.xa},${address.thanh},${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
         if (room.department.name != departmentName) return;
@@ -1203,8 +1205,7 @@ exports.exportAllStudentByDepartment = async (departmentName) => {
     // return csvData;
 };
 exports.exportAllStudentByRoom = async (departmentName, roomName) => {
-    // departmentName = "B9";
-    // roomName = 101;
+
     let Students = [];
     const department = await DepartmentModel.findOne({
         name: departmentName
@@ -1229,7 +1230,7 @@ exports.exportAllStudentByRoom = async (departmentName, roomName) => {
     StudentData.forEach((student) => {
         let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
         email = user.email;
-        const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
+        const stringAddress = `${address.xa},${address.thanh},${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
         // if (room.department.name != departmentName) return;
