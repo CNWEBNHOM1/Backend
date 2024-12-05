@@ -6,7 +6,8 @@ const ExcelJS = require('exceljs');
 exports.createRequest = async (req, res) => {
     try {
         req.body.userId = req.user.userId;
-        const request = await userService.createRequest(req.body, req.file);
+        const fileURL = req.file ? req.fileURL : "";
+        const request = await userService.createRequest(req.body, fileURL);
         res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -79,7 +80,7 @@ exports.uploadBillProof = async (req, res) => {
     try {
         const email = req.user.userEmail;
         const billId = req.body.id;
-        const image = req.file;
+        const image = req.file ? req.fileURL : "";
         const paymentInformation = await userService.uploadBillProof(email, image, billId);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
@@ -89,7 +90,7 @@ exports.uploadBillProof = async (req, res) => {
 };
 exports.createReport = async (req, res) => {
     try {
-        const image = req.file;
+        const image = req.file ? req.fileURL : "";
         const email = req.user.userEmail;
         const noidung = req.body.noidung;
         const reportInfo = await userService.createReport(email, image, noidung);
@@ -111,20 +112,6 @@ exports.getListBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-
-// exports.requestChangeRoom = async (req, res) => {
-//     try {
-//         const email = req.user.userEmail;
-//         const noidung = req.body.noidung;
-//         const roomId = req.body.roomId;
-//         const data = await userService.requestChangeRoom(email, noidung, roomId);
-//         res.json({ data: data, status: "success" });
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// }
-
-
 // Manager controller 
 exports.getAllStudents = async (req, res) => {
     try {
@@ -142,51 +129,27 @@ exports.getAllStudents = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-};
-// exports.getAllWaitingStudents = async (req, res) => {
+}
+exports.getAllRooms = async (req, res) => {
+    try {
+        const data = await userService.getAllRooms(req.body);
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+// exports.removeStudent = async (req, res) => {
 //     try {
-//         const data = await userService.getAllWaitingStudents();
+//         const data = await userService.removeStudent(req.body.email);
 //         res.status(200).json({ data: data, status: "success" });
 //     } catch (err) {
 //         res.status(500).json({ error: err.message });
 //     }
 // }
-exports.getAllRooms = async (req, res) => {
+exports.removeStudent = async (req, res) => {
     try {
-        const allr = await userService.getAllRooms();
-        res.status(200).json({ data: allr, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.getAllRoomsOfDepartment = async (req, res) => {
-    try {
-        const data = await userService.getAllRoomsOfDepartment(req.body);
+        const data = await userService.removeStudent(req.params.id);
         res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.declineStudent = async (req, res) => {
-    try {
-        const data = await userService.declineStudent(req.body.email);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.handleStudent = async (req, res) => {
-    try {
-        const data = await userService.handleStudent(req.params.id, req.params.action);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.kickAllStudents = async (req, res) => {
-    try {
-        await userService.kickAllStudents();
-        res.status(200).json({ message: 'All students have been kicked from their rooms' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -420,17 +383,52 @@ exports.handleUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+exports.statisticBills = async (req, res) => {
+    try {
+        const data = await userService.statisticBills();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+exports.statisticReports = async (req, res) => {
+    try {
+        const data = await userService.statisticReports();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticRequests = async (req, res) => {
+    try {
+        const data = await userService.statisticRequests();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticRooms = async (req, res) => {
+    try {
+        const data = await userService.statisticRooms();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.statisticStudents = async (req, res) => {
+    try {
+        const data = await userService.statisticStudents();
+        res.status(200).json({ data: data, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 exports.exportAllStudent = async (req, res) => {
-    // try {
-    //     const csvData = await userService.exportAllStudent();
-    //     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    //     res.setHeader("Content-Disposition", "attachment; filename=allStudentData.csv");
-    //     res.status(200).end(csvData);
-    // } catch (err) {
-    //     res.status(500).json({ error: err.message });
-    // }
+
     try {
         const students = await userService.exportAllStudent();
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Danh sách sinh viên');
         worksheet.views = [
@@ -448,7 +446,9 @@ exports.exportAllStudent = async (req, res) => {
         let stt = 1;
         const headerRow = worksheet.addRow(headers);
         headerRow.font = { bold: true };
-        students.forEach(student => {
+
+        students.forEach((student) => {
+            // console.log(student);
             worksheet.addRow([
                 stt++,
                 student.Email,
@@ -467,6 +467,7 @@ exports.exportAllStudent = async (req, res) => {
                 student.CreatedAt
             ]);
         });
+        // console.log(students);
         res.setHeader('Content-Disposition', `attachment; filename="${Date.now()}_DSSV.xlsx"`);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         await workbook.xlsx.write(res);
@@ -475,24 +476,8 @@ exports.exportAllStudent = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.statisticBills = async (req, res) => {
-    try {
-        const data = await userService.statisticBills();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
 exports.exportAllStudentByDepartment = async (req, res) => {
-    // try {
-    //     const departmentName = req.body.department;
-    //     const csvData = await userService.exportAllStudentByDepartment(departmentName);
-    //     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    //     res.setHeader("Content-Disposition", `attachment; filename=\"${departmentName}Student.csv\"`);
-    //     res.status(200).end(csvData);
-    // } catch (err) {
-    //     res.status(500).json({ error: err.message });
-    // }
+
     try {
         let departmentName = req.body.department;
         // departmentName = "B9";
@@ -541,25 +526,7 @@ exports.exportAllStudentByDepartment = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.statisticReports = async (req, res) => {
-    try {
-        const data = await userService.statisticReports();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
 exports.exportAllStudentByRoom = async (req, res) => {
-    // try {
-    //     const department = req.body.department;
-    //     const room = req.body.room;
-    //     const csvData = await userService.exportAllStudentByRoom(department, room);
-    //     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    //     res.setHeader("Content-Disposition", `attachment; filename=\"${department}-${room}Student.csv\"`);
-    //     res.status(200).end(csvData);
-    // } catch (err) {
-    //     res.status(500).json({ error: err.message });
-    // }
     try {
         let department = req.body.department;
         let room = req.body.room;
@@ -611,18 +578,10 @@ exports.exportAllStudentByRoom = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.statisticRequests = async (req, res) => {
-    try {
-        const data = await userService.statisticRequests();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
 exports.exportBills = async (req, res, next) => {
     try {
         let billId = req.body.billId;
-        billId = "6736ae6da885f02a9bd15b38";
+        // billId = "6736ae6da885f02a9bd15b38";
         // console.log(billId);
         const billData = await userService.getBills(billId);
 
@@ -634,21 +593,5 @@ exports.exportBills = async (req, res, next) => {
 
     } catch (err) {
         res.status(500).json({ error: 'Lỗi xuất hóa đơn.', details: err.message });
-    }
-}
-exports.statisticRooms = async (req, res) => {
-    try {
-        const data = await userService.statisticRooms();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.statisticStudents = async (req, res) => {
-    try {
-        const data = await userService.statisticStudents();
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
     }
 }

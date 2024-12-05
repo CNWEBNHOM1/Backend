@@ -1,16 +1,18 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
-const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
-const upload = require('../middlewares/uploadImg');
+// const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
+const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageGoogleUpload');
+// const upload = require('../middlewares/uploadImg');
 const limiter = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
 // Guest route 
-router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-// router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
-router.post('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
+// router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
+router.post('/createRequest', auth(['Khách']), upload, uploadRequestHandler, userController.createRequest);
+router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
+// router.post('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
 router.post('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
 router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
@@ -25,15 +27,17 @@ router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 //them getImage 
 
-router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
-router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
+router.post('/uploadProof', auth(['Sinh viên']), upload, uploadBillHandler, userController.uploadBillProof);//file
+router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, userController.createReport);//noidun
+// router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
+// router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
 // router.post('/changeRoomRequest', auth(['Sinh viên']), userController.requestChangeRoom);
 
 
 // Manager route
 // router.get ('/pendingStudent', auth(['Quản lý']), userController.getAllWaitingStudents);
 router.get('/allUsers', auth(['Quản lý']), userController.getAllUsers);
-router.get('/room', auth(['Quản lý', 'Khách']), userController.getAllRooms);
+// router.get('/room', auth(['Quản lý', 'Khách']), userController.getAllRooms);
 router.get('/outdateBills', auth(['Quản lý']), userController.getAllOutDateBills);
 router.get('/createBills', auth(['Quản lý']), userController.createBills);
 router.get('/', auth(['Quản lý']), userController.getAllStudents);
@@ -65,16 +69,14 @@ router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
 router.post('/getAllReports', auth(['Quản lý']), userController.getAllReports);
 router.post('/allBills', auth(['Quản lý']), userController.getAllBills);
-router.post('/roomd', auth(['Quản lý']), userController.getAllRoomsOfDepartment);
-router.post('/declineStudent', auth(['Quản lý']), userController.declineStudent);
-router.post('/kickAll', auth(['Quản lý']), userController.kickAllStudents);
+router.post('/roomd', auth(['Quản lý']), userController.getAllRooms);
 // router.post ('/sendBills', auth(['Quản lý']), userController.sendBills);
 router.get('/sendBill/:id', auth(['Quản lý']), userController.sendBill);
 router.post('/createRoom', auth(['Quản lý']), userController.createRoom);
 router.post('/createDepartment', auth(['Quản lý']), userController.createDepartment);
 
 router.put('/handleRequest/:id/:action', auth(['Quản lý']), userController.handleRequest);
-router.put('/handleStudent/:id/:action', auth(['Quản lý']), userController.handleStudent);
+router.put('/removeStudent/:id', auth(['Quản lý']), userController.removeStudent);
 router.put('/handleUser/:id/:action', auth(['Quản lý']), userController.handleUser);
 router.put('/updateRoom/:id', auth(['Quản lý']), userController.updateRoom);
 router.put('/handleBill/:id/:action', auth(['Quản lý']), userController.handleBill);

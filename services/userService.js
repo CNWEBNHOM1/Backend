@@ -22,10 +22,9 @@ const formatDate = (date) => {
 };
 
 // Guest Service 
-exports.createRequest = async (data, file) => {
-    data.minhchung = file ? file.filename : null;
+exports.createRequest = async (data, fileURL) => {
+    data.minhchung = fileURL !== "" ? fileURL : "";
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
-    console.log(address)
     const room = await RoomModel.findById(roomId);
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
 
@@ -109,9 +108,9 @@ exports.getListRoommates = async (email) => {
     if (!student) throw new Error("Student not found");
     const listStudent = await StudentModel.find({
         room: student.room,
-        user: { $ne: student.user }
+        // user: { $ne: student.user }
     })
-    if (!listStudent[0]) throw new Error("phong ko co ai ngoai ban")
+    if (!listStudent[1]) throw new Error("phong ko co ai ngoai ban")
     return listStudent;
 };
 exports.getMyInfo = async (email) => {
@@ -121,15 +120,11 @@ exports.getMyInfo = async (email) => {
     if (!user) throw new Error('User not exist');
 
     const student = await StudentModel.findOne({ user: user._id }).populate('user').populate('room');
-    // const student = await StudentModel.find({ user: "6736c42a20ada4d09902ddc7" });
     if (!student) throw new Error('Student not found');
     return student;
-};
-exports.fix = async (email) => {
-    return await BillModel.find().populate('room');
 }
 exports.uploadBillProof = async (email, image, billId) => {
-    if (!image) throw new Error('Image is required');
+    if (image === "") throw new Error('Image is required');
     const user = await UserModel.findOne({
         email: email
     });
@@ -149,10 +144,9 @@ exports.uploadBillProof = async (email, image, billId) => {
     bill.trangthai = "Chờ xác nhận";
     console.log(bill);
     return await bill.save();
-
-};
+}
 exports.createReport = async (email, image, noidung) => {
-    if (!image) throw new Error('Image is required');
+    if (image === "") throw new Error('Image is required');
     const user = await UserModel.findOne({
         email: email
     });
@@ -171,10 +165,9 @@ exports.createReport = async (email, image, noidung) => {
         trangthai: trangthai,
         noidung: noidung,
         ghichu: ghichu,
-        minhchung: image.filename
+        minhchung: image
 
     };
-    // const report = await  reportModel.create(data)
     return await ReportModel.create(data)
 }
 exports.getListBills = async (email, query) => {
@@ -211,38 +204,6 @@ exports.getListBills = async (email, query) => {
     return bills
         ;
 }
-
-
-// exports.requestChangeRoom = async (email, noidung, roomId) => {
-//     if (!noidung) throw new Error('Yeu cau khong hop le');
-//     const user = await UserModel.findOne({
-//         email: email
-//     });
-//     if (!user) throw new Error('User not exist');
-//     const student = await StudentModel.findOne({ user: user._id }).populate('user');
-//     if (!student) throw new Error("Student not found");
-//     if (roomId === student.room) throw new Error('Yeu cau khong hop le');
-//     const roomChange = await RoomModel.findOne({ _id: roomId });
-//     if (roomChange.occupiedSlots == roomChange.capacity) throw new Error('room full');
-//     const data =
-//     {
-//         user: user._id,
-//         room: roomChange._id,
-//         name: student.name,
-//         ngaysinh: student.ngaysinh,
-//         gender: student.gender,
-//         priority: student.priority,
-//         phone: student.phone,
-//         address: student.address,
-//         khoa: student.khoa,
-//         school: student.school,
-//         lop: student.lop,
-//         noidung: noidung,
-//         trangthai: "pending"
-//     };
-//     // console.log(data);
-//     return await RequestModel.create(data)
-// }
 // Manager Service 
 exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
     // Convert page và limit thành số
@@ -333,27 +294,16 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
         currentPage: pageNumber,
         pageLimit
     };
-};
-
-// exports.getAllWaitingStudents = async () => {
-//     return await StudentModel.find(
-//         {
-//             trangthai: "pending"
-//         }
-//     )
-// }
-// sửa 15/11
+}
 exports.getAllUsers = async () => {
     return UserModel.find();
 }
-// sửa 15/11 
 exports.createRoom = async (data) => {
     const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, sodiencuoi, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
 
-    // Kiểm tra xem department có tồn tại không
-    const departmentExists = await DepartmentModel.findById(department);
-    if (!departmentExists)
-        throw new Error('Department not found');
+    const roomExists = await RoomModel.find({ name: name, department: department });
+    if (roomExists)
+        throw new Error('Room exist');
     const newRoom = new RoomModel({
         name,
         department,
@@ -371,7 +321,6 @@ exports.createRoom = async (data) => {
 
     return await newRoom.save();
 }
-// sửa 15/11
 exports.updateRoom = async (id, data) => {
     const {
         name, department, gender, capacity, occupiedSlots, giatrangbi, tieno, tiennuoc, sodiencuoi,
@@ -386,25 +335,24 @@ exports.updateRoom = async (id, data) => {
         },
         { new: true, runValidators: true } // Trả về phòng đã được cập nhật và kiểm tra validation
     );
-
     return updatedRoom;
 }
-exports.getAllRooms = async () => {
-    return await RoomModel.find().sort({ department: 1 }).populate('department');
-}
-exports.getAllRoomsOfDepartment = async (data) => {
-    const { page = 1, limit = 10, department } = data;
+exports.getAllRooms = async (data) => {
+    const { page = 1, limit = 10, name = null, department = null } = data;
 
-    // Tạo filter, nếu department có giá trị thì thêm điều kiện, nếu không thì lấy tất cả
-    const filter = department ? { department: department } : {};
-
+    const filter = {};
+    if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+    }
+    if (department) {
+        filter.department = department;
+    }
     const listRoom = await RoomModel.find(filter).populate('department')
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
 
     // Đếm tổng số phòng theo filter
     const totalRoom = await RoomModel.countDocuments(filter);
-
     const totalPages = Math.ceil(totalRoom / limit);
 
     return {
@@ -414,34 +362,8 @@ exports.getAllRoomsOfDepartment = async (data) => {
         totalPages,
         listRoom
     };
-};
-exports.addStudent = async (data) => {
-    return StudentModel.create(data);
-};
-exports.declineStudent = async (email) => {
-    const student = await StudentModel.findOne(
-        {
-            email: email,
-        }
-    );
-    const room = await RoomModel.findOne(
-        {
-            name: student[0].roomselected,
-            department: student[0].departmentselected,
-        }
-    );
-    student.roomselected = "none";
-    student.departmentselected = "none";
-    student.trangthai = "none";
-    room.occupiedSlots++;
-
-    await room.save();
-    return await student.save();
 }
-exports.updateStudent = async (id, data) => {
-    return await StudentModel.findByIdAndUpdate(id, data, { new: true });
-}
-exports.handleStudent = async (id, action) => {
+exports.removeStudent = async (id) => {
     const student = await StudentModel.findById(id).populate('user')
         .populate({
             path: 'room', // Nối thông tin phòng
@@ -450,20 +372,16 @@ exports.handleStudent = async (id, action) => {
                 model: 'Departments' // Đảm bảo đúng model cho department
             }
         });
-    student.trangthai = action;
-    if (action === 'Dừng trước hạn') {
-        await RoomModel.findByIdAndUpdate(
-            student.room,
-            { $inc: { occupiedSlots: -1 } }
-        )
-    } else {
-        const ROOM = await RoomModel.findById(student.room);
-        if (ROOM.occupiedSlots < ROOM.capacity) {
-            ROOM.occupiedSlots++;
-            await ROOM.save();
-        } else throw new Error("This room is full");
-    }
+    student.trangthai = 'Dừng trước hạn';
     await student.save();
+    await UserModel.findByIdAndUpdate(
+        student.user,
+        { role: 'Khách' }
+    )
+    await RoomModel.findByIdAndUpdate(
+        student.room,
+        { $inc: { occupiedSlots: -1 } }
+    )
 }
 exports.handleUser = async (id, action) => {
     await UserModel.findByIdAndUpdate(
@@ -478,7 +396,8 @@ exports.transferRoom = async (student_id, new_room_id) => {
 
     if (new_room_id.toString() === student.room.toString())
         throw new Error('This student is already in this room')
-
+    if (new_room.gender !== student.gender)
+        throw new Error('Gender not match')
     if (new_room.occupiedSlots < new_room.capacity) {
         await RoomModel.findByIdAndUpdate(student.room, { $inc: { occupiedSlots: -1 } });
         student.room = new_room_id;
@@ -574,7 +493,7 @@ exports.getAllBills = async (data) => {
         pageSize: limitInt,
         listBill: bills
     };
-};
+}
 exports.getOutDateBills = async () => {
     return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
 }
@@ -931,6 +850,7 @@ exports.handleRequest = async (id, action) => {
             //     trangthai: 'Đang ở',
             // });
             student.room = request.room._id; // Update current room
+            student.trangthai = 'Đang ở';
             await student.save();
         }
         // const newPassword = crypto.randomBytes(16).toString('hex');
@@ -962,7 +882,7 @@ exports.handleRequest = async (id, action) => {
                 </ul>
 
                 <p>Sinh viên không cần mang theo giấy tờ gì khi đến nhận phòng.</p>
-                <p>Tài khoản bạn sử dụng để đăng ký đã được đặt lại mật khẩu. Mật khẩu mới là: <strong>${newPassword}</strong>.</p>
+                <p>Tài khoản bạn sử dụng để đăng ký đã được đặt lại mật khẩu. Mật khẩu mới là: <strong>${newPassword}</strong>. Từ bây giờ, bạn sẽ đăng nhập hệ thống với vai trò là: <strong>Khách</strong></p>
                 <p>Mọi thắc mắc vui lòng liên hệ đến số: +84 394 305 264 (giờ hành chính).</p>
                 <p>Trân trọng,</p>
                 <p><strong>Nhóm 1, học phần Công nghệ Web, học kỳ 2024.1</strong></p>
@@ -972,6 +892,7 @@ exports.handleRequest = async (id, action) => {
     } else if (action === "declined") {
         const ROOM = RoomModel.findById(request.room);
         ROOM.occupiedSlots--;
+        ROOM.save();
         request.trangthai = "declined";
     }
 
@@ -980,6 +901,11 @@ exports.handleRequest = async (id, action) => {
 // sửa 15/11
 exports.createDepartment = async (data) => {
     const { name, room_count, broken_room } = data;
+    const existingDepartment = await DepartmentModel.findOne({ name: name });
+    if (existingDepartment) {
+        // Nếu phòng đã tồn tại, ném ngoại lệ
+        throw new Error('Department with this name already exists');
+    }
     const newDepartment = new DepartmentModel({
         name,
         room_count,
@@ -1140,6 +1066,7 @@ exports.exportAllStudent = async () => {
             CreatedAt: createdAt
         });
     });
+    // console.log(Students)
     return Students;
 
     // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
@@ -1265,7 +1192,7 @@ exports.getBills = async (billId) => {
     // billId = "6736ae6da885f02a9bd15b38";
     const bill = await BillModel.findById(billId).populate('room');
     if (!bill) throw new Error("Hoá đơn không tồn tại");
-    // console.log(bill);
+    console.log(bill);
 
     const { room, sodiendau, sodiencuoi, dongia, thanhtien, handong, trangthai } = bill;
 
