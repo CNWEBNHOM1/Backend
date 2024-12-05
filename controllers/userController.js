@@ -5,7 +5,8 @@ const userService = require('../services/userService');
 exports.createRequest = async (req, res) => {
     try {
         req.body.userId = req.user.userId;
-        const request = await userService.createRequest(req.body, req.file);
+        const fileURL = req.file? req.fileURL : "";
+        const request = await userService.createRequest(req.body, fileURL);
         res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -76,7 +77,7 @@ exports.uploadBillProof = async (req, res) => {
     try {
         const email = req.user.userEmail;
         const billId = req.body.id;
-        const image = req.file;
+        const image = req.file? req.fileURL : "";
         const paymentInformation = await userService.uploadBillProof(email, image, billId);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
@@ -86,7 +87,7 @@ exports.uploadBillProof = async (req, res) => {
 };
 exports.createReport = async (req, res) => {
     try {
-        const image = req.file;
+        const image = req.file? req.fileURL : "";
         const email = req.user.userEmail;
         const noidung = req.body.noidung;
         const reportInfo = await userService.createReport(email, image, noidung);

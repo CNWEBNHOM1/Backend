@@ -20,8 +20,8 @@ const formatDate = (date) => {
 };
 
 // Guest Service 
-exports.createRequest = async (data, file) => {
-    data.minhchung = file ? file.filename : null;
+exports.createRequest = async (data, fileURL) => {
+    data.minhchung = fileURL !== "" ? fileURL : "";
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
     const room = await RoomModel.findById(roomId);
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
@@ -118,7 +118,7 @@ exports.getMyInfo = async (email) => {
     return student;
 }
 exports.uploadBillProof = async (email, image, billId) => {
-    if (!image) throw new Error('Image is required');
+    if (image === "") throw new Error('Image is required');
     const user = await UserModel.findOne({
         email: email
     });
@@ -134,13 +134,13 @@ exports.uploadBillProof = async (email, image, billId) => {
     });
     if (!bill) throw new Error("No pending bill found, or the bill may already be paid");
     console.log(bill);
-    bill.anhminhchung = image.filename;
+    bill.anhminhchung = image;
     bill.trangthai = "Chờ xác nhận";
     console.log(bill);
     return await bill.save();
 }
 exports.createReport = async (email, image, noidung) => {
-    if (!image) throw new Error('Image is required');
+    if (image === "") throw new Error('Image is required');
     const user = await UserModel.findOne({
         email: email
     });
@@ -159,7 +159,7 @@ exports.createReport = async (email, image, noidung) => {
         trangthai: trangthai,
         noidung: noidung,
         ghichu: ghichu,
-        minhchung: image.filename
+        minhchung: image
 
     };
     return await ReportModel.create(data)
@@ -897,9 +897,6 @@ exports.handleRequest = async (id, action) => {
 // sửa 15/11
 exports.createDepartment = async (data) => {
     const { name, room_count, broken_room } = data;
-    const dpm = await DepartmentModel.find({name: name});
-    if (dpm)
-        throw new Error('This department has already exist');
     const newDepartment = new DepartmentModel({
         name,
         room_count,
@@ -1137,7 +1134,7 @@ exports.exportAllStudentsByDepartment = async (departmentId) => {
 };
 exports.exportAllStudentByRoom = async (roomId) => {
     let Students = [];
-    
+
     const StudentData = await StudentModel.find({
         room: roomId
     }).populate({

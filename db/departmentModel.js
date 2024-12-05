@@ -4,7 +4,7 @@ const DepartmentSchema = new mongoose.Schema({
     name: {
         type: String,
         // required: [true, "Please provide a name"],
-        // unique: [true, "Name Exist"],
+        unique: [true, "Name Exist"],
     },
     room_count: {
         type: Number,

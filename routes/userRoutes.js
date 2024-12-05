@@ -1,16 +1,18 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
-const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
-const upload = require('../middlewares/uploadImg');
+// const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
+const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageGoogleUpload');
+// const upload = require('../middlewares/uploadImg');
 const limiter = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
 // Guest route 
-router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-// router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
-router.post('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
+// router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
+router.post('/createRequest', auth(['Khách']), upload, uploadRequestHandler, userController.createRequest);
+router.post('/updateRequest-1', auth(['Khách']), limiter, userController.updateRequest1);
+// router.post('/updateRequest-1', auth(['Khách']), userController.updateRequest1);
 router.post('/updateRequest-2', auth(['Khách']), userController.updateRequest2);
 router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 // Ví dụ nếu form ở frontend như sau:
@@ -25,8 +27,10 @@ router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
 
 
-router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
-router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
+router.post('/uploadProof', auth(['Sinh viên']), upload, uploadBillHandler, userController.uploadBillProof);//file
+router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, userController.createReport);//noidun
+// router.post('/uploadProof', auth(['Sinh viên']), uploadBillProof.single('minhchung'), userController.uploadBillProof);//file
+// router.post('/createReport', auth(['Sinh viên']), uploadReportProof.single('minhchung'), userController.createReport);//noidun
 // router.post('/changeRoomRequest', auth(['Sinh viên']), userController.requestChangeRoom);
 
 
