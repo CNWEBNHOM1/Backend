@@ -139,8 +139,8 @@ exports.uploadBillProof = async (email, image, billId) => {
         _id: billId
     });
     if (!bill) throw new Error("No pending bill found, or the bill may already be paid");
-    // console.log(bill);
-    bill.anhminhchung = image.filename;
+    console.log(bill);
+    bill.anhminhchung = image;
     bill.trangthai = "Chờ xác nhận";
     console.log(bill);
     return await bill.save();
@@ -1248,4 +1248,3 @@ exports.statisticStudents = async () => {
     const total = await StudentModel.countDocuments();
     return { count_male_living, count_male_stop_living, count_female_living, count_female_stop_living, total };
 }
-
