@@ -284,9 +284,9 @@ exports.getAllUsers = async () => {
     return UserModel.find();
 }
 exports.createRoom = async (data) => {
-    const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, sodiencuoi, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
+    const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
 
-    const roomExists = await RoomModel.find({ name: name, department: department });
+    const roomExists = await RoomModel.findOne({ name: name, department: department });
     if (roomExists)
         throw new Error('Room exist');
     const newRoom = new RoomModel({
@@ -297,7 +297,6 @@ exports.createRoom = async (data) => {
         giatrangbi,
         tieno,
         tiennuoc,
-        sodiencuoi,
         dongiadien,
         sophongvs,
         binhnuocnong,
