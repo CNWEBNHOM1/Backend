@@ -4,9 +4,7 @@ const userService = require('../services/userService');
 // Guest controller
 exports.createRequest = async (req, res) => {
     try {
-        req.body.userId = req.user.userId;
-        const fileURL = req.file? req.fileURL : "";
-        const request = await userService.createRequest(req.body, fileURL);
+        const request = await userService.createRequest(req.user.userId, req.body, req.fileURL);
         res.json({ data: request, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
-
+require('dotenv').config();
 const {initializeApp} = require('firebase/app');
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -10,13 +10,13 @@ const {initializeApp} = require('firebase/app');
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyD4CYkz-ljL7GR1XqXntv0XSog_iXls32Q",
-  authDomain: "student-list-php.firebaseapp.com",
-  projectId: "student-list-php",
-  storageBucket: "student-list-php.firebasestorage.app",
-  messagingSenderId: "818605897939",
-  appId: "1:818605897939:web:616973616f8fd328ce7c26",
-  measurementId: "G-0W3KWJVSTG"
+  apiKey: process.env.firebase_apiKey,
+  authDomain: process.env.firebase_authDomain,
+  projectId: process.env.firebase_projectId,
+  storageBucket: process.env.firebase_storageBucket,
+  messagingSenderId: process.env.firebase_messagingSenderId,
+  appId: process.env.firebase_appId,
+  measurementId: process.env.firebase_measurementId
 };
 
 // Initialize Firebase
