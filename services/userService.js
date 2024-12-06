@@ -20,8 +20,9 @@ const formatDate = (date) => {
 };
 
 // Guest Service 
-exports.createRequest = async (data, fileURL) => {
-    data.minhchung = fileURL !== "" ? fileURL : "";
+exports.createRequest = async (uid, data, fileURL) => {
+    data.minhchung = fileURL;
+    data.userId = uid;
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
     const room = await RoomModel.findById(roomId);
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
@@ -44,7 +45,6 @@ exports.createRequest = async (data, fileURL) => {
         trangthai: 'pending',
         minhchung
     });
-    console.log(newRequest);
     return await newRequest.save();
 }
 exports.getAllRoomsAvailable = async () => {

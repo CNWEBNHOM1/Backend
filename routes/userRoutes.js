@@ -1,9 +1,10 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
+// const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageGoogleUpload');
 // const { uploadBillProof, uploadGuestProof, uploadReportProof } = require('../middlewares/uploadImage');
-const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageGoogleUpload');
 // const upload = require('../middlewares/uploadImg');
+const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageCloudinaryUpload');
 const limiter = require('../middlewares/rateLimiter');
 
 const router = express.Router();
@@ -25,7 +26,6 @@ router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailab
 router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//studentInfo+room
 router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
 router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
-
 
 router.post('/uploadProof', auth(['Sinh viên']), upload, uploadBillHandler, userController.uploadBillProof);//file
 router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, userController.createReport);//noidun
