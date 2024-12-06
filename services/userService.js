@@ -79,17 +79,6 @@ exports.updateRequest2 = async (roomId) => {
         { new: true },
     );
 }
-exports.getAllRoomsAvailable = async () => {
-    const rooms = await RoomModel.find({
-        tinhtrang: 'Bình thường'
-    }).populate('department');
-    const roomList = rooms.filter(room => {
-        return Number(room.occupiedSlots) < Number(room.capacity);
-    });
-    if (!roomList[0]) throw new Error("Het phong roi");
-    return roomList;
-
-};
 // Student Service 
 exports.getListRoommates = async (email) => {
     const user = await UserModel.findOne({
@@ -343,6 +332,7 @@ exports.getAllRooms = async (data) => {
     if (department) {
         filter.department = department;
     }
+
     const listRoom = await RoomModel.find(filter).populate('department')
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
@@ -692,7 +682,8 @@ exports.getAllDepartments = async (data) => {
     const {
         page = 1,
         limit = 10,
-        name = ''
+        name = '',
+        department
     } = data;
 
     const pageInt = parseInt(page);
@@ -702,7 +693,6 @@ exports.getAllDepartments = async (data) => {
     if (name) {
         filter.name = { $regex: name, $options: 'i' };
     }
-
     const totalDepartment = await DepartmentModel.countDocuments(filter);
 
     const totalPages = Math.ceil(totalDepartment / limitInt);
