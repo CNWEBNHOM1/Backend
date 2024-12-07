@@ -165,15 +165,27 @@ exports.transfer2Student = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-// sửa 15/11
+// sửa 07/12 - ANTU
 exports.getAllUsers = async (req, res) => {
     try {
-        const data = await userService.getAllUsers();
-        res.status(200).json({ data: data, status: "success" });
+        // Lấy các tham số từ query
+        const { page = 1, limit = 10, email = '' } = req.query;
+
+        // Gọi service với tham số
+        const data = await userService.getAllUsers(page, limit, email);
+
+        res.status(200).json({ 
+            data: data.users, 
+            totalUsers: data.totalUsers, 
+            totalPages: data.totalPages,
+            currentPage: page,
+            status: "success" 
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}
+};
+
 exports.createRoom = async (req, res) => {
     try {
         const data = await userService.createRoom(req.body);

@@ -280,9 +280,35 @@ exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
         pageLimit
     };
 }
-exports.getAllUsers = async () => {
-    return UserModel.find();
-}
+// sửa 07/12 - ANTU
+exports.getAllUsers = async (page, limit, email) => {
+    // Chuyển các tham số thành số nguyên
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+
+    // Tính offset
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Sử dụng bộ lọc để tìm kiếm theo email
+    const filter = email ? { email: { $regex: email, $options: 'i' } } : {};
+
+    // Đếm tổng số user phù hợp với bộ lọc
+    const totalUsers = await UserModel.countDocuments(filter);
+
+    // Lấy dữ liệu user theo phân trang và bộ lọc
+    const users = await UserModel.find(filter)
+        .skip(skip)
+        .limit(limitNumber);
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalUsers / limitNumber);
+
+    return {
+        users,
+        totalUsers,
+        totalPages
+    };
+};
 exports.createRoom = async (data) => {
     const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
 
