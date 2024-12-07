@@ -21,16 +21,15 @@ exports.login = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-    await authService.changePasswordUser(req.user.email, req.body.oldPass, req.body.newPass);
+    await authService.changePasswordUser(req.user.userEmail, req.body.oldPass, req.body.newPass);
     res.status(200).json({ message: 'Password changed successfully' })
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 }
 exports.sendMailToResetPassword = async (req, res) => {
-  let email = req.body.email;
   try {
-    await authService.resetPasswordMail(email);
+    await authService.resetPasswordMail(req.body.email);
     res.status(200).json({ message: "Email sent successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to send email" });
