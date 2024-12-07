@@ -358,13 +358,21 @@ exports.getDetailReport = async (req, res) => {
 }
 exports.getStudentsOfOneRoom = async (req, res) => {
     try {
-        const { query } = req.query;
-        const data = await userService.getStudentsOfOneRoom(query);
-        res.status(200).json({ data: data, status: "success" });
+        const data = await userService.getStudentsOfOneRoom(req.params.id, req.query);
+        res.status(200).json({
+            status: "success",
+            data: data.students,
+            pagination: {
+                total: data.total,
+                page: data.page,
+                limit: data.limit,
+            },
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}
+};
+
 // sửa 15/11
 exports.getAllRequests = async (req, res) => {
     try {

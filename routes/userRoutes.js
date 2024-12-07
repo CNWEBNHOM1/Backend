@@ -50,7 +50,7 @@ router.get('/allRequests', auth(['Quản lý']), userController.getAllRequests);
 router.get('/detailRequest/:id', auth(['Quản lý']), userController.getDetailRequest);
 router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailReport);
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
-router.get('/getStudentsOfRoom/', auth(['Quản lý']), userController.getStudentsOfOneRoom);
+router.get('/getStudentsOfRoom/:id', auth(['Quản lý']), userController.getStudentsOfOneRoom);
 router.get('/statisticBills/', auth(['Quản lý']), userController.statisticBills);
 router.get('/statisticReports/', auth(['Quản lý']), userController.statisticReports);
 router.get('/statisticRequests/', auth(['Quản lý']), userController.statisticRequests);

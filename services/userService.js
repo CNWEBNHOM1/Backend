@@ -336,6 +336,16 @@ exports.updateRoom = async (id, data) => {
         name, department, gender, capacity, occupiedSlots, giatrangbi, tieno, tiennuoc, sodiencuoi,
         dongiadien, sophongvs, binhnuocnong, dieuhoa, tinhtrang
     } = data;
+    if (tinhtrang === 'Bị hỏng')
+        await DepartmentModel.findByIdAndUpdate(
+            department,
+            { $inc: { broken_room: 1 } }
+        )
+    else if (tinhtrang === 'Bình thường')
+        await DepartmentModel.findByIdAndUpdate(
+            department,
+            { $inc: { broken_room: -1 } }
+        )
     // Tìm và cập nhật room dựa vào id
     const updatedRoom = await RoomModel.findByIdAndUpdate(
         id,
@@ -978,12 +988,37 @@ exports.detailReport = async (id) => {
     if (report) return report;
 }
 // --------
-exports.getStudentsOfOneRoom = async (id) => {
+exports.getStudentsOfOneRoom = async (id, query) => {
+    const { name, page = 1, limit = 10 } = query;
+
+    // Tìm phòng
     const room = await RoomModel.findById(id);
-    return await StudentModel.find(
-        { room: room.name }
-    )
-}
+    if (!room) {
+        throw new Error('Room not found');
+    }
+
+    // Tạo bộ lọc
+    const filter = {
+        room: room._id,
+        trangthai: 'Đang ở',
+    };
+
+    // Nếu có tên, thêm điều kiện tìm kiếm tên (không phân biệt hoa thường)
+    if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+    }
+
+    // Thực hiện truy vấn với phân trang
+    const students = await StudentModel.find(filter)
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
+
+    // Đếm tổng số kết quả để trả về
+    const total = await StudentModel.countDocuments(filter);
+
+    return { students, total, page: Number(page), limit: Number(limit) };
+};
+
 // sửa 15/11
 exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
     // Convert page và limit thành số
