@@ -1,4 +1,5 @@
 const PDFDocument = require('pdfkit');
+const moment = require('moment');
 
 function generateInvoicePdf(res, billData) {
     const doc = new PDFDocument({ margin: 50 });
@@ -17,10 +18,14 @@ function generateInvoicePdf(res, billData) {
         .text('HÓA ĐƠN TIỀN PHÒNG KÝ TÚC XÁ', { align: 'center' })
         .moveDown(1);
 
+
+    const currentDate = moment().format('DD/MM/YYYY');
+    const dueDate = moment(billData.handong).format('DD/MM/YYYY');
+
     doc.fontSize(14)
         .text(`Tòa: ${billData.department}`)
         .text(`Phòng: ${billData.room}`)
-        .text(`Ngày tạo: ${new Date().toLocaleDateString()}`)
+        .text(`Ngày tạo: ${currentDate}`)
         .moveDown(1);
 
     doc.font('Roboto-Bold')
@@ -33,7 +38,7 @@ function generateInvoicePdf(res, billData) {
         { label: 'Chỉ số điện cuối:', value: billData.sodiencuoi },
         { label: 'Đơn giá điện:', value: `${billData.dongia.toLocaleString()} VNĐ` },
         { label: 'Thành tiền:', value: `${billData.thanhtien.toLocaleString()} VNĐ` },
-        { label: 'Hạn đóng:', value: new Date(billData.handong).toLocaleDateString() },
+        { label: 'Hạn đóng:', value: dueDate },
         { label: 'Trạng thái:', value: billData.trangthai },
     ];
 
