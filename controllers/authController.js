@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-    await authService.changePasswordUser(req.body.email, req.body.oldPass, req.body.newPass);
+    await authService.changePasswordUser(req.user.email, req.body.oldPass, req.body.newPass);
     res.status(200).json({ message: 'Password changed successfully' })
   } catch (error) {
     res.status(400).json({ message: error.message });
