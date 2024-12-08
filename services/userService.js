@@ -19,6 +19,32 @@ const formatDate = (date) => {
     return moment(date).format('HH:mm:ss DD/MM/YYYY');
 };
 
+// ---- Thanh toán VNPAY ----
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+
+const vnpay = new VNPay({
+    tmnCode: process.env.vnpay_tmnCode,
+    secureSecret: process.env.vnpay_secureSecret,
+    vnpayHost: process.env.vnpay_vnpayHost,
+    testMode: true, // tùy chọn, ghi đè vnpayHost thành sandbox nếu là true
+    hashAlgorithm: 'SHA512', // tùy chọn
+
+    /**
+     * Sử dụng enableLog để bật/tắt logger
+     * Nếu enableLog là false, loggerFn sẽ không được sử dụng trong bất kỳ phương thức nào
+     */
+    enableLog: true, // optional
+
+    /**
+     * Hàm `loggerFn` sẽ được gọi để ghi log
+     * Mặc định, loggerFn sẽ ghi log ra console
+     * Bạn có thể ghi đè loggerFn để ghi log ra nơi khác
+     *
+     * `ignoreLogger` là một hàm không làm gì cả
+     */
+    loggerFn: ignoreLogger, // optional
+})
+// #### Thanh toán VNPAY ####
 // Guest Service 
 exports.createRequest = async (uid, data, fileURL) => {
     data.minhchung = fileURL;
@@ -45,6 +71,9 @@ exports.createRequest = async (uid, data, fileURL) => {
         trangthai: 'pending',
         minhchung
     });
+    const rq = await newRequest.save();
+
+
     return await newRequest.save();
 }
 exports.getAllRoomsAvailable = async () => {
@@ -452,13 +481,8 @@ exports.getAllBills = async (data) => {
 
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
-
     // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
     const filter = {};
-
-    if (department) {
-        filter.department = department;
-    }
 
     if (room) {
         filter.$expr = {
@@ -489,30 +513,36 @@ exports.getAllBills = async (data) => {
         }
     }
 
-    // Tính tổng số tài liệu dựa vào filter
-    const totalBills = await BillModel.countDocuments(filter);
-
-    // Tính tổng số trang
-    const totalPages = Math.ceil(totalBills / limitInt);
-
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const bills = await BillModel.find(filter).populate({
+    let bills = await BillModel.find(filter).populate({
         path: 'room', // Nối thông tin phòng
         populate: {
             path: 'department', // Nối thông tin department trong room
-            model: 'Departments' // Đảm bảo đúng model cho department
+            model: 'Departments', // Đảm bảo đúng model cho department
+            match: department ? { _id: department } : {},
         }
     })
         .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
 
+    const filteredBills = bills.filter((bill) => bill.room && bill.room.department);
+    // if (department) {
+    //     bills = bills.filter(bill => bill.room.department._id.toString() === department);
+    // }
+    // Tính tổng số tài liệu dựa vào filter
+    // const totalBills = bills.length;
+    const totalBills = filteredBills.length;
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalBills / limitInt);
     return {
         total: totalBills,
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        listBill: bills
+        // listBill: bills,
+        listBill: filteredBills,
     };
 }
 exports.getOutDateBills = async () => {
@@ -762,10 +792,6 @@ exports.getAllReports = async (data) => {
     // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
     const filter = {};
 
-    if (department) {
-        filter.department = department;
-    }
-
     if (room) {
         filter.$expr = {
             $regexMatch: {
@@ -791,31 +817,33 @@ exports.getAllReports = async (data) => {
         }
     }
 
-    // Tính tổng số tài liệu dựa vào filter
-    const totalReports = await ReportModel.countDocuments(filter);
-
-    // Tính tổng số trang
-    const totalPages = Math.ceil(totalReports / limitInt);
-
     // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
     const reports = await ReportModel.find(filter)
         .populate({
             path: 'room', // Nối thông tin phòng
             populate: {
                 path: 'department', // Nối thông tin department trong room
-                model: 'Departments' // Đảm bảo đúng model cho department
+                model: 'Departments', // Đảm bảo đúng model cho department
+                match: department ? { _id: department } : {},
             }
         })
         .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
         .skip((pageInt - 1) * limitInt)
         .limit(limitInt);
 
+    const filteredReports = reports.filter((report) => report.room && report.room.department);
+    // Tính tổng số tài liệu dựa vào filter
+    const totalReports = filteredReports.length;
+
+    // Tính tổng số trang
+    const totalPages = Math.ceil(totalReports / limitInt);
     return {
         total: totalReports,
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        listReport: reports
+        // listReport: reports,
+        listReport: filteredReports
     };
 }
 exports.handleReport = async (id, action, data) => {
@@ -1054,7 +1082,8 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
             path: 'room', // Nối thông tin phòng
             populate: {
                 path: 'department', // Nối thông tin department trong room
-                model: 'Departments' // Đảm bảo đúng model cho department
+                model: 'Departments', // Đảm bảo đúng model cho department
+                // match: filters.department ? { _id: filters.department } : {},
             }
         })
         .populate('user')
@@ -1062,17 +1091,18 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         .limit(pageLimit)  // Giới hạn số kết quả trả về
         .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
 
+    const filteredRequests = requests.filter((request) => request.room && request.room.department);
     // Lấy tổng số request để tính số trang
-    const totalRequests = await RequestModel.countDocuments(filterConditions);
+    const totalRequests = filteredRequests.length;
 
     // Tính toán tổng số trang
     const totalPages = Math.ceil(totalRequests / pageLimit);
     return {
-        data: requests,
         totalRequests,
         totalPages,
         currentPage: pageNumber,
-        pageLimit
+        pageLimit,
+        data: filteredRequests,
     };
 };
 exports.statisticBills = async () => {

@@ -376,10 +376,10 @@ exports.getStudentsOfOneRoom = async (req, res) => {
 // sửa 15/11
 exports.getAllRequests = async (req, res) => {
     try {
-        const { status, room, name, cccd, page, limit } = req.query;
+        const { department, status, room, name, cccd, page, limit } = req.query;
         // Gọi service để lấy dữ liệu với các tham số lọc và phân trang
         const result = await userService.getAllRequest(
-            { status, room, name, cccd },
+            { department, status, room, name, cccd },
             page,
             limit
         );
