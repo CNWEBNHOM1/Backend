@@ -71,8 +71,6 @@ exports.createRequest = async (uid, data, fileURL) => {
         trangthai: 'pending',
         minhchung
     });
-    const rq = await newRequest.save();
-
 
     return await newRequest.save();
 }
