@@ -521,9 +521,8 @@ exports.getAllBills = async (data) => {
         }
     })
         .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
-        .skip((pageInt - 1) * limitInt)
-        .limit(limitInt);
-
+        // .skip((pageInt - 1) * limitInt)
+        // .limit(limitInt);
     const filteredBills = bills.filter((bill) => bill.room && bill.room.department);
     // if (department) {
     //     bills = bills.filter(bill => bill.room.department._id.toString() === department);
@@ -826,9 +825,8 @@ exports.getAllReports = async (data) => {
             }
         })
         .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
-        .skip((pageInt - 1) * limitInt)
-        .limit(limitInt);
-
+        // .skip((pageInt - 1) * limitInt)
+        // .limit(limitInt);
     const filteredReports = reports.filter((report) => report.room && report.room.department);
     // Tính tổng số tài liệu dựa vào filter
     const totalReports = filteredReports.length;
@@ -1086,8 +1084,8 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         })
         .populate('user')
         .skip(skip)  // Bỏ qua các kết quả trước đó
-        .limit(pageLimit)  // Giới hạn số kết quả trả về
-        .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
+        // .limit(pageLimit)  // Giới hạn số kết quả trả về
+        // .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
 
     const filteredRequests = requests.filter((request) => request.room && request.room.department);
     // Lấy tổng số request để tính số trang
