@@ -468,114 +468,100 @@ exports.getAllBills = async (data) => {
     const {
         page = 1,
         limit = 10,
-        room = null,
-        department = null,
+        roomName = null, // tên phòng
+        departmentName = null, // department id
         trangthai = null,
-        overdue = false,
-        fromDate = null,
-        toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
 
     const pageInt = parseInt(page);
     const limitInt = parseInt(limit);
-    // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
-    const filter = {};
 
-    if (room) {
-        filter.$expr = {
-            $regexMatch: {
-                input: { $toString: "$room" },
-                regex: room.toString(),
-                options: 'i'
+    // Sử dụng facet để làm đếm và phân trang trong một truy vấn
+    const bills = await BillModel.aggregate([
+        {
+            $lookup: {
+                from: 'rooms',
+                localField: 'room',
+                foreignField: '_id',
+                as: 'roomDetails'
             }
-        };
-    }
-
-    if (trangthai) {
-        filter.trangthai = trangthai;
-    }
-
-    if (overdue) {
-        const today = new Date();
-        filter.handong = { $lt: today };
-    }
-
-    if (fromDate || toDate) {
-        filter.handong = filter.handong || {};
-        if (fromDate) {
-            filter.handong.$gte = new Date(fromDate);
+        },
+        { $unwind: '$roomDetails' },
+        {
+            $lookup: {
+                from: 'departments',
+                localField: 'roomDetails.department',
+                foreignField: '_id',
+                as: 'departmentDetails'
+            }
+        },
+        { $unwind: '$departmentDetails' },
+        {
+            $match: {
+                ...(roomName && { "roomDetails.name": { $regex: roomName, $options: 'i' } }),  // Lọc theo tên phòng
+                ...(departmentName && { "departmentDetails.name": departmentName }),  // Lọc theo departmentId
+                ...(trangthai && { trangthai })  // Lọc theo trạng thái nếu có
+            }
+        },
+        {
+            $facet: {
+                totalCount: [ // Facet cho đếm số bản ghi
+                    {
+                        $count: 'total'
+                    }
+                ],
+                bills: [ // Facet cho phân trang và sắp xếp
+                    {
+                        $sort: {
+                            handong: sortOrder // Sắp xếp theo `handong`
+                        }
+                    },
+                    {
+                        $skip: (pageInt - 1) * limitInt // Bỏ qua các bản ghi trước đó
+                    },
+                    {
+                        $limit: limitInt // Giới hạn số lượng bản ghi trả về
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            sodiendau: 1,
+                            sodiencuoi: 1,
+                            thanhtien: 1,
+                            handong: 1,
+                            trangthai: 1,
+                            anhminhchung: 1,
+                            "roomDetails._id": 1,
+                            "roomDetails.name": 1,  // Thông tin tên phòng
+                            "roomDetails.department": 1,
+                            "departmentDetails.name": 1,  // Tên phòng ban
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                totalCount: { $arrayElemAt: ["$totalCount.total", 0] }, // Lấy tổng số bản ghi từ facet
+                bills: 1
+            }
         }
-        if (toDate) {
-            filter.handong.$lt = new Date(toDate);
-        }
-    }
+    ]);
 
-    // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    let bills = await BillModel.find(filter).populate({
-        path: 'room', // Nối thông tin phòng
-        populate: {
-            path: 'department', // Nối thông tin department trong room
-            model: 'Departments', // Đảm bảo đúng model cho department
-            match: department ? { _id: department } : {},
-        }
-    })
-        .sort({ handong: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
-        // .skip((pageInt - 1) * limitInt)
-        // .limit(limitInt);
-    const filteredBills = bills.filter((bill) => bill.room && bill.room.department);
-    // if (department) {
-    //     bills = bills.filter(bill => bill.room.department._id.toString() === department);
-    // }
-    // Tính tổng số tài liệu dựa vào filter
-    // const totalBills = bills.length;
-    const totalBills = filteredBills.length;
+    const totalCount = bills.length > 0 ? bills[0].totalCount : 0;
+    const resultBills = bills.length > 0 ? bills[0].bills : [];
 
-    // Tính tổng số trang
-    const totalPages = Math.ceil(totalBills / limitInt);
+    const totalPages = Math.ceil(totalCount / limitInt);
     return {
-        total: totalBills,
+        total: totalCount,
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        // listBill: bills,
-        listBill: filteredBills,
+        listBill: resultBills,
     };
-}
-exports.getOutDateBills = async () => {
-    return await BillModel.find({ trangthai: "Quá hạn" }); // trả về một mảng
-}
-// Khởi tạo hóa đơn 
-// exports.createBills = async () => {
-//     const rooms = await RoomModel.find(
-//         {
-//             tinhtrang: 'Bình thường',
-//         },
-//         {
-//             department: 1,
-//             name: 1,
-//             sodiencuoi: 1,
-//             dongiadien: 1,
-//         }
-//     ).sort({ department: 1 });
-//     const bills = rooms.map(room => {
-//         const handong = new Date();
-//         handong.setDate(handong.getDate() + 15);
-//         return {
-//             department: room.department,
-//             room: room.name,
-//             sodiendau: room.sodiencuoi,
-//             sodiencuoi: 0,
-//             dongia: room.dongiadien,
-//             thanhtien: 0,
-//             handong: handong,
-//             trangthai: "Chưa đóng",
-//             anhminhchung: "",
-//         };
-//     });
-//     BillModel.insertMany(bills);
-//     return bills;
-// }
+};
+
 // sửa 15/11 - post
 exports.createBill = async (data) => {
     const { room, sodiencuoi } = data;
@@ -775,11 +761,9 @@ exports.getAllReports = async (data) => {
     const {
         page = 1,
         limit = 10,
-        room = null,
-        department = null,
+        roomName = null, // tên phòng
+        departmentName = null, // department id
         trangthai = null,
-        fromDate = null,
-        toDate = null,
         sortOrder = -1 // Mặc định là giảm dần nếu không có giá trị
     } = data;
 
@@ -787,59 +771,87 @@ exports.getAllReports = async (data) => {
     const limitInt = parseInt(limit);
 
     // Tạo đối tượng filter dựa vào department, room, trangthai, overdue, fromDate và toDate
-    const filter = {};
-
-    if (room) {
-        filter.$expr = {
-            $regexMatch: {
-                input: { $toString: "$room" },
-                regex: room.toString(),
-                options: 'i'
+    const reports = await ReportModel.aggregate([
+        {
+            $lookup: {
+                from: 'rooms',
+                localField: 'room',
+                foreignField: '_id',
+                as: 'roomDetails'
             }
-        };
-    }
-
-    if (trangthai) {
-        filter.trangthai = trangthai;
-    }
-
-
-    if (fromDate || toDate) {
-        filter.ngaygui = filter.ngaygui || {};
-        if (fromDate) {
-            filter.ngaygui.$gte = new Date(fromDate);
-        }
-        if (toDate) {
-            filter.ngaygui.$lte = new Date(toDate);
-        }
-    }
-
-    // Lấy danh sách hóa đơn đã phân trang dựa trên filter và sắp xếp theo handong
-    const reports = await ReportModel.find(filter)
-        .populate({
-            path: 'room', // Nối thông tin phòng
-            populate: {
-                path: 'department', // Nối thông tin department trong room
-                model: 'Departments', // Đảm bảo đúng model cho department
-                match: department ? { _id: department } : {},
+        },
+        { $unwind: '$roomDetails' },
+        {
+            $lookup: {
+                from: 'departments',
+                localField: 'roomDetails.department',
+                foreignField: '_id',
+                as: 'departmentDetails'
             }
-        })
-        .sort({ ngaygui: sortOrder }) // Sắp xếp theo handong theo thứ tự người dùng chọn
-        // .skip((pageInt - 1) * limitInt)
-        // .limit(limitInt);
-    const filteredReports = reports.filter((report) => report.room && report.room.department);
-    // Tính tổng số tài liệu dựa vào filter
-    const totalReports = filteredReports.length;
-
+        },
+        { $unwind: '$departmentDetails' },
+        {
+            $match: {
+                ...(roomName && { "roomDetails.name": { $regex: roomName, $options: 'i' } }),  // Lọc theo tên phòng
+                ...(departmentName && { "departmentDetails.name": departmentName }),  // Lọc theo departmentId
+                ...(trangthai && { trangthai })  // Lọc theo trạng thái nếu có
+            }
+        },
+        {
+            $facet: {
+                totalCount: [ // Facet cho đếm số bản ghi
+                    {
+                        $count: 'total'
+                    }
+                ],
+                reports: [ // Facet cho phân trang và sắp xếp
+                    {
+                        $sort: {
+                            createAt: sortOrder // Sắp xếp theo `handong`
+                        }
+                    },
+                    {
+                        $skip: (pageInt - 1) * limitInt // Bỏ qua các bản ghi trước đó
+                    },
+                    {
+                        $limit: limitInt // Giới hạn số lượng bản ghi trả về
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            noidung: 1,
+                            minhchung: 1,
+                            trangthai: 1,
+                            createAt: 1,
+                            updateAt: 1,
+                            ghichu: 1,
+                            "roomDetails._id": 1,
+                            "roomDetails.name": 1,  // Thông tin tên phòng
+                            "roomDetails.department": 1,
+                            "departmentDetails.name": 1,  // Tên phòng ban
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                totalCount: { $arrayElemAt: ["$totalCount.total", 0] }, // Lấy tổng số bản ghi từ facet
+                reports: 1
+            }
+        }
+    ]);
     // Tính tổng số trang
-    const totalPages = Math.ceil(totalReports / limitInt);
+    const totalCount = reports.length > 0 ? reports[0].totalCount : 0;
+    const resultReports = reports.length > 0 ? reports[0].reports : [];
+
+    const totalPages = Math.ceil(totalCount / limitInt);
     return {
-        total: totalReports,
+        total: totalCount,
         totalPages,
         page: pageInt,
         pageSize: limitInt,
-        // listReport: reports,
-        listReport: filteredReports
+        listReport: resultReports,
     };
 }
 exports.handleReport = async (id, action, data) => {
@@ -1079,17 +1091,17 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
             populate: {
                 path: 'department', // Nối thông tin department trong room
                 model: 'Departments', // Đảm bảo đúng model cho department
-                // match: filters.department ? { _id: filters.department } : {},
+                match: filters.department ? { _id: filters.department } : {},
             }
         })
         .populate('user')
         .skip(skip)  // Bỏ qua các kết quả trước đó
-        // .limit(pageLimit)  // Giới hạn số kết quả trả về
-        // .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
+        .limit(pageLimit)  // Giới hạn số kết quả trả về
+        .sort({ createdAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
 
     const filteredRequests = requests.filter((request) => request.room && request.room.department);
     // Lấy tổng số request để tính số trang
-    const totalRequests = filteredRequests.length;
+    const totalRequests = await RequestModel.countDocuments(filterConditions);
 
     // Tính toán tổng số trang
     const totalPages = Math.ceil(totalRequests / pageLimit);
