@@ -1,6 +1,28 @@
 const userService = require('../services/userService');
 // const generateInvoicePdf = require('../middlewares/exportInvoice');
 
+// VNPAY Controller 
+exports.getPaymentUrl = async (req, res) => {
+    try {
+        const srcAddress =
+            req.headers['x-forwarded-for'] ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.ip;
+        const url = await userService.getPaymentUrl(srcAddress, req.body);
+        res.json({ data: url, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getReturn = async (req, res) => {
+    try {
+        const result = await userService.getReturn(req.query);
+        res.json({ data: result, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 // Guest controller
 exports.createRequest = async (req, res) => {
     try {
@@ -75,7 +97,7 @@ exports.uploadBillProof = async (req, res) => {
     try {
         const email = req.user.userEmail;
         const billId = req.body.id;
-        const image = req.file? req.fileURL : "";
+        const image = req.file ? req.fileURL : "";
         const paymentInformation = await userService.uploadBillProof(email, image, billId);
         res.status(200).json({ data: paymentInformation, status: "success" });
     } catch (err) {
@@ -85,7 +107,7 @@ exports.uploadBillProof = async (req, res) => {
 };
 exports.createReport = async (req, res) => {
     try {
-        const image = req.file? req.fileURL : "";
+        const image = req.file ? req.fileURL : "";
         const email = req.user.userEmail;
         const noidung = req.body.noidung;
         const reportInfo = await userService.createReport(email, image, noidung);
@@ -174,12 +196,12 @@ exports.getAllUsers = async (req, res) => {
         // Gọi service với tham số
         const data = await userService.getAllUsers(page, limit, email);
 
-        res.status(200).json({ 
-            data: data.users, 
-            totalUsers: data.totalUsers, 
+        res.status(200).json({
+            data: data.users,
+            totalUsers: data.totalUsers,
             totalPages: data.totalPages,
             currentPage: page,
-            status: "success" 
+            status: "success"
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

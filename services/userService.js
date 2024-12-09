@@ -20,7 +20,7 @@ const formatDate = (date) => {
 };
 
 // ---- Thanh toán VNPAY ----
-const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+const { VNPay, ignoreLogger, VnpLocale, verifyReturnUrl } = require('vnpay');
 
 const vnpay = new VNPay({
     tmnCode: process.env.vnpay_tmnCode,
@@ -44,6 +44,25 @@ const vnpay = new VNPay({
      */
     loggerFn: ignoreLogger, // optional
 })
+exports.getPaymentUrl = async (ip, data) => {
+    const { returnUrl, amount } = data;
+    const date = new Date();
+
+    const paymentUrl = vnpay.buildPaymentUrl({
+        vnp_Amount: amount,
+        vnp_IpAddr: ip,
+        vnp_TxnRef: moment(date).format('DDHHmmss'),
+        vnp_OrderInfo: "Thanh toan tien phong",
+        vnp_OrderType: '170003',
+        vnp_ReturnUrl: returnUrl,
+        vnp_Locale: VnpLocale.VN,
+    });
+    return paymentUrl;
+}
+exports.getReturn = async (queries) => {
+    return vnpay.verifyReturnUrl(queries);
+}
+
 // #### Thanh toán VNPAY ####
 // Guest Service 
 exports.createRequest = async (uid, data, fileURL) => {
@@ -71,7 +90,6 @@ exports.createRequest = async (uid, data, fileURL) => {
         trangthai: 'pending',
         minhchung
     });
-
     return await newRequest.save();
 }
 exports.getAllRoomsAvailable = async () => {
@@ -532,6 +550,8 @@ exports.getAllBills = async (data) => {
                             handong: 1,
                             trangthai: 1,
                             anhminhchung: 1,
+                            createdAt: 1,
+                            updatedAt: 1,
                             "roomDetails._id": 1,
                             "roomDetails.name": 1,  // Thông tin tên phòng
                             "roomDetails.department": 1,
@@ -822,8 +842,8 @@ exports.getAllReports = async (data) => {
                             noidung: 1,
                             minhchung: 1,
                             trangthai: 1,
-                            createAt: 1,
-                            updateAt: 1,
+                            createdAt: 1,
+                            updatedAt: 1,
                             ghichu: 1,
                             "roomDetails._id": 1,
                             "roomDetails.name": 1,  // Thông tin tên phòng
