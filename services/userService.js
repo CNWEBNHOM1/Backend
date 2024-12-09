@@ -51,7 +51,7 @@ exports.getPaymentUrl = async (ip, data) => {
     const paymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: amount,
         vnp_IpAddr: ip,
-        vnp_TxnRef: moment(date).format('DDHHmmss'),
+        vnp_TxnRef: moment(date).format('YYYYMMDDHHmmss'),
         vnp_OrderInfo: "Thanh toan tien phong",
         vnp_OrderType: '170003',
         vnp_ReturnUrl: returnUrl,
@@ -102,21 +102,10 @@ exports.getAllRoomsAvailable = async () => {
     if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
 };
-// exports.getOwnRequest = async (email) => {
-//     return await RequestModel.find(
-//         {
-//             email: email,
-//         }
-//     )
-// }
-exports.getOwnRequest = async (Email) => {
-    const user = await UserModel.findOne({
-        email: Email
-    });
-    if (!user) throw new Error("User không tồn tại");
+exports.getOwnRequest = async (email) => {
     return await RequestModel.find(
         {
-            user: user._id,
+            email: email,
         }
     )
 }
