@@ -104,11 +104,11 @@ exports.getAllRoomsAvailable = async () => {
 };
 exports.getOwnRequest = async (userId) => {
     return await RequestModel.find({
-        user: userId, 
+        user: userId,
     })
         .populate('user')
         .populate({
-            path: 'room', 
+            path: 'room',
             populate: {
                 path: 'department',
             },
@@ -227,7 +227,13 @@ exports.getListBills = async (email, query) => {
     const pageLimit = Math.max(1, parseInt(limit) || 10);
 
     const bills = await BillModel.find(filters)
-        .populate('room')
+        .populate({
+            path: 'room',
+            populate: {
+                path: 'department', // Nối với department
+                model: 'Departments'
+            }
+        })
         .sort({ [sort]: direction === 'desc' ? -1 : 1 })
         .skip((pageNumber - 1) * pageLimit)
         .limit(pageLimit);
