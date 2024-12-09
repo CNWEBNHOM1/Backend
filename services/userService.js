@@ -102,10 +102,10 @@ exports.getAllRoomsAvailable = async () => {
     if (!roomList[0]) throw new Error("Het phong roi");
     return roomList;
 };
-exports.getOwnRequest = async (email) => {
+exports.getOwnRequest = async (userId) => {
     return await RequestModel.find(
         {
-            email: email,
+            user: userId,
         }
     )
 }

@@ -44,7 +44,8 @@ exports.getAllRoomsAvailable = async (req, res) => {
 
 exports.getOwnRequest = async (req, res) => {
     try {
-        const data = await userService.getOwnRequest(req.user.userEmail);
+        console.log(req.user.userId);
+        const data = await userService.getOwnRequest(req.user.userId);
         res.json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
