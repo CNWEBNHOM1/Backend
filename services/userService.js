@@ -103,11 +103,16 @@ exports.getAllRoomsAvailable = async () => {
     return roomList;
 };
 exports.getOwnRequest = async (userId) => {
-    return await RequestModel.find(
-        {
-            user: userId,
-        }
-    )
+    return await RequestModel.find({
+        user: userId, 
+    })
+        .populate('user')
+        .populate({
+            path: 'room', 
+            populate: {
+                path: 'department',
+            },
+        });
 }
 exports.updateRequest1 = async (roomId) => {
     const room = await RoomModel.findById(roomId);
