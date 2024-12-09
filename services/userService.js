@@ -152,7 +152,14 @@ exports.getMyInfo = async (email) => {
     });
     if (!user) throw new Error('User not exist');
 
-    const student = await StudentModel.findOne({ user: user._id }).populate('user').populate('room');
+    const student = await StudentModel.findOne({ user: user._id }).populate('user')
+        .populate({
+            path: 'room',
+            populate: {
+                path: 'department', // Nối với department
+                model: 'Departments'
+            }
+        });
     if (!student) throw new Error('Student not found');
     return student;
 }
