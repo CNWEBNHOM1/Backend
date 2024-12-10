@@ -82,5 +82,5 @@ router.put('/transfer2Student/:student1/:student2', auth(['Quản lý']), userCo
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
 router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
 router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
-router.get('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
+router.get('/exportBills', auth(['Quản lý', 'Sinh viên', 'Khách']), userController.exportBills);//truyền id
 module.exports = router;
