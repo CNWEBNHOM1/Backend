@@ -2,23 +2,23 @@ const userService = require('../services/userService');
 // const generateInvoicePdf = require('../middlewares/exportInvoice');
 
 // VNPAY Controller 
-exports.getPaymentUrl = async (req, res) => {
+exports.getBillPaymentUrl = async (req, res) => {
     try {
         const srcAddress =
             req.headers['x-forwarded-for'] ||
             req.connection.remoteAddress ||
             req.socket.remoteAddress ||
             req.ip;
-        const url = await userService.getPaymentUrl(srcAddress, req.body);
+        const url = await userService.getBillPaymentUrl(srcAddress, req.body);
         res.json({ data: url, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
-exports.getReturn = async (req, res) => {
+exports.getBillPaymentReturn = async (req, res) => {
     try {
-        const result = await userService.getReturn(req.query);
-        res.json({ data: result, status: "success" });
+        const result = await userService.getBillPaymentReturn(req.query);
+        res.json({ data: result, status: "success", message: 'Payment confirmed' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

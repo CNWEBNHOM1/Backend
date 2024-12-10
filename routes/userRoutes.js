@@ -10,8 +10,8 @@ const limiter = require('../middlewares/rateLimiter');
 const router = express.Router();
 
 // VNPAY route 
-router.post('/getPaymentUrl', auth(['Khách', 'Sinh viên']), userController.getPaymentUrl);
-router.get('/getReturn', auth(['Khách', 'Sinh viên']), userController.getReturn);
+router.post('/getBillPaymentUrl', auth(['Sinh viên']), userController.getBillPaymentUrl);
+router.get('/getBillPaymentReturn', auth(['Sinh viên']), userController.getBillPaymentReturn);
 // Guest route 
 // router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
 router.post('/createRequest', auth(['Khách']), upload, uploadRequestHandler, userController.createRequest);
