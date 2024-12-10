@@ -78,4 +78,9 @@ router.put('/handleBill/:id/:action', auth(['Quản lý']), userController.handl
 router.put('/handleReport/:id/:action', auth(['Quản lý']), userController.handleReport);
 router.put('/transferRoom/:student_id/:new_room_id', auth(['Quản lý']), userController.transferRoom);
 router.put('/transfer2Student/:student1/:student2', auth(['Quản lý']), userController.transfer2Student);
+// export billModel, excel 
+router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
+router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
+router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
+router.get('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
 module.exports = router;

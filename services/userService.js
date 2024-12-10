@@ -1224,22 +1224,80 @@ exports.statisticStudents = async () => {
     return { count_male_living, count_male_stop_living, count_female_living, count_female_stop_living, total };
 }
 // Xuất hóa đơn cho từng phòng, danh sách excel
-exports.exportAllStudents = async () => {
+exports.exportAllStudent = async () => {
     let Students = [];
     const StudentData = await StudentModel.find().populate({
         path: 'room',
         populate: {
-            path: 'department', // Nối với department
-            model: 'Departments'
+            path: 'department'
         }
-    })
+    }).populate('user');
+    // console.log(StudentData);
     StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
+        const stringAddress = `${address.xa},${address.thanh},${address.tinh}`;
+        const stringRoom = `${room.department.name} - ${room.name}`;
+        const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
+        const UID = user._id;
+        Students.push({
+            UserID: UID,
+            Email: email,
+            Name: name,
+            DOB: stringNgaySinh,
+            Gender: gender,
+            IDCard: cccd,
+            Priority: priority,
+            Phone: phone,
+            Address: stringAddress,
+            Room: stringRoom,
+            AcademicYear: khoa,
+            School: school,
+            Class: lop,
+            Status: trangthai,
+            CreatedAt: createdAt
+        });
+    });
+    // console.log(Students)
+    return Students;
+
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // console.log(csvData);
+    // return csvData;
+};
+exports.exportAllStudentByDepartment = async (departmentName) => {
+    // const departmentId = "6736da2513a0a5ef1c7fcb15";
+    let Students = [];
+    // const department = await DepartmentModel.findOne({
+    //     _id: departmentId
+    // })
+    // console.log(department);
+    const department = await DepartmentModel.findOne({
+        name: departmentName
+    });
+    // console.log(department);
+    if (!department) throw new Error("Không có tòa này");
+
+    const StudentData = await StudentModel.find().populate({
+        path: 'room',
+
+        populate: {
+            path: 'department',
+            // match: { _id: departmentId },
+        }
+    }).populate('user');
+    // console.log(StudentData);
+    StudentData.forEach((student) => {
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
         const stringAddress = `${address.xa}, ${address.thanh}, ${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
+        if (room.department.name != departmentName) return;
         Students.push({
-            UserID: user,
+            UserID: user._id,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,
@@ -1256,67 +1314,47 @@ exports.exportAllStudents = async () => {
             CreatedAt: createdAt
         });
     });
-    // not implemented 
-
-    return csvData;
+    return Students;
+    // console.log(Students);
+    // if (!Students[0]) throw new Error("Tòa này không có ai");
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // const departmentName = department.name;
+    // return csvData;
 };
-exports.exportAllStudentsByDepartment = async (departmentId) => {
-    // departmentId = "6736a1cba7e99f28cae7bf8f";
-    let Students = [];
+exports.exportAllStudentByRoom = async (departmentName, roomName) => {
 
-    const StudentData = await StudentModel.find().populate({
-        path: 'room',
-        populate: {
-            path: 'department', // Nối với department
-            model: 'Departments'
-        }
+    let Students = [];
+    const department = await DepartmentModel.findOne({
+        name: departmentName
+    });
+    if (!department) throw new Error("Không có tòa này");
+    const roomTmp = await RoomModel.findOne({
+        name: roomName,
+        department: department._id
     })
-    StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
-        const stringAddress = `xã: ${address.xa}, thành: ${address.thanh}, tỉnh: ${address.tinh}`;
-        const stringRoom = `${room.department.name} - ${room.name}`;
-        const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
-        if (room.department._id !== departmentId) return;
-        Students.push({
-            UserID: user,
-            Email: email,
-            Name: name,
-            DOB: stringNgaySinh,
-            Gender: gender,
-            IDCard: cccd,
-            Priority: priority,
-            Phone: phone,
-            Address: stringAddress,
-            Room: stringRoom,
-            AcademicYear: khoa,
-            School: school,
-            Class: lop,
-            Status: trangthai,
-            CreatedAt: createdAt
-        });
-    });
-    // not implemented 
-    return csvData;
-};
-exports.exportAllStudentByRoom = async (roomId) => {
-    let Students = [];
-
+    if (!roomTmp) throw new Error(`Không có phòng này trong tòa ${departmentName}`);
     const StudentData = await StudentModel.find({
-        room: roomId
+        room: roomTmp._id
     }).populate({
         path: 'room',
+
         populate: {
-            path: 'department', // Nối với department
-            model: 'Departments'
+            path: 'department',
+            // match: { _id: departmentId },
         }
-    })
+    }).populate('user');
+    // console.log(StudentData);
     StudentData.forEach((student) => {
-        const { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        let { user, email, name, ngaysinh, gender, cccd, priority, phone, address, room, khoa, school, lop, trangthai, createdAt } = student;
+        email = user.email;
         const stringAddress = `${address.xa}, ${address.thanh}, ${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
+        // if (room.department.name != departmentName) return;
         Students.push({
-            UserID: user,
+            UserID: user._id,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,
@@ -1333,6 +1371,34 @@ exports.exportAllStudentByRoom = async (roomId) => {
             CreatedAt: createdAt
         });
     });
-    // not implemented 
-    return csvData;
+    // console.log(Students);
+    if (!Students[0]) throw new Error("Phòng này không có ai");
+    return Students;
+    // const csvFields = ['UserID', 'Email', 'Name', 'DOB', 'Gender', 'IDCard', 'Priority', 'Phone', 'Address', 'Room', 'AcademicYear', 'School', 'Class', 'Status', 'CreatedAt'];
+    // const csvParser = new CsvParser({ fields: csvFields, withBOM: true });
+    // const csvData = csvParser.parse(Students);
+    // // const departmentName = department.name;
+    // return csvData;
+};
+exports.getBills = async (billId) => {
+    // billId = "6736ae6da885f02a9bd15b38";
+    const bill = await BillModel.findById(billId).populate('room');
+    if (!bill) throw new Error("Hoá đơn không tồn tại");
+    console.log(bill);
+
+    const { room, sodiendau, sodiencuoi, dongia, thanhtien, handong, trangthai } = bill;
+
+    const department = await DepartmentModel.findById(bill.room.department);
+    const data = {
+        department: department.name,
+        room: room.name,
+        sodiendau,
+        sodiencuoi,
+        dongia,
+        thanhtien,
+        handong,
+        trangthai,
+    };
+    // console.log(data);
+    return data;
 };

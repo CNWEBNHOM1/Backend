@@ -1,6 +1,6 @@
 const userService = require('../services/userService');
-// const generateInvoicePdf = require('../middlewares/exportInvoice');
-
+const generateInvoicePdf = require('../middlewares/exportInvoice');
+const ExcelJS = require('exceljs');
 // VNPAY Controller 
 exports.getBillPaymentUrl = async (req, res) => {
     try {
@@ -462,42 +462,163 @@ exports.statisticStudents = async (req, res) => {
 }
 // export csv, bill
 exports.exportAllStudent = async (req, res) => {
+
     try {
-        const csvData = await userService.exportAllStudent();
-        res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", "attachment; filename=allStudentData.csv");
-        res.status(200).end(csvData);
+        const students = await userService.exportAllStudent();
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Danh sách sinh viên');
+        worksheet.views = [
+            {
+                state: 'frozen',
+                xSplit: 0,
+                ySplit: 1
+            }
+        ];
+        const headers = [
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
+        ];
+        let stt = 1;
+        const headerRow = worksheet.addRow(headers);
+        headerRow.font = { bold: true };
+
+        students.forEach((student) => {
+            // console.log(student);
+            worksheet.addRow([
+                stt++,
+                student.Email,
+                student.Name,
+                student.DOB,
+                student.Gender,
+                student.IDCard,
+                student.Priority,
+                student.Phone,
+                student.Address,
+                student.Room,
+                student.AcademicYear,
+                student.School,
+                student.Class,
+                student.Status,
+                student.CreatedAt
+            ]);
+        });
+        // console.log(students);
+        res.setHeader('Content-Disposition', `attachment; filename="${Date.now()}_DSSV.xlsx"`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 exports.exportAllStudentByDepartment = async (req, res) => {
+
     try {
-        const departmentName = req.body.department;
-        const csvData = await userService.exportAllStudentByDepartment(departmentName);
-        res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", `attachment; filename=\"${departmentName}Student.csv\"`);
-        res.status(200).end(csvData);
+        let departmentName = req.body.department;
+        // departmentName = "B9";
+        const students = await userService.exportAllStudentByDepartment(departmentName);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet(`Danh sách sinh viên tòa ${departmentName}`);
+        worksheet.views = [
+            {
+                state: 'frozen',
+                xSplit: 0,
+                ySplit: 1
+            }
+        ];
+        const headers = [
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
+        ];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.font = { bold: true };
+        let stt = 1;
+        students.forEach(student => {
+            worksheet.addRow([
+                stt++,
+                student.Email,
+                student.Name,
+                student.DOB,
+                student.Gender,
+                student.IDCard,
+                student.Priority,
+                student.Phone,
+                student.Address,
+                student.Room,
+                student.AcademicYear,
+                student.School,
+                student.Class,
+                student.Status,
+                student.CreatedAt
+            ]);
+        });
+        res.setHeader('Content-Disposition', `attachment; filename="${departmentName}_${Date.now()}_DSSV.xlsx"`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 exports.exportAllStudentByRoom = async (req, res) => {
     try {
-        const department = req.body.department;
-        const room = req.body.room;
-        const csvData = await userService.exportAllStudentByRoom(department, room);
-        res.setHeader("Content-Type", "text/csv; charset=utf-8");
-        res.setHeader("Content-Disposition", `attachment; filename=\"${department}-${room}Student.csv\"`);
-        res.status(200).end(csvData);
+        let department = req.body.department;
+        let room = req.body.room;
+        // room = "101";
+        // department = "B9";
+        const students = await userService.exportAllStudentByRoom(department, room);
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet(`Danh sách sinh viên ${department}-${room}`);
+        worksheet.views = [
+            {
+                state: 'frozen',
+                xSplit: 0,
+                ySplit: 1
+            }
+        ];
+        const headers = [
+            'STT', 'Email', 'Họ và tên', 'Ngày sinh', 'Giới tính',
+            'CCCD', 'Ưu tiên', 'Số điện thoại', 'Địa chỉ',
+            'Phòng', 'Khóa', 'Trường', 'Lớp', 'Trạng thái', 'Ngày bắt đầu'
+        ];
+        const headerRow = worksheet.addRow(headers);
+        headerRow.font = { bold: true };
+        let stt = 1;
+        students.forEach(student => {
+            worksheet.addRow([
+                stt++,
+                student.Email,
+                student.Name,
+                student.DOB,
+                student.Gender,
+                student.IDCard,
+                student.Priority,
+                student.Phone,
+                student.Address,
+                student.Room,
+                student.AcademicYear,
+                student.School,
+                student.Class,
+                student.Status,
+                student.CreatedAt
+            ]);
+        });
+        // ${billData.department}_${billData.room}_${Date.now()}_Invoice.pdf
+        res.setHeader('Content-Disposition', `attachment; filename="${department}_${room}_${Date.now()}_DSSV.xlsx"`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 exports.exportBills = async (req, res, next) => {
     try {
-        const billId = req.body.billId;
-
+        let billId = req.body.billId;
+        // billId = "6736ae6da885f02a9bd15b38";
         // console.log(billId);
         const billData = await userService.getBills(billId);
 
