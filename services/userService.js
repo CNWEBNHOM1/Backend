@@ -75,29 +75,6 @@ exports.getBillPaymentReturn = async (queries) => {
         trangthai: vnp_ResponseCode === '00' ? 'Thành công' : 'Không thành công',
     }
 }
-exports.getRequestPaymentUrl = async (ip, data) => {
-    const { returnUrl, billId, amount } = data;
-    const date = new Date();
-
-    const billPaymentUrl = vnpay.buildPaymentUrl({
-        vnp_Amount: amount,
-        vnp_IpAddr: ip,
-        vnp_TxnRef: billId + moment(date).format('YYYYMMDDHHmmss'),
-        vnp_OrderInfo: "Thanh toan tien dien",
-        vnp_OrderType: '170003',
-        vnp_ReturnUrl: returnUrl,
-        vnp_Locale: VnpLocale.VN,
-    });
-    return billPaymentUrl;
-}
-exports.getRequestPaymentReturn = async (queries) => {
-    const return_vnp_TxnRef = queries.vnp_TxnRef.slice(0, -14);
-    if (queries.vnp_ResponseCode === '00') {
-        const bill = await BillModel.findById(return_vnp_TxnRef);
-        bill.trangthai = 'Đã đóng';
-    }
-    return await bill.save();
-}
 // #### Thanh toán VNPAY ####
 // Guest Service 
 exports.createRequest = async (uid, data, fileURL) => {
