@@ -42,7 +42,7 @@ router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, 
 router.get('/allUsers', auth(['Quản lý']), userController.getAllUsers);
 // router.get('/room', auth(['Quản lý', 'Khách']), userController.getAllRooms);
 router.get('/outdateBills', auth(['Quản lý']), userController.getAllOutDateBills);
-router.get('/createBills', auth(['Quản lý']), userController.createBills);
+// router.get('/createBills', auth(['Quản lý']), userController.createBills);
 router.get('/', auth(['Quản lý']), userController.getAllStudents);
 router.get('/searchStudent', auth(['Quản lý']), userController.searchStudent);
 router.get('/detailStudent/:id', auth(['Quản lý']), userController.getDetailStudent);

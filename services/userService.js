@@ -625,10 +625,9 @@ exports.createBill = async (data) => {
     // Tìm bill gần nhất để lấy số điện cuối làm số điện đầu
     const lastBill = await BillModel.findOne({ room }).sort({ createdAt: -1 });
     const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
-
     // Tính tổng tiền
     if (sodiencuoi <= sodiendau)
-        return new Error('Invalid sodiencuoi');
+        throw new Error('Invalid sodiencuoi');
     const thanhtien = (sodiencuoi - sodiendau) * dongia;
     const handong = new Date();
     handong.setDate(handong.getDate() + 15);

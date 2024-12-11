@@ -1,6 +1,7 @@
 const userService = require('../services/userService');
 const generateInvoicePdf = require('../middlewares/exportInvoice');
 const ExcelJS = require('exceljs');
+const { error } = require('console');
 // VNPAY Controller 
 exports.getBillPaymentUrl = async (req, res) => {
     try {
@@ -213,7 +214,9 @@ exports.createRoom = async (req, res) => {
         const data = await userService.createRoom(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (err.message === 'Room exist')
+            res.status(403).json({ error: err.message });
+        else res.status(500).json({ error: err.message });
     }
 }
 exports.updateRoom = async (req, res) => {
@@ -240,20 +243,22 @@ exports.getAllOutDateBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-exports.createBills = async (req, res) => {
-    try {
-        const bills = await userService.createBills();
-        res.status(200).json({ data: bills, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
+// exports.createBills = async (req, res) => {
+//     try {
+//         const bills = await userService.createBills();
+//         res.status(200).json({ data: bills, status: "success" });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
 exports.createBill = async (req, res) => {
     try {
         const bill = await userService.createBill(req.body);
         res.status(200).json({ data: bill, status: "success" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (err.message === "Invalid sodiencuoi")
+            res.status(403).json({ error: err.message });
+        else res.status(500).json({ error: err.message });
     }
 }
 exports.handleBill = async (req, res) => {
@@ -327,7 +332,9 @@ exports.createDepartment = async (req, res) => {
         const data = await userService.createDepartment(req.body);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (err.message === "Department with this name already exists")
+            res.status(403).json({ error: err.message });
+        else res.status(500).json({ error: err.message });
     }
 }
 exports.getDetailStudent = async (req, res) => {
