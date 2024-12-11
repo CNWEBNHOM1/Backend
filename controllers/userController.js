@@ -1,8 +1,28 @@
 const userService = require('../services/userService');
 const generateInvoicePdf = require('../middlewares/exportInvoice');
 const ExcelJS = require('exceljs');
-const { error } = require('console');
 // VNPAY Controller 
+exports.getRoomPaymentUrl = async (req, res) => {
+    try {
+        const srcAddress =
+            req.headers['x-forwarded-for'] ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.ip;
+        const url = await userService.getRoomPaymentUrl(srcAddress, req.body);
+        res.json({ data: url, status: "success" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+exports.getRoomPaymentReturn = async (req, res) => {
+    try {
+        const result = await userService.getRoomPaymentReturn(req.query);
+        res.json({ data: result, status: "success", message: 'Payment confirmed' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
 exports.getBillPaymentUrl = async (req, res) => {
     try {
         const srcAddress =
@@ -30,7 +50,9 @@ exports.createRequest = async (req, res) => {
         const request = await userService.createRequest(req.user.userId, req.body, req.fileURL);
         res.json({ data: request, status: "success" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (err === "Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!")
+            res.status(403).json({ error: err.message });
+        else res.status(500).json({ error: err.message });
     }
 }
 exports.getAllRoomsAvailable = async (req, res) => {
@@ -47,22 +69,6 @@ exports.getOwnRequest = async (req, res) => {
     try {
         const data = await userService.getOwnRequest(req.user.userId);
         res.json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.updateRequest1 = async (req, res) => {
-    try {
-        const data = await userService.updateRequest1(req.body.roomId);
-        res.status(200).json({ data: data, status: "success" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-exports.updateRequest2 = async (req, res) => {
-    try {
-        const data = await userService.updateRequest2(req.body.roomId);
-        res.status(200).json({ data: data, status: "success" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -257,7 +263,7 @@ exports.createBill = async (req, res) => {
         res.status(200).json({ data: bill, status: "success" });
     } catch (err) {
         if (err.message === "Invalid sodiencuoi")
-            res.status(403).json({ error: err.message });
+            res.status(403).json({ error: err.message, sodiendau: err.sodiendau });
         else res.status(500).json({ error: err.message });
     }
 }

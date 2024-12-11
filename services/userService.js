@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+const crypto = require('crypto'); // sửa lại khi hoàn thiện prj
 const bcrypt = require('bcrypt');
 
 const StudentModel = require("../db/studentModel");
@@ -44,6 +44,45 @@ const vnpay = new VNPay({
      */
     loggerFn: ignoreLogger, // optional
 })
+exports.getRoomPaymentUrl = async (ip, data) => {
+    const { returnUrl, requestId } = data;
+    const room = await RoomModel.findById(requestId.room)
+        .populate({
+            path: 'room',
+            populate: {
+                path: 'department'
+            }
+        });
+    const sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
+    const date = new Date();
+    const roomPaymentUrl = vnpay.buildPaymentUrl({
+        vnp_Amount: sotienphaitra,
+        vnp_IpAddr: ip,
+        vnp_TxnRef: requestId + moment(date).format('YYYYMMDDHHmmss'),
+        vnp_OrderInfo: `Thanh toan tien phong ${room.department.name}-${room.name}`,
+        vnp_OrderType: '170003',
+        vnp_ReturnUrl: returnUrl,
+        vnp_Locale: VnpLocale.VN,
+    });
+    return roomPaymentUrl;
+}
+exports.getRoomPaymentReturn = async (queries) => {
+    const { vnp_TxnRef, vnp_Amount, vnp_ResponseCode, vnp_OrderInfo, vnp_TransactionDate } = queries;
+    const requestId = vnp_TxnRef.slice(0, -14);
+    if (vnp_ResponseCode === '00') {
+        const request = await RequestModel.findById(requestId);
+        request.trangthai = 'pending';
+        await RoomModel.findByIdAndUpdate(request.room, { $inc: { occupiedSlots: 1 } });
+        await request.save();
+    }
+    return {
+        magiaodich: requestId,
+        sotien: vnp_Amount,
+        thongtingiaodich: vnp_OrderInfo,
+        ngaygiaodich: vnp_TransactionDate,
+        trangthai: vnp_ResponseCode === '00' ? 'Thành công' : 'Không thành công',
+    }
+}
 exports.getBillPaymentUrl = async (ip, data) => {
     const { returnUrl, billId } = data;
     const date = new Date();
@@ -81,7 +120,11 @@ exports.createRequest = async (uid, data, fileURL) => {
     data.minhchung = fileURL;
     data.userId = uid;
     const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
+    const request_by_userId = await RequestModel.findOne({ user: userId, trangthai: "pending" });
+    if (request_by_userId)
+        throw new Error("Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!");
     const room = await RoomModel.findById(roomId);
+
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
 
     const newRequest = new RequestModel({
@@ -125,21 +168,6 @@ exports.getOwnRequest = async (userId) => {
                 path: 'department',
             },
         });
-}
-exports.updateRequest1 = async (roomId) => {
-    const room = await RoomModel.findById(roomId);
-    return await RoomModel.findOneAndUpdate(
-        { _id: roomId, occupiedSlots: { $lt: room.capacity } },
-        { $inc: { occupiedSlots: 1 } },
-        { new: true },
-    );
-}
-exports.updateRequest2 = async (roomId) => {
-    return await RoomModel.findByIdAndUpdate(
-        roomId,
-        { $inc: { occupiedSlots: -1 } },
-        { new: true },
-    );
 }
 // Student Service 
 exports.getListRoommates = async (email) => {
@@ -626,8 +654,11 @@ exports.createBill = async (data) => {
     const lastBill = await BillModel.findOne({ room }).sort({ createdAt: -1 });
     const sodiendau = lastBill ? lastBill.sodiencuoi : 0; // Nếu chưa có bill thì sodiendau = 0
     // Tính tổng tiền
-    if (sodiencuoi <= sodiendau)
-        throw new Error('Invalid sodiencuoi');
+    if (sodiencuoi <= sodiendau) {
+        const error = new Error("Invalid sodiencuoi");
+        error.sodiendau = sodiendau;
+        throw error;
+    }
     const thanhtien = (sodiencuoi - sodiendau) * dongia;
     const handong = new Date();
     handong.setDate(handong.getDate() + 15);

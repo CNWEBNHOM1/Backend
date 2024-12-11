@@ -61,8 +61,8 @@ const RequestSchema = new mongoose.Schema({
     },
     trangthai: {
         type: String,
-        enum: ["pending", "approved", "declined"],
-        default: "none",
+        enum: ["unpaid", "pending", "approved", "declined"],
+        default: "unpaid",
     },
     noidung: {
         type: String,
