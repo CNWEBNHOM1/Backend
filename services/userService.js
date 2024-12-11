@@ -1027,10 +1027,18 @@ exports.handleRequest = async (id, action) => {
         };
         await transporter.sendMail(mailOptions);
     } else if (action === "declined") {
-        const ROOM = RoomModel.findById(request.room);
+        const ROOM = await RoomModel.findById(request.room);
         ROOM.occupiedSlots--;
-        ROOM.save();
+        // console.log(ROOM);
+        await ROOM.save();
         request.trangthai = "declined";
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.mailUser,
+                pass: process.env.mailPass
+            }
+        });
         let mailOptions = {
             from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
             subject: `Từ chối đăng ký phòng ở ký túc xá`,
