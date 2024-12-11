@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const CsvParser = require('json2csv').Parser;
+const PDFDocument = require('pdfkit');
 
 const StudentModel = require("../db/studentModel");
 const RoomModel = require("../db/roomModel");
@@ -257,12 +259,10 @@ exports.getListBills = async (email, query) => {
         .skip((pageNumber - 1) * pageLimit)
         .limit(pageLimit);
 
-    if (!bills.length) throw new Error('Bill not found');
+    // if (!bills.length) throw new Error('Bill not found');
 
-    return {
-        total: bills.length,
-        bills
-    };
+    return bills
+        ;
 }
 // Manager Service 
 exports.getAllStudents = async (filters = {}, page = 1, limit = 10) => {
@@ -1044,6 +1044,8 @@ exports.detailBill = async (id) => {
                 model: 'Departments' // Đảm bảo đúng model cho department
             }
         });
+
+    console.log(bill);
     if (bill) return bill;
 }
 exports.detailDepartment = async (id) => {
@@ -1215,9 +1217,8 @@ exports.exportAllStudent = async () => {
         const stringAddress = `${address.xa},${address.thanh},${address.tinh}`;
         const stringRoom = `${room.department.name} - ${room.name}`;
         const stringNgaySinh = ngaysinh.toLocaleDateString('vi-VN');
-        const UID = user._id;
         Students.push({
-            UserID: UID,
+            UserID: user,
             Email: email,
             Name: name,
             DOB: stringNgaySinh,

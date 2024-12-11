@@ -435,6 +435,7 @@ exports.statisticBills = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+
 exports.statisticReports = async (req, res) => {
     try {
         const data = await userService.statisticReports();
@@ -467,7 +468,6 @@ exports.statisticStudents = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
-// export csv, bill
 exports.exportAllStudent = async (req, res) => {
 
     try {
