@@ -1019,7 +1019,7 @@ exports.handleRequest = async (id, action, data) => {
                 </ul>
 
                 <p>Sinh viên không cần mang theo giấy tờ gì khi đến nhận phòng.</p>
-                <p>Tài khoản bạn sử dụng để đăng ký đã được đặt lại mật khẩu. Mật khẩu mới là: <strong>${newPassword}</strong>. Từ bây giờ, bạn sẽ đăng nhập hệ thống với vai trò là: <strong>Khách</strong></p>
+                <p>Tài khoản bạn sử dụng để đăng ký đã được đặt lại mật khẩu. Mật khẩu mới là: <strong>${newPassword}</strong>. Từ bây giờ, bạn sẽ đăng nhập hệ thống với vai trò là: <strong>Sinh viên</strong></p>
                 <p>Mọi thắc mắc vui lòng liên hệ đến số: +84 394 305 264 (giờ hành chính).</p>
                 <p>Trân trọng,</p>
                 <p><strong>Nhóm 1, học phần Công nghệ Web, học kỳ 2024.1</strong></p>
