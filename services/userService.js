@@ -1031,6 +1031,28 @@ exports.handleRequest = async (id, action) => {
         ROOM.occupiedSlots--;
         ROOM.save();
         request.trangthai = "declined";
+        let mailOptions = {
+            from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
+            subject: `Từ chối đăng ký phòng ở ký túc xá`,
+            to: request.user.email,
+            html: `
+                <h1>Đăng ký không thành công</h1>
+                <p><strong>Xin chào ${request.name}!</strong></p>
+                <p>Cảm ơn bạn đã quan tâm đến dịch vụ lưu trú tại ký túc xá. Tuy nhiên, Nhóm 1 môn Công nghệ Web rất tiếc phải thông báo rằng đăng ký phòng ở của bạn đã bị từ chối.</p>
+                <p><strong>Nội dung yêu cầu của bạn:</strong> ${request.noidung}</p>
+                <p><strong>Thông tin phòng bạn đã đăng ký:</strong></p>
+                <ul>
+                    <li><strong>Tòa nhà đăng ký:</strong> ${request.room.department.name}</li>
+                    <li><strong>Phòng đăng ký:</strong> ${request.room.name}</li>
+                </ul>
+                <p><strong>Lý do từ chối:</strong> 'Thông tin không hợp lệ hoặc phòng đã được đăng ký.'</p>
+
+                <p>Mọi thắc mắc vui lòng liên hệ đến số: +84 394 305 264 (giờ hành chính).</p>
+                <p>Trân trọng,</p>
+                <p><strong>Nhóm 1, học phần Công nghệ Web, học kỳ 2024.1</strong></p>
+            `,
+        };
+        await transporter.sendMail(mailOptions);
     }
 
     await request.save();
