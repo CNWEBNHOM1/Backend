@@ -45,11 +45,11 @@ const vnpay = new VNPay({
     loggerFn: ignoreLogger, // optional
 })
 exports.getBillPaymentUrl = async (ip, data) => {
-    const { returnUrl, billId, amount } = data;
+    const { returnUrl, billId } = data;
     const date = new Date();
-
+    const bill = await BillModel.findById(billId);
     const billPaymentUrl = vnpay.buildPaymentUrl({
-        vnp_Amount: amount,
+        vnp_Amount: bill.thanhtien,
         vnp_IpAddr: ip,
         vnp_TxnRef: billId + moment(date).format('YYYYMMDDHHmmss'),
         vnp_OrderInfo: "Thanh toan tien dien",
