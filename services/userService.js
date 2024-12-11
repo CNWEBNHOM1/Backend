@@ -762,33 +762,41 @@ exports.sendBill = async (id) => {
         subject: `Tiền điện phòng ${department.name} - ${room.name} tháng ${bill.handong.getMonth() + 1}`,
         to: emails.join(", "),  // Gửi đến tất cả sinh viên trong phòng
         html: `
-            <h3>Hóa đơn tiền điện</h3>
-            <table border="1" cellpadding="10" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Tòa</th>
-                        <th>Phòng</th>
-                        <th>Số điện đầu</th>
-                        <th>Số điện cuối</th>
-                        <th>Đơn giá</th>
-                        <th>Thành tiền</th>
-                        <th>Hạn đóng</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>${department.name}</td>
-                        <td>${room.name}</td>
-                        <td>${bill.sodiendau}</td>
-                        <td>${bill.sodiencuoi}</td>
-                        <td>${bill.dongia} đ</td>
-                        <td>${bill.thanhtien} đ</td>
-                        <td>Trước ${formatDate(bill.handong)}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div style="position: relative;">
+                <!-- Thêm ảnh ở góc trên trái -->
+                <img src="https://res.cloudinary.com/dovfk4xet/image/upload/v1733940012/logo-soict_xdgose.png" alt="Logo" style="position: absolute; top: 10px; left: 10px; width: 100px; height: auto;">
+                
+                <!-- Nội dung email -->
+                <h3 style="text-align: center;">Hóa đơn tiền điện</h3>
+                <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Tòa</th>
+                            <th style="text-align: center;">Phòng</th>
+                            <th style="text-align: center;">Số điện đầu</th>
+                            <th style="text-align: center;">Số điện cuối</th>
+                            <th style="text-align: center;">Đơn giá</th>
+                            <th style="text-align: center;">Thành tiền</th>
+                            <th style="text-align: center;">Hạn đóng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">${department.name}</td>
+                            <td style="text-align: center; vertical-align: middle;">${room.name}</td>
+                            <td style="text-align: center; vertical-align: middle;">${bill.sodiendau}</td>
+                            <td style="text-align: center; vertical-align: middle;">${bill.sodiencuoi}</td>
+                            <td style="text-align: center; vertical-align: middle;">${bill.dongia} đ</td>
+                            <td style="text-align: center; vertical-align: middle;">${bill.thanhtien} đ</td>
+                            <td style="text-align: center; vertical-align: middle;">Trước ${formatDate(bill.handong)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         `,
     };
+    
+    
     await transporter.sendMail(mailOptions);
     return;
 }
