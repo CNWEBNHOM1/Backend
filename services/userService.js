@@ -1213,10 +1213,10 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
             }
         })
         .populate('user')
+        .sort({ prioriry: -1, updatedAt: 1 })  // Sắp xếp theo thời gian tạo (mới nhất trước)
         .skip(skip)  // Bỏ qua các kết quả trước đó
-        .limit(pageLimit)  // Giới hạn số kết quả trả về
-        .sort({ prioriry: -1, updatedAt: -1 });  // Sắp xếp theo thời gian tạo (mới nhất trước)
-
+        .limit(pageLimit);  // Giới hạn số kết quả trả về
+        
     const filteredRequests = requests.filter((request) => request.room && request.room.department);
     // Lấy tổng số request để tính số trang
     const totalRequests = await RequestModel.countDocuments(filterConditions);
