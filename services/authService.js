@@ -23,7 +23,7 @@ exports.createUser = async (email, password) => {
             pass: process.env.mailPass
         }
     });
-    const verificationLink = `http://localhost:5000/auth/verify-email?token=${verify_token}`;
+    const verificationLink = `https://backend-gjtr.onrender.com/auth/verify-email?token=${verify_token}`;
     let mailOptions = {
         from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
         to: email,
