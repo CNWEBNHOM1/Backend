@@ -45,11 +45,11 @@ router.get('/statisticRooms/', auth(['Quản lý']), userController.statisticRoo
 router.get('/statisticStudents/', auth(['Quản lý']), userController.statisticStudents);
 
 //export ra excel
-router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
-router.get('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
-router.get('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
+router.post('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
+router.post('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
+router.post('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
 //exports pdf hoá đơn theo id
-router.get('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
+router.post('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
 
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
