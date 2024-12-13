@@ -15,7 +15,7 @@ dbConnect();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'uploads')));  // Thư mục để lưu ảnh
-
+app.use(express.static(path.join(__dirname, 'build')));
 // CORS headers
 app.use(cors({
     origin: "https://frontend-68nc.onrender.com",
@@ -25,6 +25,9 @@ app.use(cors({
 }));
 
 // Routes
+app.use('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 
