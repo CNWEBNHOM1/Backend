@@ -7,8 +7,8 @@ const limiter = require('../middlewares/rateLimiter');
 const router = express.Router();
 
 // VNPAY route 
-router.post('/getRoomPaymentUrl', auth(['Sinh viên']), userController.getRoomPaymentUrl);
-router.get('/getRoomPaymentReturn', auth(['Sinh viên']), userController.getRoomPaymentReturn);
+router.post('/getRoomPaymentUrl', auth(['Khách']), userController.getRoomPaymentUrl);
+router.get('/getRoomPaymentReturn', auth(['Khách']), userController.getRoomPaymentReturn);
 router.post('/getBillPaymentUrl', auth(['Sinh viên']), userController.getBillPaymentUrl);
 router.get('/getBillPaymentReturn', auth(['Sinh viên']), userController.getBillPaymentReturn);
 // Guest route 
