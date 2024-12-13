@@ -46,20 +46,20 @@ const vnpay = new VNPay({
 })
 exports.getRoomPaymentUrl = async (ip, data) => {
     const { returnUrl, requestId } = data;
-    const room = await RoomModel.findById(requestId.room)
+    const request = await RequestModel.findById(requestId)
         .populate({
             path: 'room',
             populate: {
                 path: 'department'
             }
         });
-    const sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
+    const sotienphaitra = request.room.giatrangbi + request.room.tieno + request.room.tiennuoc;
     const date = new Date();
     const roomPaymentUrl = vnpay.buildPaymentUrl({
         vnp_Amount: sotienphaitra,
         vnp_IpAddr: ip,
         vnp_TxnRef: requestId + moment(date).format('YYYYMMDDHHmmss'),
-        vnp_OrderInfo: `Thanh toan tien phong ${room.department.name}-${room.name}`,
+        vnp_OrderInfo: `Thanh toan tien phong ${request.room.department.name}-${request.room.name}`,
         vnp_OrderType: '170003',
         vnp_ReturnUrl: returnUrl,
         vnp_Locale: VnpLocale.VN,
@@ -795,8 +795,8 @@ exports.sendBill = async (id) => {
             </div>
         `,
     };
-    
-    
+
+
     await transporter.sendMail(mailOptions);
     return;
 }
