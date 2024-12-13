@@ -38,7 +38,7 @@ exports.sendMailToResetPassword = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     await authService.verifyEmail(req.query.token);
-    res.redirect('http://localhost:4444/login');
+    res.redirect('https://frontend-68nc.onrender.com/login');
   } catch (err) {
     if (err.message === 'Invalid or expried OTP')
       res.status(404).json({ error: err.message });
