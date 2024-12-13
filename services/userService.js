@@ -1216,7 +1216,7 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         .sort({ prioriry: -1, updatedAt: 1 })  // Sắp xếp theo thời gian tạo (mới nhất trước)
         .skip(skip)  // Bỏ qua các kết quả trước đó
         .limit(pageLimit);  // Giới hạn số kết quả trả về
-        
+
     const filteredRequests = requests.filter((request) => request.room && request.room.department);
     // Lấy tổng số request để tính số trang
     const totalRequests = await RequestModel.countDocuments(filterConditions);
@@ -1430,7 +1430,10 @@ exports.getBills = async (billId) => {
     const bill = await BillModel.findById(billId).populate('room');
     if (!bill) throw new Error("Hoá đơn không tồn tại");
     console.log(bill);
-
+    const giatrangbi = bill.room.giatrangbi;
+    const tieno = bill.room.tieno;
+    const tiennuoc = bill.room.tiennuoc;
+    // console.log(giatrangbi)
     const { room, sodiendau, sodiencuoi, dongia, thanhtien, handong, trangthai } = bill;
 
     const department = await DepartmentModel.findById(bill.room.department);
@@ -1443,6 +1446,9 @@ exports.getBills = async (billId) => {
         thanhtien,
         handong,
         trangthai,
+        giatrangbi,
+        tieno,
+        tiennuoc
     };
     // console.log(data);
     return data;
