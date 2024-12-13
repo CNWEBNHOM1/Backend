@@ -1,4 +1,5 @@
 const User = require('../db/userModel');
+const Otp = require('../db/otpModel');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -11,9 +12,25 @@ exports.createUser = async (email, password) => {
     if (!emailRegex.test(email)) throw new Error('You must use HUST email');
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword });
-    user.role = 'Khách';
-    return await user.save();
+    const verify_token = Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+    const OTP = new Otp({ email, password: hashedPassword, value: verify_token });
+    await OTP.save();
+
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.mailUser,
+            pass: process.env.mailPass
+        }
+    });
+    const verificationLink = `http://localhost:5000/auth/verify-email?token=${verify_token}`;
+    let mailOptions = {
+        from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
+        to: email,
+        subject: 'Email Verification',
+        text: `Click the link to verify your account: ${verificationLink}`,
+    };
+    return transporter.sendMail(mailOptions);
 };
 
 exports.loginUser = async (email, password, role) => {
@@ -73,4 +90,11 @@ exports.resetPasswordMail = async (email) => {
     // console.log(mailOptions);
     // console.log(transporter.auth.user);
     return transporter.sendMail(mailOptions);
+}
+exports.verifyEmail = async (token) => {
+    const OTP = await Otp.findOne({ value: token });
+    if (!OTP) {
+        throw new Error('Invalid or expried OTP');
+    }
+    await User.create({ email: OTP.email, password: OTP.password });
 }

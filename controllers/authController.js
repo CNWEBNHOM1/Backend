@@ -3,7 +3,7 @@ const authService = require('../services/authService');
 exports.register = async (req, res) => {
   try {
     const user = await authService.createUser(req.body.email, req.body.password);
-    res.status(201).json({ message: 'User Created Successfully', email: user.email, role: user.role, id: user._id });
+    res.status(201).json({ message: 'User Created Successfully. Check your mail to active', email: user.email, role: user.role, id: user._id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -33,5 +33,15 @@ exports.sendMailToResetPassword = async (req, res) => {
     res.status(200).json({ message: "Email sent successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to send email" });
+  }
+}
+exports.verifyEmail = async (req, res) => {
+  try {
+    await authService.verifyEmail(req.query.token);
+    res.redirect('http://localhost:4444/login');
+  } catch (err) {
+    if (err.message === 'Invalid or expried OTP')
+      res.status(404).json({ error: err.message });
+    else res.status(500).json({ error: "Failed to verify" });
   }
 }

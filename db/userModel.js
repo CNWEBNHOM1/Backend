@@ -13,13 +13,13 @@ const UserSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['Khách', 'Sinh viên', 'Quản lý'], // Giới hạn giá trị cho trường "role"
-        required: [true, "Please provide a role!"],
+        default: 'Khách',
     },
     status: {
         type: String,
         enum: ["available", "blocked"],
-        default: "available"
-    }
+        default: "available",
+    },
 }, {timestamps: true})
 
 module.exports = mongoose.models.Users || mongoose.model("Users", UserSchema);

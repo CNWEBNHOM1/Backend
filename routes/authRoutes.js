@@ -9,4 +9,5 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/changePassword', isAuth(['Quản lý', 'Sinh viên', 'Khách']), authController.changePassword);
 router.post('/forgotPassword', limiter, authController.sendMailToResetPassword);
+router.get('/verify-email', authController.verifyEmail);
 module.exports = router;
