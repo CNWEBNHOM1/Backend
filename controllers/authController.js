@@ -5,7 +5,10 @@ exports.register = async (req, res) => {
     const user = await authService.createUser(req.body.email, req.body.password);
     res.status(201).json({ message: 'User Created Successfully. Check your mail to active', email: user.email, role: user.role, id: user._id });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.message === 'Email exist')
+      res.status(444).json({ message: error.message });
+    else
+      res.status(500).json({ message: error.message });
   }
 };
 
