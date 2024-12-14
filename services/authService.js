@@ -10,7 +10,7 @@ const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+\d{6,}@sis\.hust\.edu\.vn$/;
 
 exports.createUser = async (email, password) => {
     if (!emailRegex.test(email)) throw new Error('You must use HUST email');
-    if (await UserModel.findOne({ email: email }))
+    if (await User.findOne({ email: email }))
         throw new Error('Email exist')
     const hashedPassword = await bcrypt.hash(password, 10);
     const verify_token = Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
