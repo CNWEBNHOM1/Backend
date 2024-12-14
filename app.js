@@ -16,12 +16,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'uploads')));  // Thư mục để lưu ảnh
 // CORS headers
-app.use(cors({
-    // origin: "https://frontend-68nc.onrender.com",
-    origin: "*",
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Specify allowed methods
-    // credentials: true  // If you want to allow cookies or authentication headers
-}));
+const allowedOrigins = ['https://frontend-68nc.onrender.com', 'http://localhost:4444'];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true); // Cho phép request nếu origin hợp lệ
+        } else {
+            callback(new Error('Not allowed by CORS')); // Từ chối các origin không hợp lệ
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức cho phép
+    credentials: true, // Cho phép gửi thông tin xác thực
+};
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/auth', authRoutes);
