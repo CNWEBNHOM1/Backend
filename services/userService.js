@@ -142,7 +142,6 @@ exports.createRequest = async (uid, data, fileURL) => {
         school,
         lop,
         sotienphaitra,
-        trangthai: 'pending',
         minhchung
     });
     return await newRequest.save();
