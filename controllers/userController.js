@@ -47,7 +47,7 @@ exports.getBillPaymentReturn = async (req, res) => {
 // Guest controller
 exports.createRequest = async (req, res) => {
     try {
-        const request = await userService.createRequest(req.user.userId, req.body, req.fileURL);
+        const request = await userService.createRequest(req.user.userId, req.body);
         res.json({ data: request, status: "success" });
     } catch (err) {
         if (err === "Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!")

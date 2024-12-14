@@ -25,9 +25,6 @@ const BillSchema = new mongoose.Schema({
         type: String,
         enum: ["Chờ xác nhận", "Đã đóng", "Chưa đóng", "Quá hạn"],
     },
-    anhminhchung: {
-        type: String,
-    },
 }, {timestamps: true});
 
 module.exports = mongoose.models.Bills || mongoose.model("Bills", BillSchema);

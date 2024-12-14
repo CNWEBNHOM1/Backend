@@ -116,10 +116,9 @@ exports.getBillPaymentReturn = async (queries) => {
 }
 // #### Thanh toán VNPAY ####
 // Guest Service 
-exports.createRequest = async (uid, data, fileURL) => {
-    data.minhchung = fileURL;
+exports.createRequest = async (uid, data) => {
     data.userId = uid;
-    const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop, minhchung } = data;
+    const { userId, roomId, name, ngaysinh, gender, sid, cccd, priority, phone, address, khoa, school, lop } = data;
     const request_by_userId = await RequestModel.findOne({ user: userId, trangthai: "pending" });
     if (request_by_userId)
         throw new Error("Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!");
@@ -142,7 +141,6 @@ exports.createRequest = async (uid, data, fileURL) => {
         school,
         lop,
         sotienphaitra,
-        minhchung
     });
     return await newRequest.save();
 }
