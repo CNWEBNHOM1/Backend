@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'uploads')));  // Thư mục để lưu ảnh
 // CORS headers
-const allowedOrigins = ['https://frontend-68nc.onrender.com', 'http://localhost:4444'];
+const allowedOrigins = ['lmvait2k66.id.vn', 'https://frontend-68nc.onrender.com', 'http://localhost:4444'];
 
 const corsOptions = {
     origin: (origin, callback) => {
