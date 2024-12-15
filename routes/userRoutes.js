@@ -2,7 +2,8 @@ const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
 const { upload, uploadReportHandler } = require('../middlewares/imageCloudinaryUpload');
-
+const multer = require('multer');
+const UPLOAD = multer();
 const router = express.Router();
 
 // VNPAY route 
@@ -11,7 +12,7 @@ router.get('/getRoomPaymentReturn', auth(['Khách']), userController.getRoomPaym
 router.post('/getBillPaymentUrl', auth(['Sinh viên']), userController.getBillPaymentUrl);
 router.get('/getBillPaymentReturn', auth(['Sinh viên']), userController.getBillPaymentReturn);
 // Guest route 
-router.post('/createRequest', auth(['Khách']), userController.createRequest);
+router.post('/createRequest', auth(['Khách']), UPLOAD.none(), userController.createRequest);
 router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);
 // Student route 
