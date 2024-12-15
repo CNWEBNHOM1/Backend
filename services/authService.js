@@ -31,7 +31,7 @@ exports.createUser = async (email, password) => {
         subject: 'Email Verification',
         text: `Click the link to verify your account: ${verificationLink}`,
     };
-    return transporter.sendMail(mailOptions);
+    return await transporter.sendMail(mailOptions);
 };
 
 exports.loginUser = async (email, password, role) => {
