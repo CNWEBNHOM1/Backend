@@ -30,7 +30,6 @@ exports.createUser = async (email, password) => {
         to: email,
         subject: 'Xác minh tài khoản đăng ký trên hệ thống quản lý ký túc xá',
         html: `
-                <h1>Đăng ký không thành công</h1>
                 <p><strong>Xin chào!</strong></p>
                 <p>Cảm ơn bạn đã quan tâm đến dịch vụ lưu trú tại ký túc xá của chúng tui :)).</p>
                 <p>Bạn vui lòng bấm vào đường dẫn sau để thực hiện xác minh: ${verificationLink}.</p>
