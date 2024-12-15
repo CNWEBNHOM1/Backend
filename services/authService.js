@@ -34,7 +34,7 @@ exports.createUser = async (email, password) => {
                 <p>Cảm ơn bạn đã quan tâm đến dịch vụ lưu trú tại ký túc xá của chúng tui :)).</p>
                 <p>Bạn vui lòng bấm vào đường dẫn sau để thực hiện xác minh: ${verificationLink}.</p>
                 <br>
-                <p>Sau khi xác minh, bạn sẽ được điều hướng đến trang đăng nhập của hệ thống. Bạn sẽ đăng nhập tài khoản của mình với vai trò là <strong>KHÁCH</strong>.</p>
+                <p>Sau khi xác minh, bạn sẽ được điều hướng đến trang đăng nhập của hệ thống. Bạn sẽ đăng nhập tài khoản của mình với vai trò là <strong>Khách</strong>.</p>
                 <br>
                 <p>Trân trọng,</p>
                 <p><strong>Nhóm 1, học phần Công nghệ Web và Dịch vụ trực tuyến, học kỳ 2024.1.</strong></p>
