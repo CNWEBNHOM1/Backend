@@ -68,7 +68,5 @@ const uploadHandler = (folder) => async (req, res, next) => {
 
 module.exports = {
     upload: upload.single('minhchung'), // Middleware nhận file
-    uploadRequestHandler: uploadHandler('requests'),
-    uploadBillHandler: uploadHandler('bills'),
     uploadReportHandler: uploadHandler('reports'),
 };

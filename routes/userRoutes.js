@@ -1,8 +1,7 @@
 const express = require('express');
 const auth = require('../middlewares/authMiddleware');
 const userController = require('../controllers/userController');
-const { upload, uploadRequestHandler, uploadBillHandler, uploadReportHandler } = require('../middlewares/imageCloudinaryUpload');
-const limiter = require('../middlewares/rateLimiter');
+const { upload, uploadReportHandler } = require('../middlewares/imageCloudinaryUpload');
 
 const router = express.Router();
 
@@ -12,18 +11,14 @@ router.get('/getRoomPaymentReturn', auth(['Khách']), userController.getRoomPaym
 router.post('/getBillPaymentUrl', auth(['Sinh viên']), userController.getBillPaymentUrl);
 router.get('/getBillPaymentReturn', auth(['Sinh viên']), userController.getBillPaymentReturn);
 // Guest route 
-// router.post('/createRequest', auth(['Khách']), upload.single('minhchung'), userController.createRequest);
-router.post('/createRequest', auth(['Khách']), upload, uploadRequestHandler, userController.createRequest);
+router.post('/createRequest', auth(['Khách']), userController.createRequest);
 router.get('/myRequest', auth(['Khách', 'Sinh viên']), userController.getOwnRequest);
 router.get('/roomAvailable', auth(['Khách']), userController.getAllRoomsAvailable);
 // Student route 
-router.get('/info', auth(['Sinh viên']), userController.getMyInfo);//studentInfo+room
-router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);//
-router.get('/listBills', auth(['Sinh viên']), userController.getListBills)//
-
-router.post('/uploadProof', auth(['Sinh viên']), upload, uploadBillHandler, userController.uploadBillProof);//file
-router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, userController.createReport);//noidun
-
+router.get('/info', auth(['Sinh viên']), userController.getMyInfo);
+router.get('/roomMates', auth(['Sinh viên']), userController.getListRoommates);
+router.get('/listBills', auth(['Sinh viên']), userController.getListBills)
+router.post('/createReport', auth(['Sinh viên']), upload, uploadReportHandler, userController.createReport);
 // Manager route
 router.get('/allUsers', auth(['Quản lý']), userController.getAllUsers);
 router.get('/outdateBills', auth(['Quản lý']), userController.getAllOutDateBills);
@@ -33,7 +28,6 @@ router.get('/detailStudent/:id', auth(['Quản lý']), userController.getDetailS
 router.get('/detailRoom/:id', auth(['Quản lý']), userController.getDetailRoom);
 router.get('/detailBill/:id', auth(['Quản lý']), userController.getDetailBill);
 router.get('/allRequests', auth(['Quản lý']), userController.getAllRequests);
-
 router.get('/detailRequest/:id', auth(['Quản lý']), userController.getDetailRequest);
 router.get('/detailReport/:id', auth(['Quản lý']), userController.getDetailReport);
 router.get('/detailDepartment/:id', auth(['Quản lý']), userController.getDetailDepartment);
@@ -43,14 +37,12 @@ router.get('/statisticReports/', auth(['Quản lý']), userController.statisticR
 router.get('/statisticRequests/', auth(['Quản lý']), userController.statisticRequests);
 router.get('/statisticRooms/', auth(['Quản lý']), userController.statisticRooms);
 router.get('/statisticStudents/', auth(['Quản lý']), userController.statisticStudents);
-
 //export ra excel
 router.get('/exportAllStudent', auth(['Quản lý']), userController.exportAllStudent);
 router.post('/exportAllStudentByDepartment', auth(['Quản lý']), userController.exportAllStudentByDepartment);//truyền tên tòa
 router.post('/exportAllStudentByRoom', auth(['Quản lý']), userController.exportAllStudentByRoom);//truyền tên tòa(string) + tên phòng(number)
 //exports pdf hoá đơn theo id
 router.post('/exportBills', auth(['Quản lý']), userController.exportBills);//truyền id
-
 
 router.post('/createBill', auth(['Quản lý']), userController.createBill);
 router.post('/getAllDepartments', auth(['Quản lý']), userController.getAllDepartments);
@@ -60,7 +52,6 @@ router.post('/roomd', auth(['Quản lý']), userController.getAllRooms);
 router.get('/sendBill/:id', auth(['Quản lý']), userController.sendBill);
 router.post('/createRoom', auth(['Quản lý']), userController.createRoom);
 router.post('/createDepartment', auth(['Quản lý']), userController.createDepartment);
-
 router.put('/handleRequest/:id/:action', auth(['Quản lý']), userController.handleRequest);
 router.put('/removeStudent/:id', auth(['Quản lý']), userController.removeStudent);
 router.put('/handleUser/:id/:action', auth(['Quản lý']), userController.handleUser);
