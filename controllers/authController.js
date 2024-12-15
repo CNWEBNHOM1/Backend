@@ -5,7 +5,7 @@ exports.register = async (req, res) => {
     const user = await authService.createUser(req.body.email, req.body.password);
     res.status(201).json({ message: 'User Created Successfully. Check your mail to active', email: user.email, role: user.role, id: user._id });
   } catch (error) {
-    if (error.message === 'Email exist')
+    if (error.message === 'Đã có tài khoản sử dụng email này!')
       res.status(444).json({ message: error.message });
     else if (error.message === 'You must use HUST email')
       res.status(443).json({ message: error.message });
@@ -43,7 +43,7 @@ exports.sendMailToResetPassword = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     await authService.verifyEmail(req.query.token);
-    res.redirect('https://frontend-68nc.onrender.com/login');
+    res.redirect('https://lmvait2k66.id.vn/login');
   } catch (err) {
     if (err.message === 'Invalid or expried OTP')
       res.status(404).json({ error: err.message });

@@ -11,10 +11,10 @@ const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+\d{6,}@sis\.hust\.edu\.vn$/;
 exports.createUser = async (email, password) => {
     if (!emailRegex.test(email)) throw new Error('You must use HUST email');
     if (await User.findOne({ email: email }))
-        throw new Error('Email exist')
+        throw new Error('Đã có tài khoản sử dụng email này!')
     const hashedPassword = await bcrypt.hash(password, 10);
     const verify_token = Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
-    const OTP = new Otp({ email, password: hashedPassword, value: verify_token });
+    const OTP = new Otp({ email: email, password: hashedPassword, value: verify_token });
     await OTP.save();
 
     let transporter = nodemailer.createTransport({
@@ -29,7 +29,7 @@ exports.createUser = async (email, password) => {
         from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
         to: email,
         subject: 'Email Verification',
-        text: `Click the link to verify your account: ${verificationLink}`,
+        text: `Bấm vào đường dẫn sau để xác minh tài khoản của bạn: ${verificationLink} Sau khi xác minh, bạn sẽ đăng nhập với vai trò là KHÁCH.`,
     };
     return await transporter.sendMail(mailOptions);
 };
