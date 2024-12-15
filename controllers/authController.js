@@ -7,6 +7,8 @@ exports.register = async (req, res) => {
   } catch (error) {
     if (error.message === 'Email exist')
       res.status(444).json({ message: error.message });
+    else if (error.message === 'You must use HUST email')
+      res.status(443).json({ message: error.message });
     else
       res.status(500).json({ message: error.message });
   }
