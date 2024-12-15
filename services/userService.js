@@ -69,12 +69,14 @@ exports.getRoomPaymentUrl = async (ip, data) => {
 exports.getRoomPaymentReturn = async (queries) => {
     const { vnp_TxnRef, vnp_Amount, vnp_ResponseCode, vnp_OrderInfo, vnp_TransactionDate } = queries;
     const requestId = vnp_TxnRef.slice(0, -14);
+    const request = await RequestModel.findById(requestId);
     if (vnp_ResponseCode === '00') {
-        const request = await RequestModel.findById(requestId);
         request.trangthai = 'pending';
         await RoomModel.findByIdAndUpdate(request.room, { $inc: { occupiedSlots: 1 } });
-        await request.save();
+    } else {
+        request.trangthai = 'declined';
     }
+    await request.save();
     return {
         magiaodich: requestId,
         sotien: vnp_Amount,
