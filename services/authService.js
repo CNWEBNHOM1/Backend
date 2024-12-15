@@ -28,8 +28,18 @@ exports.createUser = async (email, password) => {
     let mailOptions = {
         from: `BQL KTX ĐHBKHN <${process.env.mailUser}>`,
         to: email,
-        subject: 'Email Verification',
-        text: `Bấm vào đường dẫn sau để xác minh tài khoản của bạn: ${verificationLink} Sau khi xác minh, bạn sẽ đăng nhập với vai trò là KHÁCH.`,
+        subject: 'Xác minh tài khoản đăng ký trên hệ thống quản lý ký túc xá',
+        html: `
+                <h1>Đăng ký không thành công</h1>
+                <p><strong>Xin chào ${request.name}!</strong></p>
+                <p>Cảm ơn bạn đã quan tâm đến dịch vụ lưu trú tại ký túc xá của chúng tui :)).</p>
+                <p>Bạn vui lòng bấm vào đường dẫn sau để thực hiện xác minh: ${verificationLink}.</p>
+                <br>
+                <p>Sau khi xác minh, bạn sẽ được điều hướng đến trang đăng nhập của hệ thống. Bạn sẽ đăng nhập tài khoản của mình với vai trò là <strong>KHÁCH</strong>.</p>
+                <br>
+                <p>Trân trọng,</p>
+                <p><strong>Nhóm 1, học phần Công nghệ Web và Dịch vụ trực tuyến, học kỳ 2024.1.</strong></p>
+            `,
     };
     return await transporter.sendMail(mailOptions);
 };
