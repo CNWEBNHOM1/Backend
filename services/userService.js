@@ -1215,7 +1215,7 @@ exports.getAllRequest = async (filters = {}, page = 1, limit = 10) => {
         .populate('user')
         // .sort({ prioriry: -1, updatedAt: 1 })  // Sắp xếp theo thời gian tạo (mới nhất trước)
         .sort({ priority: -1 })
-        .sort({ updatedAt: -1 })
+        .sort({ updatedAt: 1 })
         .skip(skip)  // Bỏ qua các kết quả trước đó
         .limit(pageLimit);  // Giới hạn số kết quả trả về
 
