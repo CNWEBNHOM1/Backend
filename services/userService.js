@@ -998,8 +998,7 @@ exports.handleRequest = async (id, action, data) => {
             student.trangthai = 'Đang ở';
             await student.save();
         }
-        // const newPassword = crypto.randomBytes(16).toString('hex');
-        const newPassword = '1234';
+        const newPassword = crypto.randomBytes(16).toString('hex');
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await UserModel.findOneAndUpdate({ _id: student.user }, { role: "Sinh viên", password: hashedPassword });
         let transporter = nodemailer.createTransport({

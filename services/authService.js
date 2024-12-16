@@ -76,7 +76,7 @@ exports.changePasswordUser = async (email, oldPass, newPass) => {
 exports.resetPasswordMail = async (email) => {
     const usr = await User.findOne({ email: email });
     if (!usr) {
-        return res.status(404).json({ message: "Email not found" });
+        throw new Error("Email not found");
     }
     const newPassword = crypto.randomBytes(16).toString('hex');
     const hashedPassword = await bcrypt.hash(newPassword, 10);

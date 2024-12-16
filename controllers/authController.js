@@ -37,7 +37,9 @@ exports.sendMailToResetPassword = async (req, res) => {
     await authService.resetPasswordMail(req.body.email);
     res.status(200).json({ message: "Email sent successfully" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to send email" });
+    if (err.message === "Email not found")
+      res.status(404).json({ error: err.message });
+    else res.status(500).json({ error: "Failed to send email" });
   }
 }
 exports.verifyEmail = async (req, res) => {
