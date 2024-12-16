@@ -99,7 +99,7 @@ exports.resetPasswordMail = async (email) => {
     };
     // console.log(mailOptions);
     // console.log(transporter.auth.user);
-    return transporter.sendMail(mailOptions);
+    return await transporter.sendMail(mailOptions);
 }
 exports.verifyEmail = async (token) => {
     const OTP = await Otp.findOne({ value: token });
