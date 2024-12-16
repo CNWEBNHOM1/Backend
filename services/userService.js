@@ -125,7 +125,8 @@ exports.createRequest = async (uid, data) => {
     if (request_by_userId)
         throw new Error("Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!");
     const room = await RoomModel.findById(roomId);
-
+    if (room.gender !== gender)
+        throw new Error("Phòng này không phù hợp với giới tính của bạn!");
     sotienphaitra = room.giatrangbi + room.tieno + room.tiennuoc;
 
     const newRequest = new RequestModel({

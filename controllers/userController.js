@@ -52,6 +52,8 @@ exports.createRequest = async (req, res) => {
     } catch (err) {
         if (err === "Bạn đang có 1 yêu cầu chờ phê duyệt, không thể tạo thêm yêu cầu mới!")
             res.status(403).json({ error: err.message });
+        else if (err === "Phòng này không phù hợp với giới tính của bạn!")
+            res.status(404).json({ error: err.message });
         else res.status(500).json({ error: err.message });
     }
 }
@@ -183,7 +185,11 @@ exports.transferRoom = async (req, res) => {
         const data = await userService.transferRoom(req.params.student_id, req.params.new_room_id);
         res.status(200).json({ data: data, status: "success" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        if (err.message === "Gender not match")
+            res.status(404).json({ error: err.message });
+        else if (err.message === "This student is already in this room")
+            res.status(405).json({ error: err.message });
+        else res.status(500).json({ error: err.message });
     }
 }
 exports.transfer2Student = async (req, res) => {
