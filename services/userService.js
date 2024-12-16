@@ -1249,8 +1249,9 @@ exports.statisticRequests = async () => {
     const count_pending = await RequestModel.countDocuments({ trangthai: 'pending' });
     const count_approved = await RequestModel.countDocuments({ trangthai: 'approved' });
     const count_declined = await RequestModel.countDocuments({ trangthai: 'declined' });
+    const count_unpaid = await RequestModel.countDocuments({ trangthai: 'unpaid' });
     const total = await RequestModel.countDocuments();
-    return { count_pending, count_approved, count_declined, total }
+    return { count_pending, count_approved, count_declined, count_unpaid, total }
 }
 exports.statisticRooms = async () => {
     const count_male_available = await RoomModel.countDocuments({ tinhtrang: 'Bình thường', gender: 'Nam' });
