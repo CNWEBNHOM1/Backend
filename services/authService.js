@@ -8,10 +8,12 @@ require('dotenv').config();
 
 const emailRegex = /^[a-zA-Z]+\.[a-zA-Z]+\d{6,}@sis\.hust\.edu\.vn$/;
 
-exports.createUser = async (email, password) => {
+exports.createUser = async (email, password, samepassword) => {
     if (!emailRegex.test(email)) throw new Error('You must use HUST email');
     if (await User.findOne({ email: email }))
         throw new Error('Đã có tài khoản sử dụng email này!')
+    if (password !== samepassword)
+        throw new Error('Mật khẩu không khớp')
     const hashedPassword = await bcrypt.hash(password, 10);
     const verify_token = Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
     const OTP = new Otp({ email: email, password: hashedPassword, value: verify_token });

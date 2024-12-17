@@ -2,13 +2,15 @@ const authService = require('../services/authService');
 
 exports.register = async (req, res) => {
   try {
-    const user = await authService.createUser(req.body.email, req.body.password);
+    const user = await authService.createUser(req.body.email, req.body.password, req.body.samepassword);
     res.status(201).json({ message: 'User Created Successfully. Check your mail to active', email: user.email, role: user.role, id: user._id });
   } catch (error) {
     if (error.message === 'Đã có tài khoản sử dụng email này!')
       res.status(444).json({ message: error.message });
     else if (error.message === 'You must use HUST email')
       res.status(443).json({ message: error.message });
+    else if (error.message === 'Mật khẩu không khớp')
+      res.status(445).json({ message: error.message });
     else
       res.status(500).json({ message: error.message });
   }

@@ -414,10 +414,14 @@ exports.getAllUsers = async (page, limit, email) => {
 };
 exports.createRoom = async (data) => {
     const { name, department, gender, capacity, giatrangbi, tieno, tiennuoc, dongiadien, sophongvs, binhnuocnong, dieuhoa } = data;
-
+    
     const roomExists = await RoomModel.findOne({ name: name, department: department });
     if (roomExists)
         throw new Error('Room exist');
+    const dpm = await DepartmentModel.findById(department);
+    const current_room_count = await RoomModel.countDocuments({ department: department });
+    if (dpm.room_count === current_room_count)
+        throw new Error('Department is full');
     const newRoom = new RoomModel({
         name,
         department,

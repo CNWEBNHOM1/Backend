@@ -228,6 +228,8 @@ exports.createRoom = async (req, res) => {
     } catch (err) {
         if (err.message === 'Room exist')
             res.status(403).json({ error: err.message });
+        else if (err.message === 'Department is full')
+            res.status(405).json({ error: err.message });
         else res.status(500).json({ error: err.message });
     }
 }
